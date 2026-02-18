@@ -1,12 +1,10 @@
-'use client';
-
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { BLOG_POSTS, BlogPost } from '@/config';
 import { pageTitle } from '@/config/site';
 
 type PageProps = {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 };
 
 // Generate static params for all blog post slugs
@@ -18,7 +16,7 @@ export async function generateStaticParams() {
 
 // Generate metadata for each post
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params;
+  const params = props.params;
   const post = BLOG_POSTS.find((p) => p.slug === params.slug);
 
   if (!post) {
@@ -76,7 +74,7 @@ function renderBody(body: string) {
 }
 
 export default async function BlogPostPage(props: PageProps) {
-  const params = await props.params;
+  const params = props.params;
   const post = BLOG_POSTS.find((p) => p.slug === params.slug);
 
   if (!post) {
