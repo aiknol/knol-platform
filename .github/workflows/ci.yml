@@ -1,0 +1,109 @@
+# =============================================================================
+# Knol — CI Pipeline
+# Runs on every push and PR: lint, test, build images
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Rust tests — OSS
+  # ---------------------------------------------------------------------------
+  test-oss:
+    name: Test OSS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: knol-oss
+      - name: Run OSS tests
+        working-directory: knol-oss
+        run: cargo test --workspace --lib
+
+  # ---------------------------------------------------------------------------
+  # Rust tests — Enterprise
+  # ---------------------------------------------------------------------------
+  test-enterprise:
+    name: Test Enterprise
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: knol-enterprise
+      - name: Run Enterprise tests
+        working-directory: knol-enterprise
+        run: cargo test --workspace --lib
+
+  # ---------------------------------------------------------------------------
+  # Clippy lint
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: knol-oss
+      - name: Clippy OSS
+        working-directory: knol-oss
+        run: cargo clippy --workspace -- -D warnings
+      - name: Clippy Enterprise
+        working-directory: knol-enterprise
+        run: cargo clippy --workspace -- -D warnings
+
+  # ---------------------------------------------------------------------------
+  # Format check
+  # ---------------------------------------------------------------------------
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --check --manifest-path knol-oss/Cargo.toml
+      - run: cargo fmt --check --manifest-path knol-enterprise/Cargo.toml
+
+  # ---------------------------------------------------------------------------
+  # Website build
+  # ---------------------------------------------------------------------------
+  build-web:
+    name: Build Website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: knol-web/package-lock.json
+      - name: Install & Build
+        working-directory: knol-web
+        run: |
+          npm ci
+          npm run build
+      - name: Upload static output
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-out
+          path: knol-web/out/
+          retention-days: 7

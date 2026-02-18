@@ -1,0 +1,55 @@
+{
+  "name": "@knol/sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript/JavaScript SDK for the Knol memory platform",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "knol",
+    "memory",
+    "sdk",
+    "typescript",
+    "javascript",
+    "ai",
+    "semantic",
+    "search",
+    "graph",
+    "knowledge"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aiknol/knol-sdk-typescript.git"
+  },
+  "homepage": "https://github.com/aiknol/knol-sdk-typescript",
+  "bugs": {
+    "url": "https://github.com/aiknol/knol-sdk-typescript/issues"
+  },
+  "author": "Knol AI",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

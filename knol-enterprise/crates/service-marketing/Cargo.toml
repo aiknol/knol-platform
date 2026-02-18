@@ -1,0 +1,42 @@
+[package]
+name = "service-marketing"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "marketing-service"
+path = "src/main.rs"
+
+[dependencies]
+memory-common.workspace = true
+memory-db.workspace = true
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+reqwest.workspace = true
+tokio-cron-scheduler.workspace = true
+
+# Redis for rate limiting
+fred = { version = "9", features = ["i-keys", "i-hashes", "i-scripts"] }
+
+# SMTP for email newsletters
+lettre = { version = "0.11", default-features = false, features = ["tokio1-rustls-tls", "builder", "smtp-transport", "hostname"] }
+
+# OAuth 1.0a signing (Twitter)
+hmac = "0.12"
+sha1 = "0.10"
+sha2 = "0.10"
+base64 = "0.22"
+rand = "0.8"
+percent-encoding = "2"
+
+# AES-256-GCM for decrypting credentials from admin DB
+aes-gcm = "0.10"

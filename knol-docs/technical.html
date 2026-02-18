@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knol — Technical Documentation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0e1a; color: #e5e7eb; min-height: 100vh; }
+  .header { background: rgba(10,14,26,0.95); border-bottom: 1px solid rgba(110,86,207,0.15); padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+  .header-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #6E56CF, #7A63D9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: #6E56CF; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+  h1 span { background: linear-gradient(135deg, #6E56CF, #7A63D9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: 1.5rem; font-weight: 700; color: #f9fafb; margin: 2.5rem 0 1rem; }
+  h3 { font-size: 1.1rem; font-weight: 600; color: #f9fafb; margin: 1.5rem 0 0.5rem; }
+  .subtitle { color: #9ca3af; font-size: 1.1rem; margin-bottom: 2rem; }
+  p { color: #9ca3af; font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.75rem; }
+
+  .schema-container { overflow-x: auto; margin: 1.5rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid rgba(55,65,81,0.3); }
+  th { color: #9ca3af; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(31,41,55,0.4); }
+  td { color: #e5e7eb; }
+  td code { background: rgba(0,0,0,0.3); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.75rem; color: #8B73E6; }
+  tr:hover { background: rgba(110,86,207,0.03); }
+
+  .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(55,65,81,0.3); border-radius: 8px; padding: 1rem 1.25rem; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 0.8rem; overflow-x: auto; margin: 1rem 0; line-height: 1.6; color: #d1d5db; }
+  .code-block .kw { color: #c084fc; }
+  .code-block .type { color: #8B73E6; }
+  .code-block .str { color: #4ade80; }
+  .code-block .comment { color: #6b7280; }
+  .code-block .fn { color: #fbbf24; }
+
+  .card { background: rgba(31,41,55,0.5); border: 1px solid rgba(55,65,81,0.4); border-radius: 12px; padding: 1.25rem; margin: 1rem 0; }
+  .crate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .crate-card { background: rgba(31,41,55,0.5); border: 1px solid rgba(55,65,81,0.4); border-radius: 10px; padding: 1rem; transition: border-color 0.3s; }
+  .crate-card:hover { border-color: rgba(110,86,207,0.4); }
+  .crate-card h4 { color: #8B73E6; font-family: monospace; font-size: 0.85rem; margin-bottom: 0.4rem; }
+  .crate-card p { color: #9ca3af; font-size: 0.78rem; margin-bottom: 0.3rem; }
+  .crate-card .type-tag { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.6rem; font-weight: 600; }
+  .tag-lib { background: rgba(110,86,207,0.15); color: #8B73E6; }
+  .tag-svc { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .tag-ent { background: rgba(249,115,22,0.15); color: #fb923c; }
+
+  .api-endpoint { margin: 1rem 0; padding: 1rem; background: rgba(31,41,55,0.4); border-radius: 8px; border-left: 3px solid; }
+  .api-endpoint.post { border-color: #6E56CF; }
+  .api-endpoint.get { border-color: #22c55e; }
+  .api-endpoint.patch { border-color: #eab308; }
+  .api-endpoint.delete { border-color: #ef4444; }
+  .api-method { font-family: monospace; font-size: 0.75rem; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 4px; margin-right: 0.5rem; }
+  .method-post { background: rgba(110,86,207,0.15); color: #8B73E6; }
+  .method-get { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .method-patch { background: rgba(234,179,8,0.15); color: #fbbf24; }
+  .method-delete { background: rgba(239,68,68,0.15); color: #f87171; }
+  .api-path { font-family: monospace; font-size: 0.85rem; color: #f9fafb; }
+  .api-desc { color: #9ca3af; font-size: 0.8rem; margin-top: 0.4rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Knol</div>
+    <div class="nav-links">
+      <a href="architecture.html">Architecture</a>
+      <a href="dataflow.html">Data Flow</a>
+      <a href="deployment.html">Deployment</a>
+      <a href="business.html">Business</a>
+      <a href="technical.html" class="active">Technical Docs</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <h1>Technical <span>Documentation</span></h1>
+  <p class="subtitle">Database schema, API reference, crate map, and implementation details.</p>
+
+  <!-- Database Schema -->
+  <h2>Database Schema</h2>
+  <p>PostgreSQL 16 with pgvector extension. 7 migrations creating the core tables. Row-Level Security (RLS) enforced per tenant.</p>
+
+  <div class="schema-container">
+    <svg viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:1100px;">
+      <defs>
+        <marker id="fk" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8B73E6"/></marker>
+      </defs>
+
+      <!-- tenants -->
+      <rect x="30" y="30" width="200" height="120" rx="8" fill="rgba(110,86,207,0.08)" stroke="#6E56CF" stroke-width="1.5"/>
+      <text x="130" y="55" text-anchor="middle" fill="#8B73E6" font-size="13" font-weight="700">tenants</text>
+      <line x1="40" y1="64" x2="220" y2="64" stroke="rgba(110,86,207,0.2)" stroke-width="1"/>
+      <text x="45" y="82" fill="#9ca3af" font-size="10">id UUID PK</text>
+      <text x="45" y="98" fill="#9ca3af" font-size="10">name TEXT</text>
+      <text x="45" y="114" fill="#9ca3af" font-size="10">plan TEXT</text>
+      <text x="45" y="130" fill="#9ca3af" font-size="10">created_at TIMESTAMPTZ</text>
+
+      <!-- episodes -->
+      <rect x="280" y="30" width="220" height="150" rx="8" fill="rgba(34,197,94,0.08)" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="390" y="55" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">episodes</text>
+      <line x1="290" y1="64" x2="490" y2="64" stroke="rgba(34,197,94,0.2)" stroke-width="1"/>
+      <text x="290" y="82" fill="#9ca3af" font-size="10">id UUID PK</text>
+      <text x="290" y="98" fill="#9ca3af" font-size="10">tenant_id UUID FK → tenants</text>
+      <text x="290" y="114" fill="#9ca3af" font-size="10">user_id TEXT</text>
+      <text x="290" y="130" fill="#9ca3af" font-size="10">content TEXT</text>
+      <text x="290" y="146" fill="#9ca3af" font-size="10">metadata JSONB</text>
+      <text x="290" y="162" fill="#9ca3af" font-size="10">created_at TIMESTAMPTZ</text>
+
+      <!-- memories -->
+      <rect x="550" y="30" width="240" height="190" rx="8" fill="rgba(122,99,217,0.08)" stroke="#7A63D9" stroke-width="1.5"/>
+      <text x="670" y="55" text-anchor="middle" fill="#B8A9E8" font-size="13" font-weight="700">memories</text>
+      <line x1="560" y1="64" x2="780" y2="64" stroke="rgba(122,99,217,0.2)" stroke-width="1"/>
+      <text x="560" y="82" fill="#9ca3af" font-size="10">id UUID PK</text>
+      <text x="560" y="98" fill="#9ca3af" font-size="10">tenant_id UUID FK</text>
+      <text x="560" y="114" fill="#9ca3af" font-size="10">episode_id UUID FK → episodes</text>
+      <text x="560" y="130" fill="#9ca3af" font-size="10">content TEXT</text>
+      <text x="560" y="146" fill="#9ca3af" font-size="10">memory_type TEXT</text>
+      <text x="560" y="162" fill="#9ca3af" font-size="10">importance FLOAT</text>
+      <text x="560" y="178" fill="#9ca3af" font-size="10">embedding VECTOR(1536)</text>
+      <text x="560" y="194" fill="#9ca3af" font-size="10">search_text TSVECTOR</text>
+      <text x="560" y="210" fill="#9ca3af" font-size="10">event_time, created_at</text>
+
+      <!-- entities -->
+      <rect x="280" y="260" width="220" height="150" rx="8" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1.5"/>
+      <text x="390" y="285" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="700">entities</text>
+      <line x1="290" y1="294" x2="490" y2="294" stroke="rgba(249,115,22,0.2)" stroke-width="1"/>
+      <text x="290" y="312" fill="#9ca3af" font-size="10">id UUID PK</text>
+      <text x="290" y="328" fill="#9ca3af" font-size="10">tenant_id UUID FK</text>
+      <text x="290" y="344" fill="#9ca3af" font-size="10">name TEXT</text>
+      <text x="290" y="360" fill="#9ca3af" font-size="10">entity_type TEXT</text>
+      <text x="290" y="376" fill="#9ca3af" font-size="10">summary TEXT</text>
+      <text x="290" y="392" fill="#9ca3af" font-size="10">attributes JSONB</text>
+
+      <!-- edges -->
+      <rect x="550" y="280" width="240" height="160" rx="8" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1.5"/>
+      <text x="670" y="305" text-anchor="middle" fill="#fb923c" font-size="13" font-weight="700">edges</text>
+      <line x1="560" y1="314" x2="780" y2="314" stroke="rgba(249,115,22,0.2)" stroke-width="1"/>
+      <text x="560" y="332" fill="#9ca3af" font-size="10">id UUID PK</text>
+      <text x="560" y="348" fill="#9ca3af" font-size="10">source_id UUID FK → entities</text>
+      <text x="560" y="364" fill="#9ca3af" font-size="10">target_id UUID FK → entities</text>
+      <text x="560" y="380" fill="#9ca3af" font-size="10">relation_type TEXT</text>
+      <text x="560" y="396" fill="#9ca3af" font-size="10">weight FLOAT</text>
+      <text x="560" y="412" fill="#9ca3af" font-size="10">valid_from TIMESTAMPTZ</text>
+      <text x="560" y="428" fill="#9ca3af" font-size="10">valid_to TIMESTAMPTZ</text>
+
+      <!-- audit_log (enterprise) -->
+      <rect x="840" y="30" width="220" height="130" rx="8" fill="rgba(239,68,68,0.06)" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="950" y="55" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="600">audit_log ✦</text>
+      <line x1="850" y1="64" x2="1050" y2="64" stroke="rgba(239,68,68,0.15)" stroke-width="1"/>
+      <text x="850" y="82" fill="#6b7280" font-size="10">id, tenant_id, actor_id</text>
+      <text x="850" y="98" fill="#6b7280" font-size="10">action, resource_type</text>
+      <text x="850" y="114" fill="#6b7280" font-size="10">resource_id, diff JSONB</text>
+      <text x="850" y="130" fill="#6b7280" font-size="10">created_at</text>
+      <text x="950" y="150" text-anchor="middle" fill="#6b7280" font-size="8">✦ Enterprise only (migration 006)</text>
+
+      <!-- FK arrows -->
+      <path d="M230,90 L275,90" stroke="#8B73E6" stroke-width="1" fill="none" marker-end="url(#fk)"/>
+      <path d="M500,100 L545,80" stroke="#8B73E6" stroke-width="1" fill="none" marker-end="url(#fk)"/>
+      <path d="M500,340 L545,350" stroke="#fb923c" stroke-width="1" fill="none" marker-end="url(#fk)"/>
+      <path d="M500,355 L545,365" stroke="#fb923c" stroke-width="1" fill="none" marker-end="url(#fk)"/>
+
+      <!-- Labels -->
+      <text x="850" y="480" fill="#6b7280" font-size="10">Additional tables: memory_scopes, working_memory,</text>
+      <text x="850" y="496" fill="#6b7280" font-size="10">procedural_memory, consolidation_log (enterprise)</text>
+    </svg>
+  </div>
+
+  <!-- Crate Map -->
+  <h2>Crate Map</h2>
+  <div class="crate-grid">
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-common</h4><p>Core types (MemoryItem, Episode, Entity, Edge), error handling, config, PII detector, policy engine, feature flags (28 features × 4 tiers), Prometheus metrics.</p></div>
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-db</h4><p>sqlx PgPool creation, migration runner, RLS helpers (SET app.tenant_id), tenant-scoped transactions.</p></div>
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-cache</h4><p>Redis client (fred v9). INCR+EXPIRE sliding window rate limiting, TTL-based query caching.</p></div>
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-queue</h4><p>NATS JetStream pub/sub. Typed publish/subscribe for MemoryWriteEvent and ExtractionEvent.</p></div>
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-llm</h4><p>Anthropic API client. Extract memories, entities, and relationships from text. Iterative retry with validation.</p></div>
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-vector</h4><p>pgvector similarity search. Store embeddings, cosine similarity with HNSW index, duplicate detection.</p></div>
+    <div class="crate-card"><span class="type-tag tag-lib">Library</span><h4>memory-graph</h4><p>Entity/edge CRUD. Graph traversal (1-hop, 2-hop expand), temporal edge filtering, entity name search.</p></div>
+    <div class="crate-card"><span class="type-tag tag-svc">Service</span><h4>service-gateway</h4><p>Axum router: auth middleware, rate limiting, tenant context, scope resolution, feature gating, metrics, route dispatch. Port 3000.</p></div>
+    <div class="crate-card"><span class="type-tag tag-svc">Service</span><h4>service-write</h4><p>Episode storage with fast ACK. Emit MemoryWriteEvent to NATS. Single and batch endpoints.</p></div>
+    <div class="crate-card"><span class="type-tag tag-svc">Service</span><h4>service-retrieve</h4><p>Query intent classification → adaptive retrieval (vector/BM25/graph/scope) → RRF fusion. The brain of search.</p></div>
+    <div class="crate-card"><span class="type-tag tag-svc">Service</span><h4>service-graph</h4><p>NATS consumer. LLM-powered entity and relationship extraction. Bi-temporal upserts with dedup.</p></div>
+    <div class="crate-card"><span class="type-tag tag-ent">Enterprise</span><h4>service-admin</h4><p>CRUD with audit diff tracking. Governance rules, retention policies, memory simulation/replay.</p></div>
+    <div class="crate-card"><span class="type-tag tag-ent">Enterprise</span><h4>service-jobs</h4><p>Background cron: importance decay, dedup scan, episodic→semantic consolidation, conflict detection/resolution.</p></div>
+    <div class="crate-card"><span class="type-tag tag-ent">Enterprise</span><h4>service-billing</h4><p>Usage event aggregation, plan limits enforcement, tier checking (Free/Starter/Pro/Enterprise).</p></div>
+    <div class="crate-card"><span class="type-tag tag-ent">Enterprise</span><h4>service-ingest</h4><p>Connector pipeline: Slack, GitHub, webhooks. Normalizes external data into the write pipeline.</p></div>
+  </div>
+
+  <!-- API Reference -->
+  <h2>API Reference</h2>
+
+  <div class="api-endpoint post">
+    <span class="api-method method-post">POST</span><span class="api-path">/v1/memory</span>
+    <div class="api-desc">Store a new memory. Returns immediately with accepted status. Extraction happens asynchronously via NATS.</div>
+    <div class="code-block">
+<span class="comment">// Request body</span>
+{
+  <span class="str">"content"</span>: <span class="str">"User prefers dark mode and concise responses"</span>,
+  <span class="str">"user_id"</span>: <span class="str">"user-123"</span>,
+  <span class="str">"metadata"</span>: { <span class="str">"source"</span>: <span class="str">"settings"</span> }
+}
+
+<span class="comment">// Response (202 Accepted)</span>
+{
+  <span class="str">"id"</span>: <span class="str">"550e8400-e29b-41d4-a716-446655440000"</span>,
+  <span class="str">"status"</span>: <span class="str">"accepted"</span>
+}
+    </div>
+  </div>
+
+  <div class="api-endpoint post">
+    <span class="api-method method-post">POST</span><span class="api-path">/v1/memory/search</span>
+    <div class="api-desc">Search memories with adaptive retrieval. Automatically classifies query intent and selects optimal strategy.</div>
+    <div class="code-block">
+<span class="comment">// Request body</span>
+{
+  <span class="str">"query"</span>: <span class="str">"What does the user prefer?"</span>,
+  <span class="str">"user_id"</span>: <span class="str">"user-123"</span>,
+  <span class="str">"limit"</span>: <span class="type">5</span>,
+  <span class="str">"memory_types"</span>: [<span class="str">"semantic"</span>, <span class="str">"episodic"</span>]
+}
+
+<span class="comment">// Response</span>
+{
+  <span class="str">"results"</span>: [{
+    <span class="str">"id"</span>: <span class="str">"..."</span>,
+    <span class="str">"content"</span>: <span class="str">"User prefers dark mode and concise responses"</span>,
+    <span class="str">"memory_type"</span>: <span class="str">"semantic"</span>,
+    <span class="str">"score"</span>: <span class="type">0.94</span>
+  }],
+  <span class="str">"query_intent"</span>: <span class="str">"preference"</span>,
+  <span class="str">"retrieval_strategy"</span>: <span class="str">"vector_primary"</span>
+}
+    </div>
+  </div>
+
+  <div class="api-endpoint get">
+    <span class="api-method method-get">GET</span><span class="api-path">/v1/memory/:id</span>
+    <div class="api-desc">Get a specific memory by ID.</div>
+  </div>
+
+  <div class="api-endpoint patch">
+    <span class="api-method method-patch">PATCH</span><span class="api-path">/v1/memory/:id</span>
+    <div class="api-desc">Update a memory's content or metadata. Creates an audit trail (enterprise).</div>
+  </div>
+
+  <div class="api-endpoint delete">
+    <span class="api-method method-delete">DELETE</span><span class="api-path">/v1/memory/:id</span>
+    <div class="api-desc">Soft-delete a memory. Audit log entry created (enterprise).</div>
+  </div>
+
+  <div class="api-endpoint get">
+    <span class="api-method method-get">GET</span><span class="api-path">/v1/graph/entities</span>
+    <div class="api-desc">List all entities for a user. Includes entity type, summary, and attribute metadata.</div>
+  </div>
+
+  <div class="api-endpoint get">
+    <span class="api-method method-get">GET</span><span class="api-path">/v1/graph/entities/:id/edges</span>
+    <div class="api-desc">Get all relationships (edges) for an entity. Supports 1-hop and 2-hop traversal.</div>
+  </div>
+
+  <!-- Tech Stack -->
+  <h2>Tech Stack</h2>
+  <div class="card">
+    <table>
+      <tr><td><strong>Language</strong></td><td>Rust 1.77+ (2021 edition)</td></tr>
+      <tr><td><strong>Web Framework</strong></td><td>Axum 0.7 + Tower middleware</td></tr>
+      <tr><td><strong>Database</strong></td><td>PostgreSQL 16 + pgvector (sqlx 0.7, runtime queries)</td></tr>
+      <tr><td><strong>Cache</strong></td><td>Redis 7 (fred v9 crate)</td></tr>
+      <tr><td><strong>Message Queue</strong></td><td>NATS 2.10 JetStream (async-nats 0.35)</td></tr>
+      <tr><td><strong>Object Storage</strong></td><td>MinIO (S3-compatible)</td></tr>
+      <tr><td><strong>LLM</strong></td><td>Anthropic Claude Haiku (reqwest 0.12)</td></tr>
+      <tr><td><strong>Auth</strong></td><td>JWT (jsonwebtoken 9) + API keys</td></tr>
+      <tr><td><strong>Metrics</strong></td><td>Prometheus 0.13 (11 collectors)</td></tr>
+      <tr><td><strong>Logging</strong></td><td>tracing + tracing-subscriber (structured JSON)</td></tr>
+      <tr><td><strong>Website</strong></td><td>Next.js 14, Tailwind CSS, static export</td></tr>
+      <tr><td><strong>CI/CD</strong></td><td>GitHub Actions (check, test, clippy, fmt)</td></tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

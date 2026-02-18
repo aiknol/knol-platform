@@ -1,0 +1,308 @@
+# =============================================================================
+# Knol — Production Docker Compose (Starter Tier)
+# Hetzner CX32 (4 vCPU, 8 GB RAM) + Neon Postgres + Upstash Redis
+# =============================================================================
+# Usage:
+#   cp .env.production.example .env.production
+#   docker compose -f deploy/docker-compose.prod.yml --env-file .env.production up -d
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Reverse proxy — Caddy (auto-TLS via Let's Encrypt)
+  # ---------------------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    container_name: knol-caddy
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-https://aiknol.com}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - knol
+
+  # ---------------------------------------------------------------------------
+  # OSS Services
+  # ---------------------------------------------------------------------------
+  gateway:
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    container_name: knol-gateway
+    restart: unless-stopped
+    command: ["gateway"]
+    env_file: .env.production
+    environment:
+      GATEWAY_PORT: "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - knol
+
+  write:
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    container_name: knol-write
+    restart: unless-stopped
+    command: ["write-service"]
+    env_file: .env.production
+    environment:
+      WRITE_SERVICE_PORT: "8081"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - knol
+
+  retrieve:
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    container_name: knol-retrieve
+    restart: unless-stopped
+    command: ["retrieve-service"]
+    env_file: .env.production
+    environment:
+      RETRIEVE_SERVICE_PORT: "8082"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8082/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - knol
+
+  graph:
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    container_name: knol-graph
+    restart: unless-stopped
+    command: ["graph-service"]
+    env_file: .env.production
+    environment:
+      GRAPH_SERVICE_PORT: "8083"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8083/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - knol
+
+  # ---------------------------------------------------------------------------
+  # Enterprise Services
+  # ---------------------------------------------------------------------------
+  admin:
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    container_name: knol-admin
+    restart: unless-stopped
+    command: ["admin-service"]
+    env_file: .env.production
+    environment:
+      ADMIN_SERVICE_PORT: "8084"
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8084/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    networks:
+      - knol
+
+  jobs:
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    container_name: knol-jobs
+    restart: unless-stopped
+    command: ["jobs-service"]
+    env_file: .env.production
+    environment:
+      JOBS_SERVICE_PORT: "8085"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8085/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - knol
+
+  billing:
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    container_name: knol-billing
+    restart: unless-stopped
+    command: ["billing-service"]
+    env_file: .env.production
+    environment:
+      BILLING_SERVICE_PORT: "8086"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8086/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    networks:
+      - knol
+
+  ingest:
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    container_name: knol-enterprise-ingest
+    restart: unless-stopped
+    command: ["ingest-service"]
+    env_file: .env.production
+    environment:
+      INGEST_SERVICE_PORT: "8087"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8087/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - knol
+
+  marketing:
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    container_name: knol-marketing
+    restart: unless-stopped
+    command: ["marketing-service"]
+    env_file: .env.production
+    environment:
+      MARKETING_SERVICE_PORT: "8088"
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8088/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    networks:
+      - knol
+
+  # ---------------------------------------------------------------------------
+  # Infrastructure — Self-hosted on VPS
+  # ---------------------------------------------------------------------------
+  nats:
+    image: nats:2.10-alpine
+    container_name: knol-nats
+    restart: unless-stopped
+    command: >
+      --jetstream
+      --http_port=8222
+      --store_dir=/data
+      --max_mem_store=256MB
+      --max_file_store=1GB
+    volumes:
+      - nats_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8222/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - knol
+
+  minio:
+    image: minio/minio:latest
+    container_name: knol-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - knol
+
+# ---------------------------------------------------------------------------
+# Persistent volumes
+# ---------------------------------------------------------------------------
+volumes:
+  caddy_data:
+  caddy_config:
+  nats_data:
+  minio_data:
+
+# ---------------------------------------------------------------------------
+# Internal network — no ports exposed except through Caddy
+# ---------------------------------------------------------------------------
+networks:
+  knol:
+    driver: bridge

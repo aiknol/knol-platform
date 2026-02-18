@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "description": "Knol marketing campaign calendar — all free tier",
+  "timezone": "UTC",
+
+  "campaigns": {
+    "daily": {
+      "schedule": "0 14 * * *",
+      "description": "Daily tweet at 2pm UTC (10am ET / 7am PT)",
+      "channels": ["twitter"],
+      "budget": "$0",
+      "notes": "Rotate between technical, launch, and comparison tweets"
+    },
+    "weekly": {
+      "schedule": "0 15 * * 2",
+      "description": "Weekly content push on Tuesdays at 3pm UTC",
+      "channels": ["twitter", "linkedin", "reddit", "devto", "blog"],
+      "budget": "$0",
+      "notes": "Blog post + cross-post + social amplification"
+    },
+    "monthly": {
+      "schedule": "0 16 1 * *",
+      "description": "Monthly big push on the 1st at 4pm UTC",
+      "channels": ["twitter", "linkedin", "email", "github", "hackernews"],
+      "budget": "$0",
+      "notes": "Newsletter + GitHub update + HN monitoring + thread"
+    }
+  },
+
+  "content_rotation": {
+    "week_1": { "theme": "Technical deep-dive", "focus": "Architecture, Rust, pgvector" },
+    "week_2": { "theme": "Use cases", "focus": "AI agents, chatbots, RAG" },
+    "week_3": { "theme": "Community", "focus": "Open source, contributing, roadmap" },
+    "week_4": { "theme": "Comparison", "focus": "vs Pinecone, vs Mem0, vs custom solutions" }
+  },
+
+  "key_dates": [
+    { "date": "launch_day", "campaign": "all_channels_blitz", "description": "Initial public launch" },
+    { "date": "monthly_1st", "campaign": "monthly", "description": "Regular monthly push" }
+  ],
+
+  "metrics_targets": {
+    "month_1": { "github_stars": 50, "twitter_followers": 100, "blog_posts": 4, "newsletter_subs": 25 },
+    "month_3": { "github_stars": 500, "twitter_followers": 500, "blog_posts": 12, "newsletter_subs": 200 },
+    "month_6": { "github_stars": 2000, "twitter_followers": 2000, "blog_posts": 24, "newsletter_subs": 1000 },
+    "month_12": { "github_stars": 10000, "twitter_followers": 5000, "blog_posts": 48, "newsletter_subs": 5000 }
+  }
+}

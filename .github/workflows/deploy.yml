@@ -1,0 +1,146 @@
+# =============================================================================
+# Knol — Deploy Pipeline
+# Triggers on tags (v*) or manual dispatch
+# Builds Docker images → pushes to GHCR → deploys to Hetzner VPS
+# =============================================================================
+
+name: Deploy
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to deploy"
+        required: false
+        default: "latest"
+
+env:
+  REGISTRY: ghcr.io
+  OSS_IMAGE: ghcr.io/${{ github.repository_owner }}/knol-oss
+  ENTERPRISE_IMAGE: ghcr.io/${{ github.repository_owner }}/knol-enterprise
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build & push Docker images
+  # ---------------------------------------------------------------------------
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ inputs.tag || 'latest' }}" >> $GITHUB_OUTPUT
+          fi
+
+      # --- OSS image ---
+      - name: Build & push OSS image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/Dockerfile.oss
+          push: true
+          tags: |
+            ${{ env.OSS_IMAGE }}:${{ steps.tag.outputs.tag }}
+            ${{ env.OSS_IMAGE }}:latest
+          cache-from: type=gha,scope=oss
+          cache-to: type=gha,scope=oss,mode=max
+
+      # --- Enterprise image ---
+      - name: Build & push Enterprise image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/Dockerfile.enterprise
+          push: true
+          tags: |
+            ${{ env.ENTERPRISE_IMAGE }}:${{ steps.tag.outputs.tag }}
+            ${{ env.ENTERPRISE_IMAGE }}:latest
+          cache-from: type=gha,scope=enterprise
+          cache-to: type=gha,scope=enterprise,mode=max
+
+  # ---------------------------------------------------------------------------
+  # Deploy to Hetzner VPS
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to VPS
+    needs: build-images
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ inputs.tag || 'latest' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Copy deploy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: knol
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "deploy/docker-compose.prod.yml,deploy/Caddyfile,deploy/deploy.sh"
+          target: /opt/knol/
+          strip_components: 1
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: knol
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/knol
+            chmod +x deploy.sh
+            ./deploy.sh ${{ steps.tag.outputs.tag }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy website to Cloudflare Pages
+  # ---------------------------------------------------------------------------
+  deploy-website:
+    name: Deploy Website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: knol-web/package-lock.json
+      - name: Install & build
+        working-directory: knol-web
+        run: |
+          npm ci
+          npm run build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy knol-web/out --project-name=knol-web

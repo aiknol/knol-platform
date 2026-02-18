@@ -1,0 +1,34 @@
+[package]
+name = "service-graph"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "graph-service"
+path = "src/main.rs"
+
+[dependencies]
+memory-common.workspace = true
+memory-db.workspace = true
+memory-queue.workspace = true
+memory-graph.workspace = true
+memory-llm.workspace = true
+memory-cache.workspace = true
+memory-vector.workspace = true
+reqwest.workspace = true
+fred.workspace = true
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+async-nats.workspace = true
+sha2.workspace = true
+hex.workspace = true
+futures = "0.3"

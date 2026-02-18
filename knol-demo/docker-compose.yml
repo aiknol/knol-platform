@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  # Use the OSS docker-compose for infrastructure
+  demo-ui:
+    image: nginx:alpine
+    container_name: ml-demo
+    ports:
+      - "8080:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./favicon.svg:/usr/share/nginx/html/favicon.svg:ro

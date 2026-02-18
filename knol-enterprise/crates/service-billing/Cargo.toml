@@ -1,0 +1,23 @@
+[package]
+name = "service-billing"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "billing-service"
+path = "src/main.rs"
+
+[dependencies]
+memory-common.workspace = true
+memory-db.workspace = true
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true

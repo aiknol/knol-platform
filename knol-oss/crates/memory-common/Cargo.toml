@@ -1,0 +1,25 @@
+[package]
+name = "memory-common"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+envy.workspace = true
+axum.workspace = true
+sqlx.workspace = true
+regex = "1"
+prometheus = "0.13"
+lazy_static = "1.4"
+tokio.workspace = true
+tower-http.workspace = true
+reqwest.workspace = true
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"

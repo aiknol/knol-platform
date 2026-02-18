@@ -1,0 +1,30 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "admin-service"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "admin-service"
+startCommand = "admin-service"
+port = 3001
+
+[[services]]
+name = "jobs-service"
+startCommand = "jobs-service"
+port = 3002
+
+[[services]]
+name = "billing-service"
+startCommand = "billing-service"
+port = 3003
+
+[[services]]
+name = "ingest-service"
+startCommand = "ingest-service"
+port = 3004

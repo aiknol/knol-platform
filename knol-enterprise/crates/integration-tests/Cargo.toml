@@ -1,0 +1,16 @@
+[package]
+name = "integration-tests"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# This crate exists solely for integration testing
+[[test]]
+name = "integration"
+path = "../../tests/integration_test.rs"
+
+[dev-dependencies]
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true

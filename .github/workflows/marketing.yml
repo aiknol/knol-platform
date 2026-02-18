@@ -1,0 +1,157 @@
+name: Marketing Automation
+
+on:
+  schedule:
+    # Daily tweet at 2pm UTC (10am ET)
+    - cron: '0 14 * * *'
+    # Weekly content push on Tuesdays at 3pm UTC
+    - cron: '0 15 * * 2'
+    # Monthly big push on the 1st at 4pm UTC
+    - cron: '0 16 1 * *'
+  workflow_dispatch:
+    inputs:
+      campaign:
+        description: 'Campaign to run'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - weekly
+          - monthly
+          - all
+      dry_run:
+        description: 'Dry run (preview only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Determine which campaign to run based on cron schedule
+  determine-campaign:
+    runs-on: ubuntu-latest
+    outputs:
+      campaign: ${{ steps.determine.outputs.campaign }}
+    steps:
+      - id: determine
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "campaign=${{ inputs.campaign }}" >> $GITHUB_OUTPUT
+          else
+            # Determine from cron schedule
+            HOUR=$(date -u +%H)
+            DOW=$(date -u +%u)  # 1=Monday, 7=Sunday
+            DOM=$(date -u +%d)  # Day of month
+
+            if [ "$DOM" = "01" ] && [ "$HOUR" = "16" ]; then
+              echo "campaign=monthly" >> $GITHUB_OUTPUT
+            elif [ "$DOW" = "2" ] && [ "$HOUR" = "15" ]; then
+              echo "campaign=weekly" >> $GITHUB_OUTPUT
+            else
+              echo "campaign=daily" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  run-campaign:
+    needs: determine-campaign
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: marketing
+        run: |
+          npm install --production 2>/dev/null || true
+          # Most channels use only Node built-ins (https, fs, crypto)
+          # Only email needs nodemailer
+          npm install nodemailer 2>/dev/null || echo "nodemailer not needed for this campaign"
+
+      - name: Run campaign
+        working-directory: marketing
+        env:
+          # Twitter
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          # Reddit
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          # Dev.to
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          # LinkedIn
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          # GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Email
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          # Claude (optional)
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          CAMPAIGN="${{ needs.determine-campaign.outputs.campaign }}"
+          DRY_RUN="${{ inputs.dry_run }}"
+
+          FLAGS="--run $CAMPAIGN"
+          if [ "$DRY_RUN" = "true" ]; then
+            FLAGS="$FLAGS --dry-run"
+          fi
+
+          echo "Running: node engine/scheduler.js $FLAGS"
+          node engine/scheduler.js $FLAGS
+
+      - name: Generate analytics report
+        if: needs.determine-campaign.outputs.campaign == 'monthly' || needs.determine-campaign.outputs.campaign == 'all'
+        working-directory: marketing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node analytics/report.js --dashboard
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marketing-reports-${{ github.run_id }}
+          path: marketing/reports/
+          retention-days: 90
+
+      - name: Commit blog posts
+        if: needs.determine-campaign.outputs.campaign == 'weekly' || needs.determine-campaign.outputs.campaign == 'monthly'
+        run: |
+          git config user.name "Knol Marketing Bot"
+          git config user.email "marketing@aiknol.com"
+          git add marketing/blog/ marketing/data/ || true
+          git diff --staged --quiet || git commit -m "marketing: auto-publish content [skip ci]"
+          git push || true
+
+  # Weekly analytics report (separate job, runs on Sundays)
+  weekly-report:
+    if: github.event.schedule == '0 14 * * *' && contains('0', format('{0}', github.run_number))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Generate weekly report
+        working-directory: marketing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node analytics/report.js --dashboard
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report-${{ github.run_id }}
+          path: marketing/reports/
+          retention-days: 90

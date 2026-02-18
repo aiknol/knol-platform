@@ -1,0 +1,154 @@
+name: knol
+
+services:
+  db-migrate:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: memory_dev
+    volumes:
+      - ./knol-oss/migrations:/migrations/oss:ro
+      - ./knol-enterprise/migrations:/migrations/enterprise:ro
+      - ./scripts/db-migrate.sh:/usr/local/bin/db-migrate.sh:ro
+    command: ["sh", "-lc", "/usr/local/bin/db-migrate.sh"]
+    restart: "no"
+
+  admin-service:
+    image: knol-enterprise-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.enterprise
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      DB_MAX_CONNECTIONS: "6"
+      DB_MIN_CONNECTIONS: "1"
+      ADMIN_SERVICE_PORT: "3001"
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?set ADMIN_JWT_SECRET in .env (>=32 chars)}
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3006}
+      RUST_LOG: info
+    command: ["admin-service"]
+    ports:
+      - "3001:8084"
+    mem_limit: 320m
+
+  jobs-service:
+    image: knol-enterprise-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.enterprise
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      DB_MAX_CONNECTIONS: "4"
+      DB_MIN_CONNECTIONS: "1"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RUST_LOG: info
+    command: ["jobs-service"]
+    mem_limit: 256m
+
+  billing-service:
+    image: knol-enterprise-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.enterprise
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      DB_MAX_CONNECTIONS: "4"
+      DB_MIN_CONNECTIONS: "1"
+      BILLING_SERVICE_PORT: "3003"
+      RUST_LOG: info
+    command: ["billing-service"]
+    ports:
+      - "3003:3003"
+    mem_limit: 256m
+
+  ingest-service:
+    image: knol-enterprise-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.enterprise
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      NATS_URL: nats://nats:4222
+      DB_MAX_CONNECTIONS: "4"
+      DB_MIN_CONNECTIONS: "1"
+      INGEST_SERVICE_PORT: "3004"
+      RUST_LOG: info
+    command: ["ingest-service"]
+    ports:
+      - "3004:3004"
+    mem_limit: 256m
+
+  website:
+    image: node:20-alpine
+    working_dir: /workspace/knol-web
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NODE_OPTIONS: "--max-old-space-size=256"
+    volumes:
+      - .:/workspace
+      - web-node-modules:/workspace/knol-web/node_modules
+    command: sh -lc "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3005"
+    ports:
+      - "3005:3005"
+    mem_limit: 512m
+
+  admin-website:
+    image: node:20-alpine
+    depends_on:
+      admin-service:
+        condition: service_started
+    working_dir: /workspace/knol-web
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NODE_OPTIONS: "--max-old-space-size=256"
+      NEXT_PUBLIC_ADMIN_API_URL: "http://localhost:3001"
+      ADMIN_WEBSITE_MODE: "true"
+    volumes:
+      - .:/workspace
+      - admin-web-node-modules:/workspace/knol-web/node_modules
+    command: sh -lc "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3006"
+    ports:
+      - "3006:3006"
+    mem_limit: 512m
+
+  demo-ui:
+    image: nginx:alpine
+    volumes:
+      - ./knol-demo/index.html:/usr/share/nginx/html/index.html:ro
+      - ./knol-demo/favicon.svg:/usr/share/nginx/html/favicon.svg:ro
+    ports:
+      - "8080:80"
+    mem_limit: 128m
+
+volumes:
+  web-node-modules:
+  admin-web-node-modules:

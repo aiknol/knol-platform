@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knol Brand Guidelines</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #0A0A0B;
+    --charcoal: #1A1A1D;
+    --graphite: #2A2A2E;
+    --steel: #52525B;
+    --silver: #71717A;
+    --mist: #A1A1AA;
+    --cloud: #E4E4E7;
+    --snow: #FAFAFA;
+    --white: #FFFFFF;
+    --violet: #6E56CF;
+    --violet-light: #8B73E6;
+    --violet-dark: #5B45B0;
+    --violet-muted: #EDE9FE;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--snow);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250,250,250,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--cloud);
+    padding: 0 48px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  nav .logo { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; color: var(--ink); }
+  nav .nav-links { display: flex; gap: 32px; }
+  nav .nav-links a {
+    font-size: 13px; font-weight: 500; color: var(--steel);
+    text-decoration: none; letter-spacing: 0.02em;
+    transition: color 0.15s;
+  }
+  nav .nav-links a:hover { color: var(--ink); }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--ink);
+    padding: 160px 48px 120px;
+    display: flex; flex-direction: column; align-items: center; gap: 24px;
+  }
+  .hero h1 {
+    font-size: 72px; font-weight: 500; letter-spacing: -3px;
+    color: var(--snow);
+  }
+  .hero p {
+    font-size: 18px; color: var(--silver); max-width: 480px;
+    text-align: center; line-height: 1.7;
+  }
+  .hero .version {
+    font-size: 12px; font-weight: 500; color: var(--steel);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    border: 1px solid var(--graphite); border-radius: 100px;
+    padding: 6px 16px;
+  }
+
+  /* ── Sections ── */
+  section {
+    max-width: 960px; margin: 0 auto;
+    padding: 96px 48px;
+  }
+  section + section { border-top: 1px solid var(--cloud); }
+
+  h2 {
+    font-size: 32px; font-weight: 600; letter-spacing: -0.5px;
+    margin-bottom: 16px; color: var(--ink);
+  }
+  h3 {
+    font-size: 18px; font-weight: 600; margin-bottom: 12px;
+    color: var(--ink); margin-top: 48px;
+  }
+  .section-desc {
+    font-size: 16px; line-height: 1.7; color: var(--steel);
+    max-width: 640px; margin-bottom: 48px;
+  }
+
+  /* ── Logo Display ── */
+  .logo-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    margin-bottom: 48px;
+  }
+  .logo-card {
+    border: 1px solid var(--cloud); border-radius: 12px;
+    overflow: hidden;
+  }
+  .logo-card .preview {
+    height: 200px; display: flex; align-items: center;
+    justify-content: center; padding: 40px;
+  }
+  .logo-card .preview.dark { background: var(--ink); }
+  .logo-card .preview.light { background: var(--snow); }
+  .logo-card .preview svg { max-height: 64px; width: auto; }
+  .logo-card .label {
+    padding: 16px 20px; font-size: 13px; font-weight: 500;
+    color: var(--steel); border-top: 1px solid var(--cloud);
+    background: var(--white);
+  }
+  .logo-card .label code {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--violet); float: right;
+  }
+
+  /* ── Color Palette ── */
+  .color-section { margin-bottom: 48px; }
+  .color-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  .swatch {
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--cloud);
+  }
+  .swatch .color-block {
+    height: 80px; width: 100%;
+  }
+  .swatch .color-info {
+    padding: 12px 14px; background: var(--white);
+  }
+  .swatch .color-name {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+  }
+  .swatch .color-hex {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--silver); margin-top: 2px;
+  }
+  .swatch .color-role {
+    font-size: 11px; color: var(--mist); margin-top: 4px;
+  }
+
+  /* ── Typography ── */
+  .type-sample {
+    padding: 32px 0; border-bottom: 1px solid var(--cloud);
+    display: flex; align-items: baseline; gap: 32px;
+  }
+  .type-sample:last-child { border-bottom: none; }
+  .type-meta {
+    min-width: 140px; flex-shrink: 0;
+  }
+  .type-meta .role { font-size: 12px; font-weight: 600; color: var(--violet); text-transform: uppercase; letter-spacing: 0.08em; }
+  .type-meta .spec { font-size: 12px; color: var(--silver); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Rules ── */
+  .rules-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .rule-card {
+    border: 1px solid var(--cloud); border-radius: 10px;
+    padding: 24px; background: var(--white);
+  }
+  .rule-card.do { border-left: 3px solid #22C55E; }
+  .rule-card.dont { border-left: 3px solid #EF4444; }
+  .rule-card .rule-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+  .rule-card.do .rule-label { color: #22C55E; }
+  .rule-card.dont .rule-label { color: #EF4444; }
+  .rule-card p { font-size: 14px; color: var(--steel); line-height: 1.6; }
+
+  /* ── Spacing ── */
+  .spacing-demo {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-top: 24px;
+  }
+  .spacing-box {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .spacing-visual {
+    background: var(--violet-muted); border-radius: 4px;
+  }
+  .spacing-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--silver);
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center; padding: 64px 48px;
+    color: var(--silver); font-size: 13px;
+    border-top: 1px solid var(--cloud);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">knol</div>
+  <div class="nav-links">
+    <a href="#logo">Logo</a>
+    <a href="#color">Color</a>
+    <a href="#typography">Typography</a>
+    <a href="#usage">Usage</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="version">Version 1.0 &mdash; February 2026</div>
+  <h1>knol</h1>
+  <p>Brand guidelines for Knol &mdash; memory infrastructure for AI. Minimal, elegant, and built for developers.</p>
+</div>
+
+<!-- ── Logo ── -->
+<section id="logo">
+  <h2>Logo</h2>
+  <p class="section-desc">The Knol logo consists of an icon mark, a wordmark, and a combination mark. The icon is a geometric K with violet knowledge nodes at its endpoints.</p>
+
+  <div class="logo-grid">
+    <div class="logo-card">
+      <div class="preview dark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" rx="14" fill="#0A0A0B"/>
+          <path d="M20 16v32M20 32l16-16M20 32l16 16" stroke="#FAFAFA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="44" cy="16" r="3.5" fill="#6E56CF"/>
+          <circle cx="44" cy="48" r="3.5" fill="#6E56CF"/>
+        </svg>
+      </div>
+      <div class="label">Icon Mark <code>knol-icon.svg</code></div>
+    </div>
+    <div class="logo-card">
+      <div class="preview light">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" rx="14" fill="#FAFAFA" stroke="#E4E4E7"/>
+          <path d="M20 16v32M20 32l16-16M20 32l16 16" stroke="#0A0A0B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="44" cy="16" r="3.5" fill="#6E56CF"/>
+          <circle cx="44" cy="48" r="3.5" fill="#6E56CF"/>
+        </svg>
+      </div>
+      <div class="label">Icon Mark (Inverted) <code>light variant</code></div>
+    </div>
+    <div class="logo-card">
+      <div class="preview dark" style="gap:16px">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-height:48px">
+          <rect width="64" height="64" rx="14" fill="#0A0A0B"/>
+          <path d="M20 16v32M20 32l16-16M20 32l16 16" stroke="#FAFAFA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="44" cy="16" r="3.5" fill="#6E56CF"/>
+          <circle cx="44" cy="48" r="3.5" fill="#6E56CF"/>
+        </svg>
+        <span style="font-size:40px;font-weight:500;letter-spacing:-1.5px;color:#FAFAFA">knol</span>
+      </div>
+      <div class="label">Combination Mark (Dark) <code>knol-combo-white.svg</code></div>
+    </div>
+    <div class="logo-card">
+      <div class="preview light" style="gap:16px">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-height:48px">
+          <rect width="64" height="64" rx="14" fill="#FAFAFA" stroke="#E4E4E7"/>
+          <path d="M20 16v32M20 32l16-16M20 32l16 16" stroke="#0A0A0B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="44" cy="16" r="3.5" fill="#6E56CF"/>
+          <circle cx="44" cy="48" r="3.5" fill="#6E56CF"/>
+        </svg>
+        <span style="font-size:40px;font-weight:500;letter-spacing:-1.5px;color:#0A0A0B">knol</span>
+      </div>
+      <div class="label">Combination Mark (Light) <code>knol-combo.svg</code></div>
+    </div>
+  </div>
+
+  <h3>Clear Space</h3>
+  <p class="section-desc">Maintain clear space equal to the icon height on all sides. Minimum size: 120px wide (combo), 16px (icon only).</p>
+
+  <h3>Logo Rules</h3>
+  <div class="rules-grid">
+    <div class="rule-card do"><div class="rule-label">Do</div><p>Use the provided SVG files at any scale. The logo is always lowercase.</p></div>
+    <div class="rule-card do"><div class="rule-label">Do</div><p>Use the white variant on dark backgrounds and the dark variant on light backgrounds.</p></div>
+    <div class="rule-card dont"><div class="rule-label">Don't</div><p>Rotate, skew, add shadows, gradients, or effects to the logo.</p></div>
+    <div class="rule-card dont"><div class="rule-label">Don't</div><p>Display the wordmark in uppercase, title case, or change the typeface.</p></div>
+  </div>
+</section>
+
+<!-- ── Color Palette ── -->
+<section id="color">
+  <h2>Color</h2>
+  <p class="section-desc">A restrained palette built on near-black and white, with a single violet accent. This constraint ensures consistency across every touchpoint.</p>
+
+  <h3>Primary</h3>
+  <div class="color-grid" style="margin-bottom:32px">
+    <div class="swatch"><div class="color-block" style="background:#0A0A0B"></div><div class="color-info"><div class="color-name">Ink</div><div class="color-hex">#0A0A0B</div><div class="color-role">Primary background, text</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#6E56CF"></div><div class="color-info"><div class="color-name">Violet</div><div class="color-hex">#6E56CF</div><div class="color-role">Accent, CTAs, links</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#FAFAFA;border-bottom:1px solid #E4E4E7"></div><div class="color-info"><div class="color-name">Snow</div><div class="color-hex">#FAFAFA</div><div class="color-role">Light background, text on dark</div></div></div>
+  </div>
+
+  <h3>Neutral Scale</h3>
+  <div class="color-grid" style="margin-bottom:32px">
+    <div class="swatch"><div class="color-block" style="background:#1A1A1D"></div><div class="color-info"><div class="color-name">Charcoal</div><div class="color-hex">#1A1A1D</div><div class="color-role">Elevated surfaces</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#2A2A2E"></div><div class="color-info"><div class="color-name">Graphite</div><div class="color-hex">#2A2A2E</div><div class="color-role">Borders, dividers (dark)</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#52525B"></div><div class="color-info"><div class="color-name">Steel</div><div class="color-hex">#52525B</div><div class="color-role">Secondary text</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#71717A"></div><div class="color-info"><div class="color-name">Silver</div><div class="color-hex">#71717A</div><div class="color-role">Tertiary text, placeholders</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#A1A1AA"></div><div class="color-info"><div class="color-name">Mist</div><div class="color-hex">#A1A1AA</div><div class="color-role">Disabled text</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#E4E4E7"></div><div class="color-info"><div class="color-name">Cloud</div><div class="color-hex">#E4E4E7</div><div class="color-role">Borders, dividers (light)</div></div></div>
+  </div>
+
+  <h3>Violet Variants</h3>
+  <div class="color-grid">
+    <div class="swatch"><div class="color-block" style="background:#5B45B0"></div><div class="color-info"><div class="color-name">Violet Dark</div><div class="color-hex">#5B45B0</div><div class="color-role">Hover state</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#8B73E6"></div><div class="color-info"><div class="color-name">Violet Light</div><div class="color-hex">#8B73E6</div><div class="color-role">Active / focus state</div></div></div>
+    <div class="swatch"><div class="color-block" style="background:#EDE9FE;border-bottom:1px solid #E4E4E7"></div><div class="color-info"><div class="color-name">Violet Muted</div><div class="color-hex">#EDE9FE</div><div class="color-role">Subtle backgrounds</div></div></div>
+  </div>
+</section>
+
+<!-- ── Typography ── -->
+<section id="typography">
+  <h2>Typography</h2>
+  <p class="section-desc">Inter for everything. JetBrains Mono for code. Generous tracking on headings, neutral on body text.</p>
+
+  <div class="type-sample">
+    <div class="type-meta"><div class="role">Display</div><div class="spec">48px / 500<br>-0.04em</div></div>
+    <div style="font-size:48px;font-weight:500;letter-spacing:-0.04em;color:var(--ink)">Memory infrastructure</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta"><div class="role">Heading 1</div><div class="spec">36px / 600<br>-0.03em</div></div>
+    <div style="font-size:36px;font-weight:600;letter-spacing:-0.03em;color:var(--ink)">Knowledge at scale</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta"><div class="role">Heading 2</div><div class="spec">28px / 600<br>-0.02em</div></div>
+    <div style="font-size:28px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)">Adaptive retrieval</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta"><div class="role">Heading 3</div><div class="spec">22px / 500<br>-0.01em</div></div>
+    <div style="font-size:22px;font-weight:500;letter-spacing:-0.01em;color:var(--ink)">Entity extraction pipeline</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta"><div class="role">Body</div><div class="spec">16px / 400<br>0</div></div>
+    <div style="font-size:16px;font-weight:400;color:var(--steel);max-width:480px;line-height:1.7">Knol provides long-term memory for AI applications through a microservice architecture with vector search, knowledge graphs, and temporal reasoning.</div>
+  </div>
+  <div class="type-sample">
+    <div class="type-meta"><div class="role">Code</div><div class="spec">14px / 400<br>JetBrains Mono</div></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--violet);background:var(--charcoal);padding:16px 20px;border-radius:8px;color:#FAFAFA">curl -X POST https://api.knol.dev/v1/memory/write \<br>&nbsp;&nbsp;-H "Authorization: Bearer $KNOL_API_KEY"</div>
+  </div>
+</section>
+
+<!-- ── Usage ── -->
+<section id="usage">
+  <h2>Usage guidelines</h2>
+  <p class="section-desc">How to apply the Knol brand consistently across digital products, documentation, and marketing materials.</p>
+
+  <h3>Voice & tone</h3>
+  <p style="color:var(--steel);line-height:1.7;max-width:640px;margin-bottom:32px">Technical but never cold. Confident but never arrogant. Write like engineers explaining something they built with care &mdash; direct, precise, and occasionally understated. Let the product speak through clean documentation.</p>
+
+  <div class="rules-grid" style="margin-bottom:48px">
+    <div class="rule-card do"><div class="rule-label">Do</div><p>"Knol extracts entities and relationships from conversations, building a knowledge graph that improves retrieval over time."</p></div>
+    <div class="rule-card dont"><div class="rule-label">Don't</div><p>"Knol is an AMAZING AI-powered memory platform that will REVOLUTIONIZE how your apps remember things!!!"</p></div>
+  </div>
+
+  <h3>Spacing</h3>
+  <p style="color:var(--steel);margin-bottom:16px">Base unit: 4px. Generous whitespace is fundamental to the Knol identity.</p>
+  <div class="spacing-demo">
+    <div class="spacing-box"><div class="spacing-visual" style="width:16px;height:16px"></div><div class="spacing-label">4</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:24px;height:24px"></div><div class="spacing-label">8</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:28px;height:28px"></div><div class="spacing-label">12</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:32px;height:32px"></div><div class="spacing-label">16</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:40px;height:40px"></div><div class="spacing-label">24</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:48px;height:48px"></div><div class="spacing-label">32</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:64px;height:64px"></div><div class="spacing-label">48</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:80px;height:80px"></div><div class="spacing-label">64</div></div>
+    <div class="spacing-box"><div class="spacing-visual" style="width:112px;height:112px"></div><div class="spacing-label">96</div></div>
+  </div>
+
+  <h3>Border radius</h3>
+  <p style="color:var(--steel);margin-bottom:16px">Consistent rounding across all components.</p>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:16px">
+    <div style="text-align:center"><div style="width:48px;height:48px;border:2px solid var(--violet);border-radius:4px;margin:0 auto 8px"></div><span class="spacing-label">4px tags</span></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;border:2px solid var(--violet);border-radius:6px;margin:0 auto 8px"></div><span class="spacing-label">6px buttons</span></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;border:2px solid var(--violet);border-radius:8px;margin:0 auto 8px"></div><span class="spacing-label">8px cards</span></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;border:2px solid var(--violet);border-radius:14px;margin:0 auto 8px"></div><span class="spacing-label">14px logo</span></div>
+  </div>
+</section>
+
+<footer>
+  <p>Knol Brand Guidelines &middot; Version 1.0 &middot; February 2026</p>
+</footer>
+
+</body>
+</html>

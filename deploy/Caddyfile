@@ -1,0 +1,82 @@
+# =============================================================================
+# Knol — Caddy Reverse Proxy Configuration
+# Automatic HTTPS via Let's Encrypt, HTTP/2 + HTTP/3
+# =============================================================================
+
+# API — api.aiknol.com
+{$API_DOMAIN:api.aiknol.com} {
+	# Gateway is the single entry point for all API traffic
+	reverse_proxy gateway:8080 {
+		health_uri /health
+		health_interval 15s
+	}
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		-Server
+	}
+
+	# Note: For rate limiting, use the gateway service's built-in
+	# rate limiter (tower-http) or add caddy-rate-limit plugin:
+	# https://github.com/mholt/caddy-ratelimit
+
+	# Request logging
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+
+	# CORS for browser clients
+	@cors_preflight method OPTIONS
+	handle @cors_preflight {
+		header Access-Control-Allow-Origin "{$CORS_ALLOW_ORIGIN:https://aiknol.com}"
+		header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+		header Access-Control-Allow-Headers "Authorization, Content-Type, X-API-Key"
+		header Access-Control-Max-Age "86400"
+		respond "" 204
+	}
+	header Access-Control-Allow-Origin "{$CORS_ALLOW_ORIGIN:https://aiknol.com}"
+}
+
+# Admin dashboard — admin.aiknol.com (enterprise)
+{$ADMIN_DOMAIN:admin.aiknol.com} {
+	reverse_proxy admin:8084 {
+		health_uri /health
+		health_interval 15s
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
+
+# Internal service routes — not publicly exposed, but available on
+# the internal network for service-to-service communication.
+# Caddy only proxies the gateway and admin externally.
+
+# MinIO console — optional, only enable for debugging
+# Uncomment to expose at minio.aiknol.com:
+#
+# {$MINIO_DOMAIN:minio.aiknol.com} {
+# 	reverse_proxy minio:9001
+# }
+
+# NATS monitoring — optional, only enable for debugging
+# Uncomment to expose at nats.aiknol.com:
+#
+# {$NATS_DOMAIN:nats.aiknol.com} {
+# 	reverse_proxy nats:8222
+# }

@@ -1,0 +1,39 @@
+{
+  "default": {
+    "safetyFactor": 0.8,
+    "duplicateWindowHours": 168
+  },
+  "twitter": {
+    "maxPerDay": 45,
+    "maxPerMonth": 1200,
+    "minSpacingSeconds": 900,
+    "quietHoursUtc": [0, 6]
+  },
+  "linkedin": {
+    "maxPerDay": 20,
+    "minSpacingSeconds": 3600,
+    "quietHoursUtc": [0, 6]
+  },
+  "reddit": {
+    "maxPerDay": 8,
+    "maxPerMinute": 50,
+    "minSpacingSeconds": 1800,
+    "quietHoursUtc": [2, 7]
+  },
+  "devto": {
+    "maxPerDay": 20,
+    "minSpacingSeconds": 1800,
+    "quietHoursUtc": [1, 6]
+  },
+  "email": {
+    "maxPerDay": 400,
+    "minSpacingSeconds": 1
+  },
+  "github": {
+    "maxPerHour": 4500,
+    "minSpacingSeconds": 10
+  },
+  "blog": {
+    "maxPerDay": 5
+  }
+}

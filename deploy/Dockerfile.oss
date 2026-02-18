@@ -1,0 +1,55 @@
+# =============================================================================
+# Knol OSS — Multi-stage Dockerfile with dependency caching
+# Produces a ~30MB image per service binary
+# =============================================================================
+
+# Stage 1: Dependency planner (cargo-chef)
+FROM rust:1-bookworm AS chef
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo install cargo-chef --locked
+WORKDIR /app
+
+FROM chef AS planner
+COPY knol-oss/ .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Stage 2: Build dependencies (cached layer)
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Stage 3: Build application
+COPY knol-oss/ .
+RUN cargo build --release \
+    --bin gateway \
+    --bin write-service \
+    --bin retrieve-service \
+    --bin graph-service \
+    && strip /app/target/release/gateway \
+    && strip /app/target/release/write-service \
+    && strip /app/target/release/retrieve-service \
+    && strip /app/target/release/graph-service
+
+# Stage 4: Minimal runtime
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r knol && useradd -r -g knol -s /sbin/nologin knol
+
+COPY --from=builder /app/target/release/gateway          /usr/local/bin/
+COPY --from=builder /app/target/release/write-service     /usr/local/bin/
+COPY --from=builder /app/target/release/retrieve-service  /usr/local/bin/
+COPY --from=builder /app/target/release/graph-service     /usr/local/bin/
+
+# Copy SQL migrations
+COPY knol-oss/migrations/ /app/migrations/
+
+USER knol
+ENV RUST_LOG=info,knol=debug
+EXPOSE 8080 8081 8082 8083
+
+CMD ["gateway"]

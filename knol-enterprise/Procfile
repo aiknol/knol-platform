@@ -1,0 +1,4 @@
+admin: admin-service
+jobs: jobs-service
+billing: billing-service
+ingest: ingest-service

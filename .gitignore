@@ -1,0 +1,35 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Node.js
+node_modules/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
+
+# Deploy secrets (never commit)
+deploy/.env.production
+deploy/*.pem
+deploy/*.key
+
+# Build artifacts
+*.wasm
+dist/

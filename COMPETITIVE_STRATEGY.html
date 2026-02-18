@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knol — Competitive Strategy vs Zep & Mem0</title>
+<style>
+  :root {
+    --bg: #0f1117; --bg2: #181b24; --bg3: #1e2230;
+    --border: #2a2e3a; --text: #e0e4ec; --muted: #8b92a5;
+    --accent: #7c3aed; --accent2: #a78bfa; --green: #10b981;
+    --blue: #3b82f6; --amber: #f59e0b; --rose: #f43f5e;
+    --cyan: #06b6d4; --teal: #14b8a6; --red: #ef4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height:1.7; }
+  .container { max-width:1200px; margin:0 auto; padding:2rem 1.5rem; }
+
+  /* Header */
+  .hero { text-align:center; padding:3rem 0 2rem; border-bottom:1px solid var(--border); margin-bottom:2.5rem; }
+  .hero h1 { font-size:2.4rem; font-weight:700; background:linear-gradient(135deg,var(--accent2),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero .subtitle { color:var(--muted); font-size:1.1rem; margin-top:.5rem; }
+  .hero .date { color:var(--muted); font-size:.85rem; margin-top:.5rem; }
+
+  /* TOC */
+  .toc { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:1.5rem 2rem; margin-bottom:2.5rem; }
+  .toc h2 { font-size:1.1rem; margin-bottom:.75rem; color:var(--accent2); }
+  .toc ol { padding-left:1.5rem; columns:2; column-gap:2rem; }
+  .toc li { margin-bottom:.35rem; }
+  .toc a { color:var(--cyan); text-decoration:none; font-size:.9rem; }
+  .toc a:hover { text-decoration:underline; }
+
+  /* Sections */
+  .section { margin-bottom:3rem; }
+  .section h2 { font-size:1.6rem; font-weight:700; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:2px solid var(--accent); display:inline-block; }
+  .section h3 { font-size:1.2rem; font-weight:600; margin:1.5rem 0 .75rem; color:var(--accent2); }
+  .section h4 { font-size:1rem; font-weight:600; margin:1rem 0 .5rem; color:var(--teal); }
+  .section p { margin-bottom:.75rem; color:var(--text); }
+
+  /* Cards */
+  .card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin-bottom:1rem; }
+  .card-title { font-weight:700; font-size:1.05rem; margin-bottom:.5rem; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(340px,1fr)); gap:1rem; margin:1rem 0; }
+
+  /* Tables */
+  table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.88rem; }
+  th { background:var(--bg3); color:var(--accent2); text-align:left; padding:.6rem .8rem; border:1px solid var(--border); font-weight:600; }
+  td { padding:.6rem .8rem; border:1px solid var(--border); vertical-align:top; }
+  tr:nth-child(even) td { background:rgba(30,34,48,.5); }
+
+  /* Badges */
+  .badge { display:inline-block; padding:.2rem .6rem; border-radius:9999px; font-size:.72rem; font-weight:600; margin-right:.3rem; }
+  .badge-green { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
+  .badge-red { background:rgba(239,68,68,.15); color:var(--red); border:1px solid rgba(239,68,68,.3); }
+  .badge-amber { background:rgba(245,158,11,.15); color:var(--amber); border:1px solid rgba(245,158,11,.3); }
+  .badge-blue { background:rgba(59,130,246,.15); color:var(--blue); border:1px solid rgba(59,130,246,.3); }
+  .badge-purple { background:rgba(124,58,237,.2); color:var(--accent2); border:1px solid rgba(124,58,237,.3); }
+
+  /* Verdict boxes */
+  .verdict { border-radius:10px; padding:1.25rem 1.5rem; margin:1.5rem 0; }
+  .verdict-yes { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.3); }
+  .verdict-no { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3); }
+  .verdict-caution { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.3); }
+  .verdict h3 { margin-top:0; }
+
+  /* Stats */
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:1rem; margin:1.5rem 0; }
+  .stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:1.25rem; text-align:center; }
+  .stat-number { font-size:1.8rem; font-weight:700; }
+  .stat-label { font-size:.8rem; color:var(--muted); margin-top:.25rem; }
+
+  /* Lists */
+  ul, ol { padding-left:1.5rem; margin:.5rem 0; }
+  li { margin-bottom:.4rem; }
+
+  /* Highlight */
+  .highlight { color:var(--cyan); font-weight:600; }
+  .warn { color:var(--amber); font-weight:600; }
+  .danger { color:var(--rose); font-weight:600; }
+  .good { color:var(--green); font-weight:600; }
+
+  /* SWOT */
+  .swot { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.5rem 0; }
+  .swot-card { border-radius:10px; padding:1.25rem; }
+  .swot-s { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.3); }
+  .swot-w { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3); }
+  .swot-o { background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.3); }
+  .swot-t { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.3); }
+
+  /* Timeline */
+  .timeline { position:relative; padding-left:2rem; margin:1.5rem 0; }
+  .timeline::before { content:''; position:absolute; left:.5rem; top:0; bottom:0; width:2px; background:var(--border); }
+  .timeline-item { position:relative; margin-bottom:1.5rem; }
+  .timeline-item::before { content:''; position:absolute; left:-1.75rem; top:.4rem; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent); background:var(--bg); }
+  .timeline-item.done::before { background:var(--green); border-color:var(--green); }
+  .timeline-phase { font-weight:700; color:var(--accent2); font-size:.85rem; text-transform:uppercase; letter-spacing:.5px; }
+  .timeline-title { font-weight:600; font-size:1rem; margin:.25rem 0; }
+  .timeline-desc { color:var(--muted); font-size:.88rem; }
+
+  /* Quote */
+  blockquote { border-left:3px solid var(--accent); padding:.75rem 1.25rem; margin:1rem 0; background:var(--bg2); border-radius:0 8px 8px 0; font-style:italic; color:var(--muted); }
+
+  /* Responsive */
+  @media(max-width:768px) {
+    .toc ol { columns:1; }
+    .swot { grid-template-columns:1fr; }
+    .card-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>Knol — Competitive Strategy</h1>
+  <div class="subtitle">Competing with Zep ($3.3M, YC W24) & Mem0 ($24M Series A) in the AI Memory Layer Market</div>
+  <div class="date">Strategic Analysis — February 2026 (Updated: Feb 17, 2026)</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#exec">Executive Summary</a></li>
+    <li><a href="#landscape">Market Landscape</a></li>
+    <li><a href="#competitors">Competitor Deep Dive</a></li>
+    <li><a href="#comparison">Feature Comparison Matrix</a></li>
+    <li><a href="#swot">SWOT Analysis</a></li>
+    <li><a href="#oss">Is Open Source the Right Strategy?</a></li>
+    <li><a href="#positioning">Strategic Positioning</a></li>
+    <li><a href="#gtm">Go-to-Market Playbook</a></li>
+    <li><a href="#roadmap">Execution Roadmap</a></li>
+    <li><a href="#monetization">Monetization Strategy</a></li>
+    <li><a href="#risks">Risk Analysis & Mitigation</a></li>
+    <li><a href="#verdict">Final Verdict</a></li>
+  </ol>
+</div>
+
+<!-- 1. Executive Summary -->
+<div class="section" id="exec">
+  <h2>1. Executive Summary</h2>
+
+  <p>The AI memory layer market has matured into critical infrastructure for the $200B+ AI applications ecosystem. The category is now being rebranded as <span class="highlight">"context engineering"</span> — assembling the right information at the right time for AI agents. Two well-funded players — <span class="highlight">Mem0</span> ($24M raised, 41K GitHub stars, v1.0 shipped, AWS exclusive partnership) and <span class="highlight">Zep</span> (YC-backed, Graphiti at 22.5K stars, MCP server shipped) — are establishing category leadership. A surging third wave — Letta ($10M, #1 on Terminal-Bench), OpenMemory (local-first MCP), Cognee — further fragments the market.</p>
+
+  <p>Knol enters this race with a <span class="good">fundamentally differentiated architecture</span>: an all-Rust core delivering infrastructure-grade performance, a unified PostgreSQL storage layer (no external vector/graph DB required), bi-temporal knowledge graphs, a 7-layer LLM cost optimization pipeline, and a <span class="good">complete SDK ecosystem</span> (Python sync/async, TypeScript, LangChain, CrewAI, MCP server). The platform now includes production-ready embedding generation, memory decay scoring, conflict detection, N-hop graph traversal, and a webhook event system — achieving feature parity with competitors on core capabilities while maintaining architectural superiority.</p>
+
+  <p>This document argues that <span class="highlight">open source is not just a good strategy — it is the only viable strategy</span> for a bootstrapped challenger. But the window is closing: Mem0's AWS partnership and v1.0 launch, Zep's Graphiti MCP server, and Letta's coding agent success are all accelerating category consolidation. Knol must launch publicly within weeks, not months. The <span class="good">"Performance Infrastructure" positioning</span> — the Rust-native, zero-dependency memory engine for production workloads — remains the right wedge.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--amber)">$24M</div>
+      <div class="stat-label">Mem0 Series A (Oct 2025)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--cyan)">41K</div>
+      <div class="stat-label">Mem0 GitHub Stars</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--green)">186M</div>
+      <div class="stat-label">Mem0 API Calls / Q3 2025</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--rose)">0</div>
+      <div class="stat-label">Knol Public Visibility (Today)</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Market Landscape -->
+<div class="section" id="landscape">
+  <h2>2. Market Landscape</h2>
+
+  <h3>Why Memory Is the Next Battleground</h3>
+  <p>65% of enterprise AI failures in 2025 were attributed to context drift or memory loss during multi-step reasoning. Every AI agent, chatbot, and copilot needs persistent memory — and none of the foundation model providers (OpenAI, Anthropic, Google) offer portable, interoperable memory infrastructure. This creates a massive greenfield opportunity for independent memory layers.</p>
+
+  <p>The market is coalescing around three philosophies:</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">1. DX-First SaaS (Mem0)</div>
+      <p>Optimize for developer experience. 3 lines of code to integrate. Managed cloud. Pluggable backends. Apache 2.0 OSS with commercial cloud. "Plaid for memory."</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--blue)">2. Research-Driven Graph (Zep)</div>
+      <p>Deep technical moat via Graphiti temporal knowledge graphs. Academic papers. Benchmark leadership. Enterprise compliance (SOC2, HIPAA). "Memory science."</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--accent2)">3. Performance Infrastructure (Knol's Opportunity)</div>
+      <p>Rust-native, zero-external-dependency, infrastructure-grade memory engine. Single Postgres deployment. Sub-5ms gateway latency. "The Nginx of AI memory."</p>
+    </div>
+  </div>
+
+  <h3>The "Context Engineering" Rebrand</h3>
+  <p>The market is undergoing a critical narrative shift: "memory" is becoming <span class="highlight">"context engineering"</span>. Zep now positions as a "context engineering platform." This reframing matters because it expands the addressable market from "memory storage" to "assembling the right information at the right time" — encompassing RAG, memory, real-time data, and business context. Knol should adopt this framing selectively: use "memory engine" for developer-facing positioning (concrete, searchable), but "context engineering" for enterprise sales (broader value prop).</p>
+
+  <h3>MCP as Distribution Channel</h3>
+  <p>Since the original strategy was written, <span class="highlight">MCP (Model Context Protocol) has emerged as the dominant distribution channel</span> for AI infrastructure tools. Both Mem0 (OpenMemory MCP) and Zep (Graphiti MCP) have shipped MCP servers. Claude Code, Cursor, Windsurf, and GitHub Copilot all support MCP natively. This means MCP is no longer a Phase 2 "nice-to-have" — it's a <span class="danger">Phase 1 launch requirement</span>. Knol has already built its MCP server.</p>
+
+  <h3>Market Sizing</h3>
+  <p>The AI memory layer sits at the intersection of three markets: vector databases ($2.8B by 2028), knowledge graphs ($4.1B by 2027), and LLM infrastructure ($28B by 2027). TrendForce projects the broader AI-driven memory market to reach $551.6B in 2026, surging to $842.7B in 2027 (53% YoY growth). The specific "memory-as-a-service" segment — Mem0 went from 35M to 186M API calls in a single quarter (5.3x growth) — is now being validated by major cloud providers (AWS chose Mem0 as exclusive memory provider for their Agent SDK).</p>
+</div>
+
+<!-- 3. Competitor Deep Dive -->
+<div class="section" id="competitors">
+  <h2>3. Competitor Deep Dive</h2>
+
+  <h3>Mem0 — The Market Leader</h3>
+  <div class="card">
+    <table>
+      <tr><th style="width:30%">Attribute</th><th>Details</th></tr>
+      <tr><td><strong>Funding</strong></td><td>$24M total ($3.9M seed + $20M Series A). Led by Basis Set Ventures, Peak XV, YC, GitHub Fund.</td></tr>
+      <tr><td><strong>Traction</strong></td><td>41K GitHub stars. 14M downloads. 80K+ developers. 186M API calls/Q3. Netflix, Lemonade, Rocket Money as customers. <span class="danger">v1.0.0 shipped</span> with rerankers, async-by-default, Azure OpenAI support.</td></tr>
+      <tr><td><strong>Architecture</strong></td><td>Python. Hybrid store: vector (Qdrant/Pinecone) + key-value + graph (Neo4j/Memgraph). Pluggable providers. v1.0 adds rerankers and async-by-default.</td></tr>
+      <tr><td><strong>Open Source</strong></td><td>Apache 2.0. Genuine OSS with self-host option. Cloud SaaS for managed experience. Launched <span class="highlight">OpenMemory MCP</span> — local-first memory with built-in UI for all MCP clients.</td></tr>
+      <tr><td><strong>Moat</strong></td><td>Developer mindshare. <span class="danger">AWS exclusive memory provider for Agent SDK</span>. Ecosystem integrations (LangChain, CrewAI, Vercel AI SDK, browser extension). OpenMemory creates cross-tool memory sharing. Published research paper (arXiv 2504.19413).</td></tr>
+      <tr><td><strong>Weakness</strong></td><td>Python performance ceiling. External DB dependencies (Qdrant, Neo4j). Graph was bolted on (2024), not native. No bi-temporal modeling. Self-hosting is complex (many moving parts). OpenMemory is separate from main Mem0 — fragmented product story.</td></tr>
+    </table>
+  </div>
+
+  <h3>Zep — The Technical Leader</h3>
+  <div class="card">
+    <table>
+      <tr><th style="width:30%">Attribute</th><th>Details</th></tr>
+      <tr><td><strong>Funding</strong></td><td>$3.3M. YC W24.</td></tr>
+      <tr><td><strong>Traction</strong></td><td><span class="highlight">22,500 GitHub stars</span> (Graphiti, up from ~2K). Strong academic credibility (published paper arXiv 2501.13956). Positions as "context engineering platform." Enterprise focus.</td></tr>
+      <tr><td><strong>Architecture</strong></td><td>Python/Go. Graphiti temporal KG. Now supports <span class="highlight">Neo4j, FalkorDB, Kuzu, Amazon Neptune</span>. Bi-temporal data model. Hybrid search (semantic + BM25 + graph traversal). P95 latency 300ms.</td></tr>
+      <tr><td><strong>Open Source</strong></td><td>Graphiti is Apache 2.0. Zep Community Edition discontinued. <span class="highlight">Shipped Graphiti MCP server</span> for Claude/Cursor.</td></tr>
+      <tr><td><strong>Moat</strong></td><td>Temporal knowledge graph IP. Benchmark leadership (94.8% DMR). SOC2 Type 2 / HIPAA compliance. Enterprise deployment options (BYOC/BYOK). Multi-database support reduces lock-in concern.</td></tr>
+      <tr><td><strong>Weakness</strong></td><td>Killed Community Edition — alienated self-hosting community. Still requires external graph DB (Neo4j/FalkorDB/Neptune). Higher complexity. "Context engineering" positioning is vague. MCP server is basic (Graphiti only, not full Zep).</td></tr>
+    </table>
+  </div>
+
+  <h3>Other Competitors</h3>
+  <div class="card-grid">
+    <div class="card" style="border-color:var(--amber)">
+      <div class="card-title" style="color:var(--amber)">Letta (ex-MemGPT) — Rising Threat</div>
+      <p>$10M seed from Felicis. UC Berkeley research team. <span class="warn">Now shipping production products</span>: Letta Code (#1 model-agnostic agent on Terminal-Bench), Conversations API for shared memory, Context Repositories with git-based versioning, and "sleep-time compute" for background memory processing. No longer just research — rapidly becoming a platform competitor. Different angle (agent-first, not memory-first) but converging on same problem.</p>
+    </div>
+    <div class="card" style="border-color:var(--amber)">
+      <div class="card-title" style="color:var(--amber)">OpenMemory MCP — New Entrant</div>
+      <p>Open-source, local-first memory layer with built-in UI. Compatible with all MCP clients (Claude, Cursor, Copilot). Key differentiator: <span class="highlight">all memory stays local</span> — no cloud sync. Hierarchical memory decomposition. Originally from Mem0 ecosystem but positioned as independent. Validates the local-first memory narrative that Knol should own.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Supermemory</div>
+      <p>Commercial. Cloudflare-based. "Infinite context, plug-and-play." Hot/warm/cold memory tiers. Less established but fast-moving.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Cognee</div>
+      <p>OSS memory engine. Semantic nodes/edges from conversations. Smaller but interesting graph-first approach.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Feature Comparison Matrix -->
+<div class="section" id="comparison">
+  <h2>4. Feature Comparison Matrix</h2>
+  <table>
+    <tr>
+      <th>Capability</th>
+      <th>Knol</th>
+      <th>Mem0</th>
+      <th>Zep</th>
+    </tr>
+    <tr>
+      <td><strong>Core Language</strong></td>
+      <td><span class="badge badge-green">Rust</span></td>
+      <td><span class="badge badge-amber">Python</span></td>
+      <td><span class="badge badge-amber">Python/Go</span></td>
+    </tr>
+    <tr>
+      <td><strong>External DB Required</strong></td>
+      <td><span class="badge badge-green">No</span> PostgreSQL only</td>
+      <td><span class="badge badge-red">Yes</span> Qdrant/Pinecone + Neo4j</td>
+      <td><span class="badge badge-red">Yes</span> Neo4j required</td>
+    </tr>
+    <tr>
+      <td><strong>Vector Search</strong></td>
+      <td>pgvector (HNSW, 1024-dim)</td>
+      <td>External vector DB</td>
+      <td>Embedded in Graphiti</td>
+    </tr>
+    <tr>
+      <td><strong>Knowledge Graph</strong></td>
+      <td><span class="badge badge-green">Native</span> PG entities+edges</td>
+      <td><span class="badge badge-amber">Bolted-on</span> Neo4j/Memgraph</td>
+      <td><span class="badge badge-green">Core</span> Graphiti temporal KG</td>
+    </tr>
+    <tr>
+      <td><strong>Bi-Temporal</strong></td>
+      <td><span class="badge badge-green">Yes</span> valid_from/valid_to</td>
+      <td><span class="badge badge-red">No</span></td>
+      <td><span class="badge badge-green">Yes</span> event + ingestion time</td>
+    </tr>
+    <tr>
+      <td><strong>Conflict Resolution</strong></td>
+      <td><span class="badge badge-green">Yes</span> 0.50 threshold</td>
+      <td><span class="badge badge-amber">Basic</span></td>
+      <td><span class="badge badge-green">Yes</span> invalidation model</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Consolidation</strong></td>
+      <td><span class="badge badge-green">Yes</span> episodic→semantic</td>
+      <td><span class="badge badge-green">Yes</span></td>
+      <td><span class="badge badge-green">Yes</span></td>
+    </tr>
+    <tr>
+      <td><strong>Hybrid Retrieval</strong></td>
+      <td><span class="badge badge-green">RRF</span> vector+BM25+graph</td>
+      <td><span class="badge badge-amber">Vector + graph</span></td>
+      <td><span class="badge badge-green">Hybrid</span> semantic+BM25+traversal</td>
+    </tr>
+    <tr>
+      <td><strong>LLM Cost Optimization</strong></td>
+      <td><span class="badge badge-green">7 layers</span> 75% reduction</td>
+      <td><span class="badge badge-amber">Token savings</span></td>
+      <td><span class="badge badge-amber">Low-latency retrieval</span></td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Tenant RLS</strong></td>
+      <td><span class="badge badge-green">PostgreSQL RLS</span></td>
+      <td><span class="badge badge-amber">Basic</span></td>
+      <td><span class="badge badge-green">Yes</span></td>
+    </tr>
+    <tr>
+      <td><strong>Admin Panel</strong></td>
+      <td><span class="badge badge-green">Full</span> Next.js 14</td>
+      <td><span class="badge badge-amber">Basic</span></td>
+      <td><span class="badge badge-amber">Playground</span></td>
+    </tr>
+    <tr>
+      <td><strong>Self-Host Complexity</strong></td>
+      <td><span class="badge badge-green">Low</span> PG + Redis + NATS</td>
+      <td><span class="badge badge-red">High</span> PG + VectorDB + GraphDB</td>
+      <td><span class="badge badge-red">High</span> PG + Neo4j + LLM</td>
+    </tr>
+    <tr>
+      <td><strong>P99 Gateway Latency</strong></td>
+      <td><span class="badge badge-green">&lt;5ms target</span></td>
+      <td><span class="badge badge-amber">Python overhead</span></td>
+      <td><span class="badge badge-amber">300ms P95 retrieval</span></td>
+    </tr>
+    <tr>
+      <td><strong>Memory Footprint</strong></td>
+      <td><span class="badge badge-green">~50MB</span> Rust binary</td>
+      <td><span class="badge badge-red">~500MB+</span> Python + deps</td>
+      <td><span class="badge badge-amber">~200MB+</span> Go/Python</td>
+    </tr>
+    <tr>
+      <td><strong>Memory Decay</strong></td>
+      <td><span class="badge badge-green">Yes</span> 3 modes (exp/linear/step)</td>
+      <td><span class="badge badge-red">No</span></td>
+      <td><span class="badge badge-amber">Implicit</span> via temporal invalidation</td>
+    </tr>
+    <tr>
+      <td><strong>Conflict Detection</strong></td>
+      <td><span class="badge badge-green">Yes</span> Jaccard + entity overlap</td>
+      <td><span class="badge badge-amber">Basic</span> dedup only</td>
+      <td><span class="badge badge-green">Yes</span> temporal invalidation</td>
+    </tr>
+    <tr>
+      <td><strong>Embedding Generation</strong></td>
+      <td><span class="badge badge-green">Multi-provider</span> OpenAI/Voyage/Gemini/local</td>
+      <td><span class="badge badge-green">Multi-provider</span></td>
+      <td><span class="badge badge-green">Multi-provider</span></td>
+    </tr>
+    <tr>
+      <td><strong>Webhooks/Events</strong></td>
+      <td><span class="badge badge-green">Yes</span> HMAC-signed, 10 event types</td>
+      <td><span class="badge badge-red">No</span></td>
+      <td><span class="badge badge-amber">Basic</span></td>
+    </tr>
+    <tr>
+      <td><strong>N-hop Graph Traversal</strong></td>
+      <td><span class="badge badge-green">Yes</span> 1-5 hops + path finding</td>
+      <td><span class="badge badge-amber">Basic</span></td>
+      <td><span class="badge badge-green">Yes</span> via Graphiti</td>
+    </tr>
+    <tr>
+      <td><strong>GitHub Stars</strong></td>
+      <td><span class="badge badge-red">0</span> (pre-launch)</td>
+      <td><span class="badge badge-green">41,000+</span></td>
+      <td><span class="badge badge-green">22,500</span> (Graphiti)</td>
+    </tr>
+    <tr>
+      <td><strong>Framework Integrations</strong></td>
+      <td><span class="badge badge-green">Ready</span> LangChain, CrewAI, MCP</td>
+      <td><span class="badge badge-green">LangChain, CrewAI, AWS, Vercel</span></td>
+      <td><span class="badge badge-amber">LangChain, MCP, OpenAI SDK</span></td>
+    </tr>
+    <tr>
+      <td><strong>SDKs</strong></td>
+      <td><span class="badge badge-green">Python</span> <span class="badge badge-green">TypeScript</span> <span class="badge badge-green">MCP</span></td>
+      <td><span class="badge badge-green">Python</span> <span class="badge badge-green">TypeScript</span></td>
+      <td><span class="badge badge-green">Python</span> <span class="badge badge-amber">Go</span></td>
+    </tr>
+    <tr>
+      <td><strong>License (OSS)</strong></td>
+      <td><span class="badge badge-green">Apache 2.0</span></td>
+      <td><span class="badge badge-green">Apache 2.0</span></td>
+      <td><span class="badge badge-green">Apache 2.0</span> (Graphiti only)</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 5. SWOT -->
+<div class="section" id="swot">
+  <h2>5. SWOT Analysis — Knol</h2>
+  <div class="swot">
+    <div class="swot-card swot-s">
+      <h4 style="color:var(--green)">Strengths</h4>
+      <ul>
+        <li><strong>Rust core</strong> — 10x lower memory, sub-5ms latency, zero GC pauses. No Python competitor can match this at scale.</li>
+        <li><strong>Zero external dependencies</strong> — Everything in PostgreSQL (vectors, graphs, config). Dramatically simpler ops than Mem0 (needs Qdrant + Neo4j) or Zep (needs Neo4j/FalkorDB/Neptune).</li>
+        <li><strong>Bi-temporal graph native</strong> — Not bolted on. Schema-level temporal modeling on entities AND edges.</li>
+        <li><strong>7-layer LLM optimization</strong> — Unique cost reduction pipeline (triage, cache, pruning, inline verification, dynamic tokens, dedup, consolidation).</li>
+        <li><strong>Complete platform</strong> — Admin panel, multi-tenant RLS, audit trails, governance. Enterprise-ready from day one.</li>
+        <li><strong>Async write pipeline</strong> — NATS JetStream decouples write latency from LLM extraction latency. Writes return instantly.</li>
+        <li><strong>Full SDK ecosystem (NEW)</strong> — Python (sync + async), TypeScript, LangChain integration, CrewAI integration, MCP server. Launch-ready across all major frameworks.</li>
+        <li><strong>Advanced memory intelligence (NEW)</strong> — Memory decay (3 modes), conflict detection (Jaccard + entity overlap), N-hop graph traversal with path finding, webhook event system. Features competitors lack.</li>
+      </ul>
+    </div>
+    <div class="swot-card swot-w">
+      <h4 style="color:var(--rose)">Weaknesses</h4>
+      <ul>
+        <li><strong>Zero community</strong> — No GitHub presence, no stars, no contributors. Starting from absolute zero in a market where Mem0 has 41K stars and Graphiti has 22.5K.</li>
+        <li><strong>No published benchmarks</strong> — Claims without third-party validation carry no weight. Mem0 published a research paper (arXiv). Zep has peer-reviewed benchmarks.</li>
+        <li><strong>No AWS/cloud partnership</strong> — Mem0 is the exclusive AWS Agent SDK memory provider. This is a significant distribution moat Knol cannot easily replicate.</li>
+        <li><strong>Rust = smaller contributor pool</strong> — Fewer Rust developers than Python developers willing to contribute to OSS. Mitigated by Python/TS SDK layer for community contributions.</li>
+        <li><strong>Bootstrapped</strong> — No venture capital vs. $24M (Mem0), $3.3M (Zep), $10M (Letta). Limited marketing budget.</li>
+        <li><strong>pgvector limitations</strong> — At very large scale (100M+ vectors), dedicated vector DBs outperform pgvector. Fine for 99% of use cases but limits ceiling narrative.</li>
+        <li><strong><s>No ecosystem integrations</s></strong> — <span class="good">RESOLVED.</span> Now has LangChain, CrewAI, MCP server, Python async SDK, TypeScript SDK.</li>
+      </ul>
+    </div>
+    <div class="swot-card swot-o">
+      <h4 style="color:var(--blue)">Opportunities</h4>
+      <ul>
+        <li><strong>"Self-hosted Mem0" narrative</strong> — Zep killed their Community Edition. Many developers want a self-hosted memory layer. Knol fills this vacuum.</li>
+        <li><strong>Infrastructure buyers want Rust</strong> — Companies deploying memory in hot paths (every LLM call) care about performance. Rust signals production-grade.</li>
+        <li><strong>PostgreSQL ecosystem love</strong> — Massive community prefers PG-native solutions over adding Neo4j/Qdrant. "Just add Knol to your existing Postgres."</li>
+        <li><strong>Enterprise cost sensitivity</strong> — 7-layer optimization = 75% LLM cost reduction. CFOs love this story.</li>
+        <li><strong>AI agent explosion</strong> — 2026 is the year of autonomous agents. Every agent needs memory. Market is growing faster than any one player can capture.</li>
+        <li><strong>MCP/tool ecosystem</strong> — Claude, Cursor, Windsurf all support MCP. A Knol MCP server = instant distribution to millions of developers.</li>
+      </ul>
+    </div>
+    <div class="swot-card swot-t">
+      <h4 style="color:var(--amber)">Threats</h4>
+      <ul>
+        <li><strong>Mem0 + AWS lock-in (ELEVATED)</strong> — Mem0 is the <span class="danger">exclusive</span> AWS Agent SDK memory provider. AWS agents = massive distribution. OpenMemory MCP creates cross-tool memory sharing. This is now the #1 competitive threat.</li>
+        <li><strong>Foundation model providers</strong> — OpenAI, Anthropic, Google could build memory natively. OpenAI already has basic memory. If they go deep, middleware layer gets squeezed.</li>
+        <li><strong>Graphiti momentum (ELEVATED)</strong> — Grew from ~2K to 22.5K stars. Multi-database support (Neo4j, FalkorDB, Kuzu, Neptune) reduces the "Neo4j dependency" weakness. MCP server shipped. Stronger than 3 months ago.</li>
+        <li><strong>Letta's coding agent success (NEW)</strong> — Letta Code is #1 on Terminal-Bench. Conversations API + sleep-time compute are novel approaches. Could capture the "agent memory" positioning before Knol launches.</li>
+        <li><strong>Category consolidation</strong> — If Mem0 acquires Cognee or Letta, the combined offering could be overwhelming. AWS could acquire Mem0 outright.</li>
+        <li><strong>Rust adoption barrier</strong> — Enterprises evaluating memory layers may prefer Python for easier customization and debugging.</li>
+        <li><strong>"Context engineering" reframing (NEW)</strong> — If memory becomes subsumed into broader "context engineering" platforms, pure memory engines may get commoditized. Knol must expand positioning beyond just memory storage.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Is Open Source the Right Strategy? -->
+<div class="section" id="oss">
+  <h2>6. Is Open Source the Right Strategy?</h2>
+
+  <div class="verdict verdict-yes">
+    <h3 style="color:var(--green)">Verdict: Yes — OSS Is Not Optional, It's Existential</h3>
+    <p>In the AI memory layer market of 2026, open source is table stakes, not a differentiator. Both Mem0 (Apache 2.0) and Zep (Graphiti Apache 2.0) are open source. A closed-source memory layer would be dead on arrival — developers will not build critical AI infrastructure on proprietary, single-vendor systems when open alternatives exist.</p>
+  </div>
+
+  <h3>Why OSS Is the Right Move</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">1. Trust in the Hot Path</div>
+      <p>Memory sits in the critical path of every LLM call. Developers need to inspect, audit, and trust this code. Closed-source memory is a non-starter for enterprises handling PII, healthcare data, or financial information. OSS = auditability = trust.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">2. Distribution Without Capital</div>
+      <p>Mem0 has $24M for marketing. Knol doesn't. Open source IS the marketing strategy. A compelling GitHub repo with good docs, benchmarks, and a clear README generates organic adoption that no ad spend can match. Mem0's 41K stars were earned, not bought.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">3. Community as Moat</div>
+      <p>Framework integrations (LangChain, CrewAI, etc.) are built by community contributors, not core teams. Without OSS, Knol will never get these integrations. With OSS, the community extends the platform faster than any internal team could.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">4. Self-Host Demand Is Real</div>
+      <p>Zep killed their Community Edition. This created a vacuum. Developers on Reddit, HN, and Discord actively seek self-hosted alternatives. Knol's all-in-PostgreSQL architecture makes it the easiest memory layer to self-host — a massive competitive advantage.</p>
+    </div>
+  </div>
+
+  <h3>But: The <em>Type</em> of OSS Matters</h3>
+
+  <p>Three open-core models exist in this market. Knol should follow Model B:</p>
+
+  <table>
+    <tr>
+      <th>Model</th>
+      <th>OSS Scope</th>
+      <th>Commercial Scope</th>
+      <th>Example</th>
+      <th>Risk</th>
+    </tr>
+    <tr>
+      <td><strong>A. Library Only</strong></td>
+      <td>Core library (Graphiti)</td>
+      <td>Everything else</td>
+      <td>Zep</td>
+      <td>Community feels shortchanged. "Crippleware."</td>
+    </tr>
+    <tr style="background:rgba(16,185,129,.05);">
+      <td><strong>B. Functional Core ✓</strong></td>
+      <td>Complete single-node product</td>
+      <td>Scale, ops, governance</td>
+      <td>GitLab, Supabase</td>
+      <td>Balanced. OSS is genuinely useful. Enterprise upsell is clear.</td>
+    </tr>
+    <tr>
+      <td><strong>C. Full OSS + SaaS</strong></td>
+      <td>Everything</td>
+      <td>Managed hosting only</td>
+      <td>Mem0</td>
+      <td>Harder to monetize. Needs massive scale to justify cloud margins.</td>
+    </tr>
+  </table>
+
+  <h3>Recommended OSS Boundary for Knol</h3>
+
+  <div class="card-grid">
+    <div class="card" style="border-color:var(--green)">
+      <div class="card-title" style="color:var(--green)">Open Source (Apache 2.0)</div>
+      <ul>
+        <li>All memory APIs (write, retrieve, search, graph)</li>
+        <li>LLM extraction pipeline + all 7 optimization layers</li>
+        <li>Bi-temporal knowledge graph</li>
+        <li>Hybrid retrieval (vector + BM25 + graph + RRF)</li>
+        <li>Multi-tenant support (single node)</li>
+        <li>Python SDK (sync + async) + TypeScript SDK + REST API</li>
+        <li>LangChain, CrewAI integrations + MCP server</li>
+        <li>Memory decay, conflict detection, webhook events</li>
+        <li>Docker Compose single-node deployment</li>
+        <li>Basic admin UI</li>
+        <li>Content triage, entity pruning, deduplication</li>
+        <li>Dynamic LLM provider switching</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:var(--accent)">
+      <div class="card-title" style="color:var(--accent2)">Enterprise (Commercial License)</div>
+      <ul>
+        <li>Horizontal scaling (multi-node, sharding)</li>
+        <li>SSO / SAML / SCIM authentication</li>
+        <li>Advanced governance (PII detection, audit, retention policies)</li>
+        <li>Scheduled consolidation + decay jobs</li>
+        <li>Usage metering + billing APIs</li>
+        <li>Ingestion connectors (Slack, GitHub, email)</li>
+        <li>Advanced admin panel (analytics, cost dashboards)</li>
+        <li>Priority support + SLAs</li>
+        <li>BYOC/BYOK deployment</li>
+        <li>SOC2 / HIPAA compliance package</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="verdict verdict-caution">
+    <h3 style="color:var(--amber)">Critical Rule: The OSS version must be genuinely useful in production</h3>
+    <p>If a solo developer or small startup can't run Knol OSS in production and get real value, the project will never build community. The OSS version should handle 90% of use cases for teams with &lt;10M memories. Enterprise kicks in for scale, compliance, and operational convenience — not for basic functionality.</p>
+  </div>
+</div>
+
+<!-- 7. Strategic Positioning -->
+<div class="section" id="positioning">
+  <h2>7. Strategic Positioning</h2>
+
+  <h3>Don't Compete on Features — Compete on Architecture</h3>
+
+  <p>Trying to out-feature Mem0 (with $24M and 80K developers) is suicidal. Trying to out-research Zep (with published papers and benchmarks) is impractical without a research team. Instead, Knol should own a <span class="highlight">fundamentally different position</span>:</p>
+
+  <div class="card" style="border-color:var(--accent); border-width:2px;">
+    <div class="card-title" style="color:var(--accent2); font-size:1.2rem;">Positioning Statement</div>
+    <blockquote>
+      "Knol is the Rust-native, zero-dependency memory engine for AI applications. One binary. One PostgreSQL database. Sub-5ms latency. Deploy in 60 seconds. The performance infrastructure layer that makes AI memory a solved problem."
+    </blockquote>
+  </div>
+
+  <h3>Three Pillars of Differentiation</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--cyan)">Pillar 1: Radical Simplicity</div>
+      <p><strong>Mem0 needs:</strong> PostgreSQL + Qdrant/Pinecone + Neo4j/Memgraph + Redis + Python runtime.</p>
+      <p><strong>Zep needs:</strong> PostgreSQL + Neo4j + Go/Python runtime.</p>
+      <p><strong>Knol needs:</strong> PostgreSQL. That's it.</p>
+      <p>A single <code>docker compose up</code> gives you vector search (pgvector), knowledge graphs (entities+edges), full-text search (pg_trgm), multi-tenant isolation (RLS), and temporal modeling — all in one database you already know how to operate.</p>
+      <p><span class="good">This is the killer message.</span> DevOps teams hate adding Neo4j and Qdrant to their stack. Knol eliminates that entire conversation.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--cyan)">Pillar 2: Infrastructure-Grade Performance</div>
+      <p>Memory sits in the hot path of every LLM call. At 1,000 req/s, the difference between Python's 50ms overhead and Rust's 0.5ms is $40K/year in compute costs. Knol's Rust core isn't a vanity choice — it's an economic argument.</p>
+      <p>Target benchmarks to publish: P99 latency vs Mem0 (10-50x faster), memory footprint vs Mem0 (10x smaller), throughput under load (concurrent extractions).</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--cyan)">Pillar 3: LLM Cost Intelligence</div>
+      <p>No competitor has a 7-layer optimization pipeline. Content triage alone eliminates 30% of LLM calls. Add caching, entity pruning, dynamic tokens, inline verification, and deduplication — and you get 75% cost reduction.</p>
+      <p>Position this as: "Knol doesn't just store memories — it makes the entire LLM pipeline 4x cheaper."</p>
+    </div>
+  </div>
+
+  <h3>Positioning Matrix</h3>
+  <table>
+    <tr>
+      <th></th>
+      <th>Simple Self-Host</th>
+      <th>Complex Self-Host</th>
+    </tr>
+    <tr>
+      <td><strong>DX-Optimized</strong></td>
+      <td style="background:rgba(124,58,237,.1);"><strong>Knol OSS</strong><br>PG-only, single binary, instant setup</td>
+      <td>Mem0 OSS<br>Needs Qdrant + Neo4j + Python</td>
+    </tr>
+    <tr>
+      <td><strong>Enterprise-Grade</strong></td>
+      <td style="background:rgba(16,185,129,.05);"><strong>Knol Enterprise</strong><br>Same simple stack + governance</td>
+      <td>Zep Cloud<br>Neo4j + compliance</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 8. GTM Playbook -->
+<div class="section" id="gtm">
+  <h2>8. Go-to-Market Playbook</h2>
+
+  <h3>Phase 1: Launch (Months 1-2) — "Earn the Right to Exist"</h3>
+  <div class="card">
+    <h4>GitHub Launch Checklist</h4>
+    <ul>
+      <li><strong>Killer README</strong> — 30-second value prop. Animated GIF showing <code>docker compose up → add memory → retrieve → graph query</code> in under 60 seconds.</li>
+      <li><strong>One-command install</strong> — <code>curl -sSf https://knol.dev/install | sh</code> that sets up PG + Knol in Docker.</li>
+      <li><strong>Benchmark page</strong> — Head-to-head latency, memory usage, and accuracy vs. Mem0 on DMR/LOCOMO benchmarks. Numbers, not claims.</li>
+      <li><strong>Architecture doc</strong> — The existing ARCHITECTURE.html, converted to a stunning docs site.</li>
+      <li><strong>"Why Rust?" blog post</strong> — Data-driven case for Rust in memory infrastructure. Benchmark charts. Share on HN/Reddit.</li>
+      <li><span class="good"><strong>MCP Server (READY)</strong></span> — Ship at launch. Both Mem0 and Zep now have MCP servers. This is table stakes, not Phase 2.</li>
+      <li><span class="good"><strong>Python + TypeScript SDKs (READY)</strong></span> — Publish to PyPI and npm at launch. Include async Python support.</li>
+      <li><span class="good"><strong>LangChain + CrewAI integrations (READY)</strong></span> — Ship at launch. Dramatically lowers barrier to adoption vs. raw REST API.</li>
+    </ul>
+
+    <h4>Launch Channels</h4>
+    <ul>
+      <li><strong>Hacker News "Show HN"</strong> — Rust + PostgreSQL + AI = HN catnip. Title: "Show HN: Knol – Rust-native AI memory engine, zero dependencies beyond PostgreSQL"</li>
+      <li><strong>r/rust, r/MachineLearning, r/LocalLLaMA</strong> — Deep technical posts showing architecture decisions.</li>
+      <li><strong>Twitter/X</strong> — Thread comparing self-hosting complexity: Mem0 (5 services) vs Knol (1 service + PG).</li>
+      <li><strong>Dev.to / Hashnode</strong> — Tutorial: "Add long-term memory to your AI agent in 5 minutes with Knol"</li>
+      <li><strong>MCP directory listings</strong> — Submit to Claude Code, Cursor, and Windsurf MCP directories for organic discovery.</li>
+    </ul>
+  </div>
+
+  <h3>Phase 2: Ecosystem (Months 3-6) — "Be Where Developers Are"</h3>
+  <div class="card">
+    <ul>
+      <li><span class="good"><s>LangChain integration</s> — DONE. Ships with launch.</span></li>
+      <li><span class="good"><s>CrewAI integration</s> — DONE. Ships with launch.</span></li>
+      <li><span class="good"><s>MCP Server</s> — DONE. Ships with launch.</span></li>
+      <li><strong>AutoGen / Semantic Kernel / Vercel AI SDK</strong> — Expand framework coverage. Community contributions welcome.</li>
+      <li><strong>Helm chart + Kubernetes operator</strong> — Enterprise deploys on K8s. Make it trivial.</li>
+      <li><strong>Supabase partnership</strong> — Knol + Supabase = complete AI backend. Natural fit (both PG-native).</li>
+      <li><strong>Vercel / Railway / Render templates</strong> — One-click deploy buttons in README.</li>
+      <li><strong>OpenMemory compatibility layer</strong> — Let users migrate from OpenMemory MCP to Knol MCP seamlessly.</li>
+      <li><strong>LlamaIndex integration</strong> — Capture the RAG-to-memory pipeline market.</li>
+    </ul>
+  </div>
+
+  <h3>Phase 3: Enterprise (Months 6-12) — "Turn Stars into Revenue"</h3>
+  <div class="card">
+    <ul>
+      <li><strong>Knol Cloud</strong> — Managed service. Free tier (10K memories). Pay-as-you-grow. SOC2 in progress.</li>
+      <li><strong>Enterprise sales</strong> — Target companies already using Mem0 OSS who hit scaling pain (Neo4j costs, Python performance). Knol = simpler, faster, cheaper.</li>
+      <li><strong>Case studies</strong> — Partner with 3-5 design partners for published case studies with real numbers.</li>
+      <li><strong>Compliance certifications</strong> — SOC2 Type 2 + HIPAA as enterprise table stakes.</li>
+    </ul>
+  </div>
+
+  <h3>Content Strategy: Technical Depth Wins</h3>
+  <table>
+    <tr>
+      <th>Content Type</th>
+      <th>Frequency</th>
+      <th>Channel</th>
+      <th>Goal</th>
+    </tr>
+    <tr>
+      <td>"Why Rust for AI Memory" deep dive</td>
+      <td>Launch</td>
+      <td>Blog + HN</td>
+      <td>Establish technical credibility</td>
+    </tr>
+    <tr>
+      <td>Benchmark reports (Knol vs Mem0 vs Zep)</td>
+      <td>Quarterly</td>
+      <td>GitHub + Blog</td>
+      <td>Prove performance claims</td>
+    </tr>
+    <tr>
+      <td>Architecture decision records</td>
+      <td>Monthly</td>
+      <td>Blog</td>
+      <td>Attract senior engineers</td>
+    </tr>
+    <tr>
+      <td>Integration tutorials</td>
+      <td>Bi-weekly</td>
+      <td>Dev.to + YouTube</td>
+      <td>Drive adoption</td>
+    </tr>
+    <tr>
+      <td>"Memory patterns" cookbook</td>
+      <td>Ongoing</td>
+      <td>Docs site</td>
+      <td>Reduce time-to-value</td>
+    </tr>
+    <tr>
+      <td>Cost savings calculator</td>
+      <td>Launch</td>
+      <td>Website</td>
+      <td>Enterprise lead gen</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 9. Execution Roadmap -->
+<div class="section" id="roadmap">
+  <h2>9. Execution Roadmap</h2>
+
+  <div class="timeline">
+    <div class="timeline-item done">
+      <div class="timeline-phase">Done — Foundation</div>
+      <div class="timeline-title">Core Platform Built</div>
+      <div class="timeline-desc">15 Rust crates, 8 microservices, bi-temporal graph, hybrid retrieval, 7-layer LLM optimization, admin panel, multi-tenant RLS. 252+ tests passing.</div>
+    </div>
+
+    <div class="timeline-item done">
+      <div class="timeline-phase">Done — Competitive Features</div>
+      <div class="timeline-title">Feature Parity + Differentiation</div>
+      <div class="timeline-desc">
+        • Multi-provider embedding generation (OpenAI, Voyage, Gemini, local)<br>
+        • Memory decay scoring (exponential, linear, step) with access reinforcement<br>
+        • Conflict detection &amp; resolution (Jaccard + entity overlap)<br>
+        • N-hop graph traversal (1-5 hops) + shortest path finding<br>
+        • Webhook event system (HMAC-signed, 10 event types)<br>
+        • Memory export/import with configurable conflict strategies<br>
+        • Session-scoped retrieval + enhanced search filters
+      </div>
+    </div>
+
+    <div class="timeline-item done">
+      <div class="timeline-phase">Done — SDK Ecosystem</div>
+      <div class="timeline-title">Framework Integrations Built</div>
+      <div class="timeline-desc">
+        • Python SDK (sync + async) with 21 methods covering all API endpoints<br>
+        • TypeScript SDK (@knol/sdk) — zero dependencies, native fetch, builder pattern<br>
+        • LangChain integration (KnolMemory, KnolChatMessageHistory, KnolRetriever)<br>
+        • CrewAI integration (KnolCrewMemory, KnolCrewStorage)<br>
+        • MCP server (@knol/mcp-server) — 7 tools + 1 resource, stdio transport<br>
+        • 25 unit tests for Python SDK
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-phase">Phase 1 (Weeks 1-4) — OSS Launch</div>
+      <div class="timeline-title">Public GitHub + Community Launch</div>
+      <div class="timeline-desc">
+        <strong>P0 (Must-have for launch):</strong><br>
+        • Public GitHub repo with killer README + architecture docs<br>
+        • Docker Compose one-command setup (PG + Redis + NATS + Knol)<br>
+        • Published DMR/LOCOMO benchmark results<br>
+        • Latency benchmark vs Mem0 (controlled test)<br>
+        • Python SDK on PyPI + TypeScript SDK on npm<br>
+        • MCP server published to MCP directories<br>
+        • Basic docs site (Docusaurus or Starlight)<br>
+        • Show HN + Reddit launch posts<br>
+        <br>
+        <strong>P1 (Nice-to-have):</strong><br>
+        • Interactive playground (web demo)<br>
+        • Video walkthrough<br>
+        • "Migrate from Mem0/OpenMemory" guide
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-phase">Phase 2 (Months 2-5) — Ecosystem</div>
+      <div class="timeline-title">Expansion + Community Growth</div>
+      <div class="timeline-desc">
+        • AutoGen + Semantic Kernel + Vercel AI SDK integrations<br>
+        • LlamaIndex integration<br>
+        • Helm chart + K8s operator<br>
+        • One-click deploy (Railway, Render, Vercel)<br>
+        • Supabase integration guide<br>
+        • OpenMemory migration tool<br>
+        • Community Discord + monthly office hours<br>
+        • <strong>Target: 2,000+ GitHub stars</strong>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-phase">Phase 3 (Months 6-9) — Enterprise Beta</div>
+      <div class="timeline-title">Knol Cloud + Enterprise Features</div>
+      <div class="timeline-desc">
+        • Knol Cloud managed service (free tier)<br>
+        • SSO/SAML for enterprise<br>
+        • SOC2 Type 2 audit started<br>
+        • 3-5 design partner case studies<br>
+        • Enterprise governance dashboard<br>
+        • Usage-based billing<br>
+        • <strong>Target: 5,000+ stars, 10 paying customers</strong>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-phase">Phase 4 (Months 9-12) — Scale</div>
+      <div class="timeline-title">Market Expansion</div>
+      <div class="timeline-desc">
+        • HIPAA compliance certification<br>
+        • Multi-region Knol Cloud (US, EU, APAC)<br>
+        • Advanced graph features (ontology designer, temporal simulation)<br>
+        • Enterprise sales team (1-2 AEs)<br>
+        • Series Seed fundraise (if needed)<br>
+        • <strong>Target: 10,000+ stars, $100K ARR</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Monetization Strategy -->
+<div class="section" id="monetization">
+  <h2>10. Monetization Strategy</h2>
+
+  <h3>Revenue Model: Open-Core + Cloud</h3>
+
+  <table>
+    <tr>
+      <th>Tier</th>
+      <th>Price</th>
+      <th>Target</th>
+      <th>Key Features</th>
+    </tr>
+    <tr>
+      <td><strong>Community (OSS)</strong></td>
+      <td>Free forever</td>
+      <td>Individual devs, startups</td>
+      <td>Full memory engine, single node, unlimited memories, community support</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Free</strong></td>
+      <td>$0/mo</td>
+      <td>Evaluation, side projects</td>
+      <td>10K memories, 1 tenant, shared infra, community support</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Pro</strong></td>
+      <td>$49-199/mo</td>
+      <td>Growing startups</td>
+      <td>100K-1M memories, 10 tenants, dedicated infra, email support</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud Enterprise</strong></td>
+      <td>Custom ($1K-10K/mo)</td>
+      <td>Mid-market, enterprise</td>
+      <td>Unlimited, SSO/SAML, SLA, dedicated support, BYOC option</td>
+    </tr>
+    <tr>
+      <td><strong>Self-Hosted Enterprise</strong></td>
+      <td>$500-5K/mo per node</td>
+      <td>Large enterprises, regulated</td>
+      <td>Enterprise license key, governance, compliance, priority support</td>
+    </tr>
+  </table>
+
+  <h3>Revenue Projections (Conservative)</h3>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--muted)">$0</div>
+      <div class="stat-label">Month 1-6 (Build community)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--amber)">$5K</div>
+      <div class="stat-label">MRR Month 9</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--green)">$15K</div>
+      <div class="stat-label">MRR Month 12</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="color:var(--cyan)">$100K+</div>
+      <div class="stat-label">ARR Year 1</div>
+    </div>
+  </div>
+
+  <h3>Upsell Triggers (OSS → Enterprise)</h3>
+  <p>These are the natural moments when self-hosted OSS users upgrade to enterprise:</p>
+  <ul>
+    <li><strong>Scale trigger:</strong> Exceeding single-node capacity (~5M memories or 500 req/s). Enterprise adds horizontal scaling.</li>
+    <li><strong>Compliance trigger:</strong> SOC2 audit asks "who has access to this memory store?" Enterprise adds audit trails, RLS policies, PII detection.</li>
+    <li><strong>Team trigger:</strong> Multiple teams sharing one instance. Enterprise adds SSO, tenant management, role-based access.</li>
+    <li><strong>Ops trigger:</strong> Running consolidation/decay manually gets tedious. Enterprise adds scheduled jobs, monitoring dashboards.</li>
+    <li><strong>Cost trigger:</strong> LLM bills growing. Enterprise analytics show exactly where tokens are spent and how to optimize.</li>
+  </ul>
+</div>
+
+<!-- 11. Risk Analysis -->
+<div class="section" id="risks">
+  <h2>11. Risk Analysis & Mitigation</h2>
+
+  <table>
+    <tr>
+      <th>Risk</th>
+      <th>Probability</th>
+      <th>Impact</th>
+      <th>Mitigation</th>
+    </tr>
+    <tr>
+      <td><strong>Mem0 + AWS captures market before Knol launches</strong></td>
+      <td><span class="badge badge-red">High</span></td>
+      <td><span class="badge badge-red">High</span></td>
+      <td>Don't compete for AWS users initially. Target self-hosted / multi-cloud / privacy-first segment. Position as "the memory layer that doesn't lock you into AWS." Urgency: launch within 4 weeks.</td>
+    </tr>
+    <tr>
+      <td><strong>OpenAI/Anthropic build native memory</strong></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td><span class="badge badge-red">High</span></td>
+      <td>Native memory will be model-locked. Knol is model-agnostic + portable. Position as "bring your own memory across any model."</td>
+    </tr>
+    <tr>
+      <td><strong>Graphiti captures temporal KG mindshare</strong></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td>Graphiti grew 10x in 3 months (2K → 22.5K stars). Knol's counter: bi-temporal without Neo4j. Publish comparison showing PG-native temporal queries vs. Graphiti + Neo4j complexity.</td>
+    </tr>
+    <tr>
+      <td><strong>Rust scares away contributors</strong></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td>SDK layer is Python/JS — most contributors work at SDK level, not engine level. Rust core is maintained by team; SDKs are community.</td>
+    </tr>
+    <tr>
+      <td><strong>pgvector doesn't scale to 100M+ vectors</strong></td>
+      <td><span class="badge badge-green">Low</span></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td>99% of users won't hit this. For those who do, add optional Qdrant/Milvus backend as enterprise feature. PG-first, not PG-only.</td>
+    </tr>
+    <tr>
+      <td><strong>Zero traction despite good tech</strong></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td><span class="badge badge-red">High</span></td>
+      <td>Marketing matters. Budget 30% of time on content, benchmarks, community engagement. Great code alone doesn't win. Show HN launch within 60 days.</td>
+    </tr>
+    <tr>
+      <td><strong>Cash runway runs out</strong></td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td><span class="badge badge-red">High</span></td>
+      <td>Keep burn low (bootstrapped). Target $5K MRR within 9 months from enterprise early adopters. Fundraise only after proving community traction (5K+ stars).</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 12. Final Verdict -->
+<div class="section" id="verdict">
+  <h2>12. Final Verdict</h2>
+
+  <div class="verdict verdict-yes">
+    <h3 style="color:var(--green)">OSS Is the Only Path — But Execution Determines Everything</h3>
+    <p>Open source is not a strategy choice — it's a market requirement. Both leading competitors are OSS. The real strategic question is <em>how</em> to do OSS effectively as a bootstrapped challenger.</p>
+  </div>
+
+  <h3>The Four Things That Will Decide Knol's Fate</h3>
+
+  <div class="card-grid">
+    <div class="card" style="border-left:4px solid var(--rose)">
+      <div class="card-title">1. Launch Speed (CRITICAL)</div>
+      <p>The competitive landscape has intensified dramatically. Mem0 shipped v1.0 + AWS exclusive. Graphiti grew 10x to 22.5K stars. Letta shipped a #1 coding agent. Every week Knol stays private, the gap widens. <span class="danger">The codebase is launch-ready. Ship the public repo in the next 2-3 weeks.</span> The SDK ecosystem, framework integrations, and MCP server are all built. There is nothing left to build before launch.</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--blue)">
+      <div class="card-title">2. Published Benchmarks</div>
+      <p>Claims without numbers are noise. Run DMR and LOCOMO benchmarks. Publish latency comparisons vs Mem0 under controlled conditions. If Knol really is 10-50x faster, <em>prove it</em>. Mem0 now has a published research paper (arXiv). Knol needs data to counter academic credibility with engineering proof.</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--green)">
+      <div class="card-title">3. Developer Experience (STRONG)</div>
+      <p>Knol now has Python (sync + async), TypeScript, LangChain, CrewAI, and MCP integrations — <span class="good">matching Mem0's ecosystem coverage at launch</span>. The DX story is: <code>pip install knol-sdk</code> → 3 lines of code → memory works. Or: add MCP server → Claude/Cursor has memory. The SDK experience is no longer a weakness.</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--accent)">
+      <div class="card-title">4. Counter-Positioning vs AWS (NEW)</div>
+      <p>Mem0's AWS exclusive partnership is a double-edged sword for them. It creates lock-in concerns for multi-cloud and privacy-conscious teams. Knol's counter: <em>"Your memory, your PostgreSQL, your rules. No vendor lock-in, no cloud dependency, no data leaving your infrastructure."</em> This is the wedge into enterprises that don't want AWS owning their AI memory.</p>
+    </div>
+  </div>
+
+  <h3>The Winning Narrative</h3>
+  <div class="card" style="border:2px solid var(--accent); text-align:center; padding:2rem;">
+    <p style="font-size:1.2rem; margin-bottom:1rem;"><strong>"Mem0 is the memory layer for prototypes.<br>Knol is the memory layer for production."</strong></p>
+    <p style="color:var(--muted);">When your AI app goes from demo to 1,000 req/s, when your CFO asks why LLM costs are $50K/month, when your security team demands audit trails, when your CTO refuses to add Neo4j and Qdrant to the stack — that's when you switch to Knol. And because it's just PostgreSQL, you'll finish the migration by lunch.</p>
+  </div>
+
+  <h3>Updated Position: What Has Changed</h3>
+  <div class="card" style="border-color:var(--teal)">
+    <table>
+      <tr><th>Area</th><th>Previous State</th><th>Current State</th></tr>
+      <tr><td><strong>SDK Ecosystem</strong></td><td><span class="badge badge-red">Python only (basic)</span></td><td><span class="badge badge-green">Python (sync+async) + TypeScript + LangChain + CrewAI + MCP</span></td></tr>
+      <tr><td><strong>Memory Intelligence</strong></td><td><span class="badge badge-red">Broken embeddings, no decay, no conflict detection</span></td><td><span class="badge badge-green">Multi-provider embeddings, 3-mode decay, Jaccard conflict detection</span></td></tr>
+      <tr><td><strong>Graph Traversal</strong></td><td><span class="badge badge-amber">Fixed 2-hop only</span></td><td><span class="badge badge-green">N-hop (1-5) + shortest path + neighbor discovery</span></td></tr>
+      <tr><td><strong>Event System</strong></td><td><span class="badge badge-red">None</span></td><td><span class="badge badge-green">HMAC-signed webhooks, 10 event types, retry with backoff</span></td></tr>
+      <tr><td><strong>Launch Readiness</strong></td><td><span class="badge badge-amber">Core only</span></td><td><span class="badge badge-green">Complete platform + ecosystem. Launch-ready.</span></td></tr>
+      <tr><td><strong>Tests</strong></td><td>150+ passing</td><td><span class="badge badge-green">252+ passing across all crates</span></td></tr>
+    </table>
+  </div>
+
+  <h3>Immediate Next Steps (Accelerated)</h3>
+  <ol>
+    <li><strong>Week 1:</strong> Clean up knol-oss for public consumption. Remove internal references. Add LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md. Write killer README with architecture diagram, quick start, and benchmark teaser. Create Docker Compose quick-start.</li>
+    <li><strong>Week 2:</strong> Run and publish DMR + LOCOMO benchmarks. Create latency comparison test suite. Publish Python SDK to PyPI, TypeScript SDK to npm, MCP server to npm. Submit MCP server to Claude/Cursor directories.</li>
+    <li><strong>Week 3:</strong> Build basic docs site (Starlight). Record 3-minute demo video. Show HN launch. Reddit posts (r/rust, r/MachineLearning, r/LocalLLaMA). Twitter thread blitz. Start Discord community.</li>
+    <li><strong>Week 4:</strong> Community engagement sprint. Respond to every issue/discussion. Write "Migrate from Mem0" guide. Write "Migrate from OpenMemory" guide. Publish "Why Rust for AI Memory" blog post.</li>
+  </ol>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center; padding:2rem 0; margin-top:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:.85rem;">
+  <p>Knol Competitive Strategy — Internal Document — February 2026 (Rev. 2)</p>
+  <p style="margin-top:.25rem;">Updated Feb 17, 2026. Rev. 2 reflects: Mem0 v1.0 + AWS exclusive, Graphiti 22.5K stars + MCP, Letta Code #1 on Terminal-Bench, OpenMemory MCP launch, and Knol's completed SDK ecosystem + competitive features.</p>
+</div>
+
+</div>
+</body>
+</html>

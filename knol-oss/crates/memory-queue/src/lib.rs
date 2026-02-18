@@ -1,0 +1,136 @@
+//! NATS JetStream publisher and subscriber for async memory processing.
+
+use async_nats::jetstream::{self, consumer::PullConsumer, stream::Stream, Context};
+use serde::{de::DeserializeOwned, Serialize};
+use tracing::info;
+
+pub const STREAM_NAME: &str = "MEMORY";
+pub const SUBJECT_WRITE: &str = "memory.write";
+pub const SUBJECT_EXTRACT: &str = "memory.extract";
+
+/// Connect to NATS and return a JetStream context.
+pub async fn connect(nats_url: &str) -> Result<(async_nats::Client, Context), QueueError> {
+    let client = async_nats::connect(nats_url).await.map_err(QueueError::Connect)?;
+    let jetstream = jetstream::new(client.clone());
+    info!("Connected to NATS at {}", nats_url);
+    Ok((client, jetstream))
+}
+
+/// Ensure the MEMORY stream exists with the right subjects.
+pub async fn ensure_stream(js: &Context) -> Result<Stream, QueueError> {
+    let stream = js
+        .get_or_create_stream(jetstream::stream::Config {
+            name: STREAM_NAME.to_string(),
+            subjects: vec![
+                SUBJECT_WRITE.to_string(),
+                SUBJECT_EXTRACT.to_string(),
+            ],
+            retention: jetstream::stream::RetentionPolicy::WorkQueue,
+            max_age: std::time::Duration::from_secs(86400 * 7), // 7 days
+            storage: jetstream::stream::StorageType::File,
+            ..Default::default()
+        })
+        .await
+        .map_err(QueueError::Stream)?;
+    info!("JetStream stream '{}' ready", STREAM_NAME);
+    Ok(stream)
+}
+
+/// Publish a typed message to a subject.
+pub async fn publish<T: Serialize>(
+    js: &Context,
+    subject: &str,
+    payload: &T,
+) -> Result<(), QueueError> {
+    let bytes = serde_json::to_vec(payload).map_err(QueueError::Serialization)?;
+    js.publish(subject.to_string(), bytes.into())
+        .await
+        .map_err(QueueError::Publish)?
+        .await
+        .map_err(QueueError::Ack)?;
+    Ok(())
+}
+
+/// Create a pull-based consumer for a subject.
+pub async fn create_consumer(
+    js: &Context,
+    stream_name: &str,
+    consumer_name: &str,
+    filter_subject: &str,
+) -> Result<PullConsumer, QueueError> {
+    let stream = js.get_stream(stream_name).await.map_err(|e| QueueError::GetStream(e.to_string()))?;
+    let consumer = stream
+        .get_or_create_consumer(
+            consumer_name,
+            jetstream::consumer::pull::Config {
+                durable_name: Some(consumer_name.to_string()),
+                filter_subject: filter_subject.to_string(),
+                ack_policy: jetstream::consumer::AckPolicy::Explicit,
+                max_deliver: 3,
+                ack_wait: std::time::Duration::from_secs(60),
+                ..Default::default()
+            },
+        )
+        .await
+        .map_err(QueueError::Consumer)?;
+    info!("Consumer '{}' ready on subject '{}'", consumer_name, filter_subject);
+    Ok(consumer)
+}
+
+/// Deserialize a message payload into a typed struct.
+pub fn deserialize_message<T: DeserializeOwned>(data: &[u8]) -> Result<T, QueueError> {
+    serde_json::from_slice(data).map_err(QueueError::Serialization)
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum QueueError {
+    #[error("NATS connection error: {0}")]
+    Connect(#[source] async_nats::ConnectError),
+    #[error("Stream create error: {0}")]
+    Stream(#[source] async_nats::jetstream::context::CreateStreamError),
+    #[error("Stream get error: {0}")]
+    GetStream(String),
+    #[error("Consumer error: {0}")]
+    Consumer(#[source] async_nats::jetstream::stream::ConsumerError),
+    #[error("Publish error: {0}")]
+    Publish(#[source] async_nats::jetstream::context::PublishError),
+    #[error("Ack error: {0}")]
+    Ack(#[source] async_nats::error::Error<async_nats::jetstream::context::PublishErrorKind>),
+    #[error("Serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_constants() {
+        assert_eq!(STREAM_NAME, "MEMORY");
+        assert_eq!(SUBJECT_WRITE, "memory.write");
+        assert_eq!(SUBJECT_EXTRACT, "memory.extract");
+    }
+
+    #[test]
+    fn test_deserialize_valid_json() {
+        let data = br#"{"content":"test","kind":"fact","confidence":0.9,"importance":0.7,"tags":[]}"#;
+        let result: Result<memory_common::ExtractedMemory, _> = deserialize_message(data);
+        assert!(result.is_ok());
+        let mem = result.unwrap();
+        assert_eq!(mem.content, "test");
+        assert_eq!(mem.kind, "fact");
+    }
+
+    #[test]
+    fn test_deserialize_invalid_json() {
+        let data = b"not json";
+        let result: Result<memory_common::ExtractedMemory, _> = deserialize_message(data);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_queue_error_display() {
+        let err = QueueError::GetStream("test error".to_string());
+        assert!(err.to_string().contains("test error"));
+    }
+}

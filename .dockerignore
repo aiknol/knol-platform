@@ -1,0 +1,14 @@
+# Knol — Docker build context exclusions
+target/
+.git/
+.github/
+brand/
+memorylayer-web/node_modules/
+memorylayer-web/out/
+memorylayer-web/.next/
+memorylayer-demo/
+*.md
+LICENSE*
+.env*
+!.env.example
+deploy/

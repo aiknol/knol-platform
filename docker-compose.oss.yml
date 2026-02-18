@@ -1,0 +1,201 @@
+name: knol
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - max_connections=80
+    environment:
+      POSTGRES_DB: memory
+      POSTGRES_USER: memory
+      POSTGRES_PASSWORD: memory_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 768m
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 384m
+
+  nats:
+    image: nats:2.10-alpine
+    command: >
+      --jetstream
+      --http_port=8222
+      --store_dir=/data
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - natsdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 256m
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    mem_limit: 512m
+
+  db-migrate:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: memory_dev
+    volumes:
+      - ./knol-oss/migrations:/migrations/oss:ro
+      - ./scripts/db-migrate.sh:/usr/local/bin/db-migrate.sh:ro
+    command: ["sh", "-lc", "/usr/local/bin/db-migrate.sh"]
+    restart: "no"
+
+  gateway:
+    image: knol-oss-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.oss
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+      write-service:
+        condition: service_started
+      retrieve-service:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      REDIS_URL: redis://redis:6379
+      DB_MAX_CONNECTIONS: "8"
+      DB_MIN_CONNECTIONS: "1"
+      GATEWAY_PORT: "8080"
+      WRITE_SERVICE_URL: http://write-service:8081
+      RETRIEVE_SERVICE_URL: http://retrieve-service:8082
+      ADMIN_SERVICE_URL: http://admin-service:3001
+      RUST_LOG: info
+    command: ["gateway"]
+    ports:
+      - "3000:8080"
+    mem_limit: 256m
+
+  write-service:
+    image: knol-oss-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.oss
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      NATS_URL: nats://nats:4222
+      DB_MAX_CONNECTIONS: "6"
+      DB_MIN_CONNECTIONS: "1"
+      WRITE_SERVICE_PORT: "8081"
+      RUST_LOG: info
+    command: ["write-service"]
+    ports:
+      - "8081:8081"
+    mem_limit: 256m
+
+  retrieve-service:
+    image: knol-oss-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.oss
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      REDIS_URL: redis://redis:6379
+      DB_MAX_CONNECTIONS: "6"
+      DB_MIN_CONNECTIONS: "1"
+      RETRIEVE_SERVICE_PORT: "8082"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RUST_LOG: info
+    command: ["retrieve-service"]
+    ports:
+      - "8082:8082"
+    mem_limit: 320m
+
+  graph-service:
+    image: knol-oss-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.oss
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DB_MAX_CONNECTIONS: "4"
+      DB_MIN_CONNECTIONS: "1"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RUST_LOG: info
+    command: ["graph-service"]
+    ports:
+      - "8083:8083"
+    mem_limit: 320m
+
+volumes:
+  pgdata:
+  natsdata:
+  miniodata:

@@ -1,0 +1,59 @@
+# =============================================================================
+# Knol Enterprise — Multi-stage Dockerfile with dependency caching
+# Requires OSS crates as path dependencies (monorepo build context)
+# =============================================================================
+
+# Stage 1: Dependency planner
+FROM rust:1-bookworm AS chef
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain stable
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo install cargo-chef --locked
+WORKDIR /app
+
+FROM chef AS planner
+# Need both workspaces for dependency resolution
+COPY knol-oss/   /app/knol-oss/
+COPY knol-enterprise/ /app/knol-enterprise/
+WORKDIR /app/knol-enterprise
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Stage 2: Build dependencies (cached layer)
+FROM chef AS builder
+COPY knol-oss/ /app/knol-oss/
+COPY --from=planner /app/knol-enterprise/recipe.json /app/knol-enterprise/recipe.json
+WORKDIR /app/knol-enterprise
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Stage 3: Build application
+COPY knol-enterprise/ /app/knol-enterprise/
+RUN cargo build --release \
+    --bin admin-service \
+    --bin jobs-service \
+    --bin billing-service \
+    --bin ingest-service \
+    && strip /app/knol-enterprise/target/release/admin-service \
+    && strip /app/knol-enterprise/target/release/jobs-service \
+    && strip /app/knol-enterprise/target/release/billing-service \
+    && strip /app/knol-enterprise/target/release/ingest-service
+
+# Stage 4: Minimal runtime
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r knol && useradd -r -g knol -s /sbin/nologin knol
+
+COPY --from=builder /app/knol-enterprise/target/release/admin-service   /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/jobs-service    /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/billing-service /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/ingest-service    /usr/local/bin/
+
+# Copy enterprise migrations if present
+COPY knol-enterprise/migrations/ /app/migrations/
+
+USER knol
+ENV RUST_LOG=info,knol=debug
+EXPOSE 8084 8085 8086 8087 8088
+
+CMD ["admin-service"]

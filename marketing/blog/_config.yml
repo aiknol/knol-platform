@@ -1,0 +1,30 @@
+title: Knol Blog
+description: Engineering insights on AI memory infrastructure
+url: "https://blog.aiknol.com"
+baseurl: ""
+theme: minima
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+author:
+  name: Knol Team
+  url: https://aiknol.com
+
+social:
+  name: Knol
+  links:
+    - https://github.com/aiknol/knol
+    - https://twitter.com/knoldev
+
+google_analytics:
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Knol Team"

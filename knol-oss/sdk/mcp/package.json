@@ -1,0 +1,41 @@
+{
+  "name": "@aiknol/knol-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Knol memory platform integration with AI coding tools",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "knol-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "knol",
+    "memory",
+    "knowledge-graph",
+    "ai",
+    "claude"
+  ],
+  "author": "Knol Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aiknol/knol-mcp-server.git"
+  }
+}
