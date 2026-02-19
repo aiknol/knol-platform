@@ -252,6 +252,16 @@ memorylayer/
 └── docker-compose.oss.yml     # One-command deployment
 ```
 
+## Local Push Gate
+
+To block pushes when local CI fails, install the tracked git hooks:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check fails.
+
 ## License
 
 - `knol-oss/` — [Apache License 2.0](knol-oss/LICENSE)

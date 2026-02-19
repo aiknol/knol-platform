@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+remote="${1:-}"
+url="${2:-}"
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+# Block direct push of monorepo branches to the public OSS repo.
+if echo "$url" | grep -qE "aiknol/knol(\.git)?$"; then
+  while read -r local_ref local_sha remote_ref remote_sha; do
+    branch="${local_ref#refs/heads/}"
+    if [[ "$branch" == "main" || "$branch" == "dev" || "$branch" == "master" ]]; then
+      echo ""
+      echo "ERROR: Blocked direct push of '$branch' to public repo ($url)."
+      echo "Use subtree push instead:"
+      echo "  git subtree push --prefix=knol-oss oss-public main"
+      echo ""
+      exit 1
+    fi
+  done
+fi
+
+"$ROOT_DIR/scripts/ci-local.sh"
+
+# Extra OSS release-quality checks when pushing to public repo.
+if echo "$url" | grep -qE "aiknol/knol(\.git)?$"; then
+  "$ROOT_DIR/knol-oss/scripts/public-readiness.sh"
+fi
+
+echo "✅ pre-push checks passed for '$remote'"
