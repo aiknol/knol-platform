@@ -45,12 +45,9 @@ pub async fn set_tenant_context(
     conn: &mut sqlx::PgConnection,
     tenant_id: Uuid,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(&format!(
-        "SET LOCAL app.tenant_id = '{}'",
-        tenant_id
-    ))
-    .execute(&mut *conn)
-    .await?;
+    sqlx::query(&format!("SET LOCAL app.tenant_id = '{}'", tenant_id))
+        .execute(&mut *conn)
+        .await?;
     Ok(())
 }
 
@@ -70,11 +67,8 @@ pub async fn begin_tenant_tx(
     tenant_id: Uuid,
 ) -> Result<sqlx::Transaction<'static, sqlx::Postgres>, sqlx::Error> {
     let mut tx = pool.begin().await?;
-    sqlx::query(&format!(
-        "SET LOCAL app.tenant_id = '{}'",
-        tenant_id
-    ))
-    .execute(&mut *tx)
-    .await?;
+    sqlx::query(&format!("SET LOCAL app.tenant_id = '{}'", tenant_id))
+        .execute(&mut *tx)
+        .await?;
     Ok(tx)
 }

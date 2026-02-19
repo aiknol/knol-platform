@@ -22,7 +22,13 @@ pub async fn publish(content: &PublishContent) -> Result<PublishResult, Marketin
     let slug: String = title
         .to_lowercase()
         .chars()
-        .map(|c| if c.is_alphanumeric() || c == ' ' { c } else { ' ' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == ' ' {
+                c
+            } else {
+                ' '
+            }
+        })
         .collect::<String>()
         .split_whitespace()
         .collect::<Vec<_>>()

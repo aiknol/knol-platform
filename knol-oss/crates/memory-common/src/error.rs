@@ -93,15 +93,42 @@ mod tests {
 
     #[test]
     fn test_error_variants() {
-        assert!(matches!(MemoryError::Database("db".into()), MemoryError::Database(_)));
-        assert!(matches!(MemoryError::Auth("auth".into()), MemoryError::Auth(_)));
-        assert!(matches!(MemoryError::Forbidden("forbidden".into()), MemoryError::Forbidden(_)));
-        assert!(matches!(MemoryError::Validation("bad".into()), MemoryError::Validation(_)));
+        assert!(matches!(
+            MemoryError::Database("db".into()),
+            MemoryError::Database(_)
+        ));
+        assert!(matches!(
+            MemoryError::Auth("auth".into()),
+            MemoryError::Auth(_)
+        ));
+        assert!(matches!(
+            MemoryError::Forbidden("forbidden".into()),
+            MemoryError::Forbidden(_)
+        ));
+        assert!(matches!(
+            MemoryError::Validation("bad".into()),
+            MemoryError::Validation(_)
+        ));
         assert!(matches!(MemoryError::RateLimited, MemoryError::RateLimited));
-        assert!(matches!(MemoryError::PlanLimitExceeded("limit".into()), MemoryError::PlanLimitExceeded(_)));
-        assert!(matches!(MemoryError::Queue("q".into()), MemoryError::Queue(_)));
-        assert!(matches!(MemoryError::Llm("llm".into()), MemoryError::Llm(_)));
-        assert!(matches!(MemoryError::Cache("cache".into()), MemoryError::Cache(_)));
-        assert!(matches!(MemoryError::Internal("internal".into()), MemoryError::Internal(_)));
+        assert!(matches!(
+            MemoryError::PlanLimitExceeded("limit".into()),
+            MemoryError::PlanLimitExceeded(_)
+        ));
+        assert!(matches!(
+            MemoryError::Queue("q".into()),
+            MemoryError::Queue(_)
+        ));
+        assert!(matches!(
+            MemoryError::Llm("llm".into()),
+            MemoryError::Llm(_)
+        ));
+        assert!(matches!(
+            MemoryError::Cache("cache".into()),
+            MemoryError::Cache(_)
+        ));
+        assert!(matches!(
+            MemoryError::Internal("internal".into()),
+            MemoryError::Internal(_)
+        ));
     }
 }

@@ -66,10 +66,7 @@ pub async fn check_rate_limit(
     window_secs: u64,
 ) -> Result<bool, CacheError> {
     // Increment counter
-    let count: u64 = client
-        .incr(key)
-        .await
-        .map_err(CacheError::Redis)?;
+    let count: u64 = client.incr(key).await.map_err(CacheError::Redis)?;
 
     // Set expiry on first request in window
     if count == 1 {
@@ -80,7 +77,10 @@ pub async fn check_rate_limit(
     }
 
     if count > max_requests {
-        warn!("Rate limit exceeded for key: {} (count={}, max={})", key, count, max_requests);
+        warn!(
+            "Rate limit exceeded for key: {} (count={}, max={})",
+            key, count, max_requests
+        );
         return Ok(false);
     }
 
@@ -155,9 +155,9 @@ mod tests {
     fn test_rate_limit_boundary_logic() {
         let max_requests: u64 = 100;
         // Simulate counter values
-        assert!(1 <= max_requests);   // first request → allowed
+        assert!(1 <= max_requests); // first request → allowed
         assert!(100 <= max_requests); // at limit → allowed
-        assert!(101 > max_requests);  // over limit → rate limited
+        assert!(101 > max_requests); // over limit → rate limited
     }
 
     #[test]

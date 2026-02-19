@@ -36,8 +36,7 @@ fn decrypt(data: &[u8], key: &[u8; 32]) -> Result<String, String> {
     if data.len() < 12 {
         return Err("Ciphertext too short".into());
     }
-    let cipher =
-        Aes256Gcm::new_from_slice(key).map_err(|e| format!("AES key error: {}", e))?;
+    let cipher = Aes256Gcm::new_from_slice(key).map_err(|e| format!("AES key error: {}", e))?;
     let nonce = Nonce::from_slice(&data[..12]);
     let plaintext = cipher
         .decrypt(nonce, &data[12..])
@@ -48,14 +47,12 @@ fn decrypt(data: &[u8], key: &[u8; 32]) -> Result<String, String> {
 /// Row from system_credentials table.
 #[derive(sqlx::FromRow)]
 struct CredRow {
-    name: String,
     encrypted_value: Vec<u8>,
 }
 
 /// Row from system_config table.
 #[derive(sqlx::FromRow)]
 struct ConfigRow {
-    key: String,
     value: serde_json::Value,
 }
 
@@ -68,7 +65,7 @@ async fn load_credential(
 ) -> Option<String> {
     // Try DB first
     if let Ok(row) = sqlx::query_as::<_, CredRow>(
-        "SELECT name, encrypted_value FROM system_credentials WHERE name = $1",
+        "SELECT encrypted_value FROM system_credentials WHERE name = $1",
     )
     .bind(db_name)
     .fetch_one(pool)
@@ -93,12 +90,11 @@ async fn load_config_value(
     default: &str,
 ) -> String {
     // Try DB first
-    if let Ok(row) = sqlx::query_as::<_, ConfigRow>(
-        "SELECT key, value FROM system_config WHERE key = $1",
-    )
-    .bind(db_key)
-    .fetch_one(pool)
-    .await
+    if let Ok(row) =
+        sqlx::query_as::<_, ConfigRow>("SELECT value FROM system_config WHERE key = $1")
+            .bind(db_key)
+            .fetch_one(pool)
+            .await
     {
         // Check if env override is set
         if let Ok(env_val) = std::env::var(env_name) {
@@ -141,7 +137,12 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
     )
     .await;
 
-    let twitter = match (twitter_key, twitter_secret, twitter_token, twitter_token_secret) {
+    let twitter = match (
+        twitter_key,
+        twitter_secret,
+        twitter_token,
+        twitter_token_secret,
+    ) {
         (Some(k), Some(s), Some(t), Some(ts)) if !k.is_empty() => {
             info!("Loaded Twitter credentials from config store");
             Some(TwitterCredentials {
@@ -163,15 +164,11 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
         load_credential(pool, &key, "reddit.client_id", "REDDIT_CLIENT_ID").await;
     let reddit_client_secret =
         load_credential(pool, &key, "reddit.client_secret", "REDDIT_CLIENT_SECRET").await;
-    let reddit_username =
-        load_credential(pool, &key, "reddit.username", "REDDIT_USERNAME").await;
-    let reddit_password =
-        load_credential(pool, &key, "reddit.password", "REDDIT_PASSWORD").await;
+    let reddit_username = load_credential(pool, &key, "reddit.username", "REDDIT_USERNAME").await;
+    let reddit_password = load_credential(pool, &key, "reddit.password", "REDDIT_PASSWORD").await;
 
-    let devto_api_key =
-        load_credential(pool, &key, "devto.api_key", "DEVTO_API_KEY").await;
-    let github_token =
-        load_credential(pool, &key, "github.token", "GITHUB_TOKEN").await;
+    let devto_api_key = load_credential(pool, &key, "devto.api_key", "DEVTO_API_KEY").await;
+    let github_token = load_credential(pool, &key, "github.token", "GITHUB_TOKEN").await;
 
     let smtp_host = load_credential(pool, &key, "smtp.host", "SMTP_HOST").await;
     let smtp_user = load_credential(pool, &key, "smtp.user", "SMTP_USER").await;
@@ -222,17 +219,14 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
 }
 
 /// Load channel-specific rate limit overrides from system_config.
-pub async fn load_rate_limit_override(
-    pool: &sqlx::PgPool,
-    channel: &str,
-) -> Option<u64> {
+#[allow(dead_code)]
+pub async fn load_rate_limit_override(pool: &sqlx::PgPool, channel: &str) -> Option<u64> {
     let key = format!("marketing.rate_limit.{}.daily", channel);
-    if let Ok(row) = sqlx::query_as::<_, ConfigRow>(
-        "SELECT key, value FROM system_config WHERE key = $1",
-    )
-    .bind(&key)
-    .fetch_one(pool)
-    .await
+    if let Ok(row) =
+        sqlx::query_as::<_, ConfigRow>("SELECT value FROM system_config WHERE key = $1")
+            .bind(&key)
+            .fetch_one(pool)
+            .await
     {
         row.value.as_u64()
     } else {

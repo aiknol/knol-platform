@@ -112,18 +112,36 @@ impl Feature {
     /// Get the minimum tier required for this feature.
     pub fn min_tier(&self) -> Tier {
         match self {
-            Feature::BasicMemoryStore | Feature::VectorSearch | Feature::BasicGraphExtraction
-            | Feature::RESTApi | Feature::SingleTenant | Feature::BasicRetrieval => Tier::OpenSource,
+            Feature::BasicMemoryStore
+            | Feature::VectorSearch
+            | Feature::BasicGraphExtraction
+            | Feature::RESTApi
+            | Feature::SingleTenant
+            | Feature::BasicRetrieval => Tier::OpenSource,
 
-            Feature::MultiTenant | Feature::BM25Search | Feature::PiiRedaction
-            | Feature::WebhookConnectors | Feature::BasicAnalytics | Feature::EmailSupport => Tier::Starter,
+            Feature::MultiTenant
+            | Feature::BM25Search
+            | Feature::PiiRedaction
+            | Feature::WebhookConnectors
+            | Feature::BasicAnalytics
+            | Feature::EmailSupport => Tier::Starter,
 
-            Feature::AdaptiveRetrieval | Feature::MemoryConsolidation | Feature::ConflictDetection
-            | Feature::ScopeCascade | Feature::CustomConnectors | Feature::PolicyEngine
-            | Feature::PrometheusMetrics | Feature::PrioritySupport => Tier::Pro,
+            Feature::AdaptiveRetrieval
+            | Feature::MemoryConsolidation
+            | Feature::ConflictDetection
+            | Feature::ScopeCascade
+            | Feature::CustomConnectors
+            | Feature::PolicyEngine
+            | Feature::PrometheusMetrics
+            | Feature::PrioritySupport => Tier::Pro,
 
-            Feature::SSOAuth | Feature::AuditLog | Feature::DataResidency | Feature::CustomLLM
-            | Feature::DedicatedInfra | Feature::SLAGuarantee | Feature::BillingApi
+            Feature::SSOAuth
+            | Feature::AuditLog
+            | Feature::DataResidency
+            | Feature::CustomLLM
+            | Feature::DedicatedInfra
+            | Feature::SLAGuarantee
+            | Feature::BillingApi
             | Feature::WhiteLabel => Tier::Enterprise,
         }
     }
@@ -221,7 +239,9 @@ impl FeatureFlags {
         if self.is_enabled(feature) {
             Ok(())
         } else {
-            Err(FeatureError::FeatureNotAvailable(feature.name().to_string()))
+            Err(FeatureError::FeatureNotAvailable(
+                feature.name().to_string(),
+            ))
         }
     }
 
@@ -344,9 +364,9 @@ pub mod middleware {
     use super::*;
     use axum::{
         extract::Request,
+        http::StatusCode,
         middleware::Next,
         response::{IntoResponse, Response},
-        http::StatusCode,
     };
 
     /// Axum middleware function that checks feature availability.
@@ -362,18 +382,19 @@ pub mod middleware {
     ///         feature_gate(Feature::AuditLog, req, next)
     ///     }));
     /// ```
-    pub async fn feature_gate(
-        required: Feature,
-        req: Request,
-        next: Next,
-    ) -> Response {
+    pub async fn feature_gate(required: Feature, req: Request, next: Next) -> Response {
         // Extract FeatureFlags from request extensions if available
         if let Some(flags) = req.extensions().get::<FeatureFlags>() {
             if !flags.is_enabled(required) {
                 return (
                     StatusCode::FORBIDDEN,
-                    format!("Feature '{}' requires {} tier or higher", required.name(), required.min_tier().name()),
-                ).into_response();
+                    format!(
+                        "Feature '{}' requires {} tier or higher",
+                        required.name(),
+                        required.min_tier().name()
+                    ),
+                )
+                    .into_response();
             }
         }
         // If no flags in extensions, allow (gateway should set them)
@@ -588,22 +609,10 @@ mod tests {
 
     #[test]
     fn test_feature_count() {
-        assert_eq!(
-            FeatureFlags::new(Tier::OpenSource).feature_count(),
-            6
-        );
-        assert_eq!(
-            FeatureFlags::new(Tier::Starter).feature_count(),
-            12
-        );
-        assert_eq!(
-            FeatureFlags::new(Tier::Pro).feature_count(),
-            20
-        );
-        assert_eq!(
-            FeatureFlags::new(Tier::Enterprise).feature_count(),
-            28
-        );
+        assert_eq!(FeatureFlags::new(Tier::OpenSource).feature_count(), 6);
+        assert_eq!(FeatureFlags::new(Tier::Starter).feature_count(), 12);
+        assert_eq!(FeatureFlags::new(Tier::Pro).feature_count(), 20);
+        assert_eq!(FeatureFlags::new(Tier::Enterprise).feature_count(), 28);
     }
 
     #[test]
@@ -743,17 +752,8 @@ mod tests {
 
     #[test]
     fn test_case_insensitive_tier_parsing() {
-        assert_eq!(
-            Tier::from_name("OPENSOURCE").unwrap(),
-            Tier::OpenSource
-        );
-        assert_eq!(
-            Tier::from_name("Pro").unwrap(),
-            Tier::Pro
-        );
-        assert_eq!(
-            Tier::from_name("ENTERPRISE").unwrap(),
-            Tier::Enterprise
-        );
+        assert_eq!(Tier::from_name("OPENSOURCE").unwrap(), Tier::OpenSource);
+        assert_eq!(Tier::from_name("Pro").unwrap(), Tier::Pro);
+        assert_eq!(Tier::from_name("ENTERPRISE").unwrap(), Tier::Enterprise);
     }
 }

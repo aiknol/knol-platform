@@ -1,8 +1,8 @@
 //! Integration tests for memory-common types.
 
+use chrono::Utc;
 use memory_common::*;
 use uuid::Uuid;
-use chrono::Utc;
 
 #[test]
 fn test_full_write_search_roundtrip_types() {
@@ -40,35 +40,29 @@ fn test_full_write_search_roundtrip_types() {
 
     // Simulate extraction result
     let extraction = ExtractionResult {
-        memories: vec![
-            ExtractedMemory {
-                content: "User prefers Rust for backend development".to_string(),
-                kind: "preference".to_string(),
-                confidence: 0.95,
-                importance: 0.8,
-                tags: vec!["programming".to_string(), "rust".to_string()],
-                source_quote: None,
-                source_offset_start: None,
-                source_offset_end: None,
-            },
-        ],
-        entities: vec![
-            ExtractedEntity {
-                name: "Rust".to_string(),
-                entity_type: "concept".to_string(),
-                summary: Some("Systems programming language".to_string()),
-                attributes: Some(serde_json::json!({"category": "language"})),
-            },
-        ],
-        relationships: vec![
-            ExtractedRelationship {
-                source_entity: "User".to_string(),
-                target_entity: "Rust".to_string(),
-                rel_type: "prefers".to_string(),
-                properties: Some(serde_json::json!({"context": "backend"})),
-                weight: Some(0.95),
-            },
-        ],
+        memories: vec![ExtractedMemory {
+            content: "User prefers Rust for backend development".to_string(),
+            kind: "preference".to_string(),
+            confidence: 0.95,
+            importance: 0.8,
+            tags: vec!["programming".to_string(), "rust".to_string()],
+            source_quote: None,
+            source_offset_start: None,
+            source_offset_end: None,
+        }],
+        entities: vec![ExtractedEntity {
+            name: "Rust".to_string(),
+            entity_type: "concept".to_string(),
+            summary: Some("Systems programming language".to_string()),
+            attributes: Some(serde_json::json!({"category": "language"})),
+        }],
+        relationships: vec![ExtractedRelationship {
+            source_entity: "User".to_string(),
+            target_entity: "Rust".to_string(),
+            rel_type: "prefers".to_string(),
+            properties: Some(serde_json::json!({"context": "backend"})),
+            weight: Some(0.95),
+        }],
     };
 
     let ext_json = serde_json::to_string(&extraction).unwrap();

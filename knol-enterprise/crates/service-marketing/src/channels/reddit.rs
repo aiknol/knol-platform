@@ -11,12 +11,14 @@ async fn authenticate(
     http_client: &reqwest::Client,
     credentials: &ChannelCredentials,
 ) -> Result<String, MarketingError> {
-    let client_id = credentials.reddit_client_id.as_ref().ok_or_else(|| {
-        MarketingError::Channel {
-            channel: "reddit".into(),
-            message: "Reddit credentials not configured".into(),
-        }
-    })?;
+    let client_id =
+        credentials
+            .reddit_client_id
+            .as_ref()
+            .ok_or_else(|| MarketingError::Channel {
+                channel: "reddit".into(),
+                message: "Reddit credentials not configured".into(),
+            })?;
     let client_secret = credentials.reddit_client_secret.as_deref().unwrap_or("");
     let username = credentials.reddit_username.as_deref().unwrap_or("");
     let password = credentials.reddit_password.as_deref().unwrap_or("");
@@ -61,11 +63,14 @@ pub async fn publish(
     let subreddit = content.subreddit.as_deref().unwrap_or("rust");
     let title = content.title.as_deref().unwrap_or(&content.text);
 
-    let mut params = vec![
+    let params = vec![
         ("sr", subreddit.to_string()),
         ("kind", "self".to_string()),
         ("title", title.to_string()),
-        ("text", content.body.as_deref().unwrap_or(&content.text).to_string()),
+        (
+            "text",
+            content.body.as_deref().unwrap_or(&content.text).to_string(),
+        ),
         ("resubmit", "true".to_string()),
     ];
 

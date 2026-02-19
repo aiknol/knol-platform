@@ -33,8 +33,7 @@ pub struct AdminAppState {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
@@ -56,8 +55,12 @@ async fn main() -> anyhow::Result<()> {
     let db_pool = memory_db::create_pool(&database_url, 6).await?;
 
     let port: u16 = memory_common::db_config::load_u64(
-        &db_pool, "services.admin_port", "ADMIN_SERVICE_PORT", 8084,
-    ).await as u16;
+        &db_pool,
+        "services.admin_port",
+        "ADMIN_SERVICE_PORT",
+        8084,
+    )
+    .await as u16;
 
     // Seed initial admin user if none exists
     auth::seed_initial_admin(&db_pool).await?;
@@ -73,8 +76,12 @@ async fn main() -> anyhow::Result<()> {
 
     // CORS for admin dashboard: DB → env → default.
     let allowed_origin = memory_common::db_config::load_str(
-        &state.db_pool, "services.admin_cors_origin", "ADMIN_CORS_ORIGIN", "http://localhost:3006",
-    ).await;
+        &state.db_pool,
+        "services.admin_cors_origin",
+        "ADMIN_CORS_ORIGIN",
+        "http://localhost:3006",
+    )
+    .await;
     let cors = if allowed_origin == "*" {
         CorsLayer::new()
             .allow_origin(Any)
@@ -100,13 +107,25 @@ async fn main() -> anyhow::Result<()> {
         .route("/config/:key", delete(routes::config::delete_config))
         // Credentials
         .route("/credentials", get(routes::credentials::list_credentials))
-        .route("/credentials/:name", put(routes::credentials::upsert_credential))
-        .route("/credentials/:name", delete(routes::credentials::delete_credential))
-        .route("/credentials/:name/test", post(routes::credentials::test_credential))
+        .route(
+            "/credentials/:name",
+            put(routes::credentials::upsert_credential),
+        )
+        .route(
+            "/credentials/:name",
+            delete(routes::credentials::delete_credential),
+        )
+        .route(
+            "/credentials/:name/test",
+            post(routes::credentials::test_credential),
+        )
         // Campaigns
         .route("/campaigns", get(routes::campaigns::list_campaigns))
         .route("/campaigns/:name", put(routes::campaigns::update_campaign))
-        .route("/campaigns/:name/logs", get(routes::campaigns::campaign_logs))
+        .route(
+            "/campaigns/:name/logs",
+            get(routes::campaigns::campaign_logs),
+        )
         // Tenants
         .route("/tenants", get(routes::tenants::list_tenants))
         .route("/tenants/:id", get(routes::tenants::get_tenant))
@@ -144,9 +163,12 @@ async fn main() -> anyhow::Result<()> {
         // Admin panel API
         .nest("/admin", admin_routes)
         // Health
-        .route("/health", get(|| async {
-            axum::Json(serde_json::json!({"status": "ok", "service": "memory-admin"}))
-        }))
+        .route(
+            "/health",
+            get(|| async {
+                axum::Json(serde_json::json!({"status": "ok", "service": "memory-admin"}))
+            }),
+        )
         .layer(cors)
         .with_state(state);
 
@@ -190,17 +212,26 @@ async fn update_memory(
 
     if let Some(content) = &body.content {
         sqlx::query("UPDATE memories SET content = $1, updated_at = now() WHERE id = $2")
-            .bind(content).bind(id).execute(&mut *tx).await
+            .bind(content)
+            .bind(id)
+            .execute(&mut *tx)
+            .await
             .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     }
     if let Some(status) = &body.status {
         sqlx::query("UPDATE memories SET status = $1, updated_at = now() WHERE id = $2")
-            .bind(status).bind(id).execute(&mut *tx).await
+            .bind(status)
+            .bind(id)
+            .execute(&mut *tx)
+            .await
             .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     }
     if let Some(importance) = body.importance {
         sqlx::query("UPDATE memories SET importance = $1, updated_at = now() WHERE id = $2")
-            .bind(importance).bind(id).execute(&mut *tx).await
+            .bind(importance)
+            .bind(id)
+            .execute(&mut *tx)
+            .await
             .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     }
 
@@ -216,7 +247,9 @@ async fn update_memory(
     .execute(&mut *tx).await
     .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
-    tx.commit().await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+    tx.commit()
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     Ok(Json(serde_json::json!({ "id": id, "updated": true })))
 }
 
@@ -227,16 +260,21 @@ async fn delete_memory(
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
     let mut tx = memory_db::begin_tenant_tx(&state.db_pool, tenant_id)
-        .await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
     sqlx::query("UPDATE memories SET status = 'deleted', updated_at = now() WHERE id = $1")
-        .bind(id).execute(&mut *tx).await
+        .bind(id)
+        .execute(&mut *tx)
+        .await
         .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     sqlx::query("INSERT INTO memory_audit (tenant_id, memory_id, target_table, action, actor_type) VALUES ($1, $2, 'memories', 'delete', 'user')")
         .bind(tenant_id).bind(id).execute(&mut *tx).await
         .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
-    tx.commit().await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+    tx.commit()
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     Ok(Json(serde_json::json!({ "id": id, "deleted": true })))
 }
 
@@ -247,7 +285,8 @@ async fn merge_memories(
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
     let mut tx = memory_db::begin_tenant_tx(&state.db_pool, tenant_id)
-        .await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
     for source_id in &body.source_ids {
         sqlx::query("UPDATE memories SET status = 'superseded', valid_to = now(), updated_at = now() WHERE id = $1")
@@ -276,8 +315,12 @@ async fn merge_memories(
             .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     }
 
-    tx.commit().await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
-    Ok(Json(serde_json::json!({ "merged_id": merged_id, "source_ids": body.source_ids })))
+    tx.commit()
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+    Ok(Json(
+        serde_json::json!({ "merged_id": merged_id, "source_ids": body.source_ids }),
+    ))
 }
 
 async fn list_audit(
@@ -287,7 +330,8 @@ async fn list_audit(
 ) -> Result<Json<Vec<serde_json::Value>>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
     let mut conn = memory_db::acquire_tenant_conn(&state.db_pool, tenant_id)
-        .await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
     let rows: Vec<AuditRow> = sqlx::query_as(
         "SELECT id, memory_id, target_table, action, actor_type, actor_id, diff, reason, timestamp FROM memory_audit WHERE ($1::uuid IS NULL OR memory_id = $1) ORDER BY timestamp DESC LIMIT $2",
@@ -296,7 +340,10 @@ async fn list_audit(
     .fetch_all(conn.as_mut()).await
     .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
-    let json: Vec<serde_json::Value> = rows.iter().map(|r| serde_json::to_value(r).unwrap()).collect();
+    let json: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|r| serde_json::to_value(r).unwrap())
+        .collect();
     Ok(Json(json))
 }
 
@@ -306,13 +353,18 @@ async fn list_policies(
 ) -> Result<Json<Vec<serde_json::Value>>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
     let mut conn = memory_db::acquire_tenant_conn(&state.db_pool, tenant_id)
-        .await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
-
-    let rows: Vec<PolicyRow> = sqlx::query_as("SELECT * FROM memory_policies WHERE enabled = true")
-        .fetch_all(conn.as_mut()).await
+        .await
         .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
-    let json: Vec<serde_json::Value> = rows.iter().map(|r| serde_json::to_value(r).unwrap()).collect();
+    let rows: Vec<PolicyRow> = sqlx::query_as("SELECT * FROM memory_policies WHERE enabled = true")
+        .fetch_all(conn.as_mut())
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+
+    let json: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|r| serde_json::to_value(r).unwrap())
+        .collect();
     Ok(Json(json))
 }
 
@@ -338,7 +390,8 @@ async fn simulate_replay(
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
     let mut conn = memory_db::acquire_tenant_conn(&state.db_pool, tenant_id)
-        .await.map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
     let rows: Vec<MemoryRow> = sqlx::query_as(
         "SELECT * FROM memories WHERE valid_from <= $1 AND (valid_to IS NULL OR valid_to > $1) AND status != 'deleted' AND ($2::uuid IS NULL OR user_id = $2) ORDER BY importance DESC LIMIT $3",
@@ -347,7 +400,10 @@ async fn simulate_replay(
     .fetch_all(conn.as_mut()).await
     .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
-    let json: Vec<serde_json::Value> = rows.iter().map(|r| serde_json::to_value(r).unwrap()).collect();
+    let json: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|r| serde_json::to_value(r).unwrap())
+        .collect();
     Ok(Json(serde_json::json!({
         "point_in_time": body.point_in_time,
         "memory_count": json.len(),
@@ -358,42 +414,87 @@ async fn simulate_replay(
 // ── Types ──
 
 #[derive(Debug, Deserialize)]
-struct UpdateMemoryRequest { content: Option<String>, status: Option<String>, importance: Option<f32> }
-
-#[derive(Debug, Deserialize)]
-struct MergeRequest {
-    source_ids: Vec<Uuid>, merged_content: String, user_id: Option<Uuid>,
-    scope: Option<String>, kind: Option<String>, confidence: Option<f32>, importance: Option<f32>,
+struct UpdateMemoryRequest {
+    content: Option<String>,
+    status: Option<String>,
+    importance: Option<f32>,
 }
 
 #[derive(Debug, Deserialize)]
-struct AuditParams { limit: Option<i64>, memory_id: Option<Uuid> }
+struct MergeRequest {
+    source_ids: Vec<Uuid>,
+    merged_content: String,
+    user_id: Option<Uuid>,
+    scope: Option<String>,
+    kind: Option<String>,
+    confidence: Option<f32>,
+    importance: Option<f32>,
+}
 
 #[derive(Debug, Deserialize)]
-struct CreatePolicyRequest { name: String, rule_type: String, config: serde_json::Value }
+struct AuditParams {
+    limit: Option<i64>,
+    memory_id: Option<Uuid>,
+}
 
 #[derive(Debug, Deserialize)]
-struct SimulateRequest { point_in_time: chrono::DateTime<chrono::Utc>, user_id: Option<Uuid>, limit: Option<usize> }
+struct CreatePolicyRequest {
+    name: String,
+    rule_type: String,
+    config: serde_json::Value,
+}
+
+#[derive(Debug, Deserialize)]
+struct SimulateRequest {
+    point_in_time: chrono::DateTime<chrono::Utc>,
+    user_id: Option<Uuid>,
+    limit: Option<usize>,
+}
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct MemoryRow {
-    id: Uuid, tenant_id: Uuid, user_id: Option<Uuid>, scope: String, kind: String,
-    content: String, content_json: Option<serde_json::Value>, confidence: f32, importance: f32,
-    status: String, valid_from: chrono::DateTime<chrono::Utc>, valid_to: Option<chrono::DateTime<chrono::Utc>>,
-    event_time: Option<chrono::DateTime<chrono::Utc>>, ingested_at: chrono::DateTime<chrono::Utc>,
-    source_episode_id: Option<Uuid>, created_by: String, tags: Vec<String>,
-    metadata: serde_json::Value, created_at: chrono::DateTime<chrono::Utc>, updated_at: chrono::DateTime<chrono::Utc>,
+    id: Uuid,
+    tenant_id: Uuid,
+    user_id: Option<Uuid>,
+    scope: String,
+    kind: String,
+    content: String,
+    content_json: Option<serde_json::Value>,
+    confidence: f32,
+    importance: f32,
+    status: String,
+    valid_from: chrono::DateTime<chrono::Utc>,
+    valid_to: Option<chrono::DateTime<chrono::Utc>>,
+    event_time: Option<chrono::DateTime<chrono::Utc>>,
+    ingested_at: chrono::DateTime<chrono::Utc>,
+    source_episode_id: Option<Uuid>,
+    created_by: String,
+    tags: Vec<String>,
+    metadata: serde_json::Value,
+    created_at: chrono::DateTime<chrono::Utc>,
+    updated_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct AuditRow {
-    id: Uuid, memory_id: Uuid, target_table: String, action: String,
-    actor_type: String, actor_id: Option<String>, diff: Option<serde_json::Value>,
-    reason: Option<String>, timestamp: chrono::DateTime<chrono::Utc>,
+    id: Uuid,
+    memory_id: Uuid,
+    target_table: String,
+    action: String,
+    actor_type: String,
+    actor_id: Option<String>,
+    diff: Option<serde_json::Value>,
+    reason: Option<String>,
+    timestamp: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct PolicyRow {
-    id: Uuid, tenant_id: Uuid, name: String, rule_type: String,
-    config: serde_json::Value, enabled: bool, created_at: chrono::DateTime<chrono::Utc>,
+    id: Uuid,
+    tenant_id: Uuid,
+    name: String,
+    rule_type: String,
+    config: serde_json::Value,
+    enabled: bool,
+    created_at: chrono::DateTime<chrono::Utc>,
 }

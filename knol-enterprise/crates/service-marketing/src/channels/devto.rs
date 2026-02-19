@@ -11,12 +11,13 @@ pub async fn publish(
     http_client: &reqwest::Client,
     credentials: &ChannelCredentials,
 ) -> Result<PublishResult, MarketingError> {
-    let api_key = credentials.devto_api_key.as_ref().ok_or_else(|| {
-        MarketingError::Channel {
+    let api_key = credentials
+        .devto_api_key
+        .as_ref()
+        .ok_or_else(|| MarketingError::Channel {
             channel: "devto".into(),
             message: "Dev.to credentials not configured".into(),
-        }
-    })?;
+        })?;
 
     let title = content.title.as_deref().unwrap_or("Untitled");
     let body_markdown = content.body.as_deref().unwrap_or(&content.text);
@@ -48,7 +49,10 @@ pub async fn publish(
     if status.as_u16() == 201 {
         let article_id = body["id"].as_i64().map(|id| id.to_string());
         let article_url = body["url"].as_str().map(|s| s.to_string());
-        info!("Dev.to: published article {}", article_url.as_deref().unwrap_or("?"));
+        info!(
+            "Dev.to: published article {}",
+            article_url.as_deref().unwrap_or("?")
+        );
         Ok(PublishResult::success("devto", article_id, article_url))
     } else if status.as_u16() == 429 {
         warn!("Dev.to: rate limited");
@@ -64,6 +68,9 @@ pub async fn publish(
             .unwrap_or("Unknown error")
             .to_string();
         warn!("Dev.to: HTTP {} — {}", status, err_msg);
-        Ok(PublishResult::failure("devto", format!("HTTP {}: {}", status, err_msg)))
+        Ok(PublishResult::failure(
+            "devto",
+            format!("HTTP {}: {}", status, err_msg),
+        ))
     }
 }

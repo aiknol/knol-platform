@@ -168,6 +168,7 @@ impl RateLimiter {
     }
 
     /// Reset counters for a specific channel (for testing or manual override).
+    #[allow(dead_code)]
     pub async fn reset_channel(&self, channel: &str) {
         let mut counters = self.counters.write().await;
         counters.remove(channel);

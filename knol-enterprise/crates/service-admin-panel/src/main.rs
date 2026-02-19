@@ -32,8 +32,7 @@ struct HealthResponse<'a> {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
@@ -43,8 +42,8 @@ async fn main() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(8084);
 
-    let admin_service_url = std::env::var("ADMIN_SERVICE_URL")
-        .unwrap_or_else(|_| "http://admin-service:3001".into());
+    let admin_service_url =
+        std::env::var("ADMIN_SERVICE_URL").unwrap_or_else(|_| "http://admin-service:3001".into());
 
     let state = Arc::new(AppState {
         client: reqwest::Client::builder()
@@ -53,8 +52,8 @@ async fn main() -> anyhow::Result<()> {
         admin_service_url,
     });
 
-    let allowed_origin = std::env::var("ADMIN_CORS_ORIGIN")
-        .unwrap_or_else(|_| "http://localhost:3006".into());
+    let allowed_origin =
+        std::env::var("ADMIN_CORS_ORIGIN").unwrap_or_else(|_| "http://localhost:3006".into());
     let cors = if allowed_origin == "*" {
         CorsLayer::new()
             .allow_origin(Any)
@@ -127,10 +126,7 @@ async fn proxy_request(
         format!("{}/admin/{}{}", state.admin_service_url, path, query)
     };
 
-    let mut req = state
-        .client
-        .request(method.clone(), &target)
-        .body(body);
+    let mut req = state.client.request(method.clone(), &target).body(body);
 
     for key in [
         "authorization",
@@ -147,10 +143,7 @@ async fn proxy_request(
     match req.send().await {
         Ok(resp) => {
             let status = resp.status();
-            let content_type = resp
-                .headers()
-                .get("content-type")
-                .cloned();
+            let content_type = resp.headers().get("content-type").cloned();
             let bytes = resp.bytes().await.unwrap_or_default();
 
             let mut out = Response::builder().status(status);

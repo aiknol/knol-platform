@@ -1,12 +1,12 @@
 //! Channel adapters for publishing content to various platforms.
 
-pub mod twitter;
+pub mod blog;
+pub mod devto;
+pub mod email;
+pub mod github;
 pub mod linkedin;
 pub mod reddit;
-pub mod devto;
-pub mod github;
-pub mod email;
-pub mod blog;
+pub mod twitter;
 
 use serde::{Deserialize, Serialize};
 
@@ -90,7 +90,10 @@ pub async fn publish_to_channel(
         "github" => github::publish(content, http_client, credentials).await,
         "email" => email::publish(content, credentials).await,
         "blog" => blog::publish(content).await,
-        "hackernews" => Ok(PublishResult::manual("hackernews", "HN requires manual submission")),
+        "hackernews" => Ok(PublishResult::manual(
+            "hackernews",
+            "HN requires manual submission",
+        )),
         _ => Err(MarketingError::Channel {
             channel: channel.to_string(),
             message: "Unknown channel".into(),

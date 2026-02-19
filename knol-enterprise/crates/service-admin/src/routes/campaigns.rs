@@ -81,12 +81,14 @@ pub async fn update_campaign(
     .ok_or_else(|| AdminError::NotFound(format!("Campaign '{}' not found", name)))?;
 
     if let Some(enabled) = body.enabled {
-        sqlx::query("UPDATE marketing_campaigns SET enabled = $1, updated_at = NOW() WHERE name = $2")
-            .bind(enabled)
-            .bind(&name)
-            .execute(&state.db_pool)
-            .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+        sqlx::query(
+            "UPDATE marketing_campaigns SET enabled = $1, updated_at = NOW() WHERE name = $2",
+        )
+        .bind(enabled)
+        .bind(&name)
+        .execute(&state.db_pool)
+        .await
+        .map_err(|e| AdminError::Internal(e.to_string()))?;
     }
 
     if let Some(cron) = &body.cron {
@@ -99,12 +101,14 @@ pub async fn update_campaign(
     }
 
     if let Some(channels) = &body.channels {
-        sqlx::query("UPDATE marketing_campaigns SET channels = $1, updated_at = NOW() WHERE name = $2")
-            .bind(channels)
-            .bind(&name)
-            .execute(&state.db_pool)
-            .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+        sqlx::query(
+            "UPDATE marketing_campaigns SET channels = $1, updated_at = NOW() WHERE name = $2",
+        )
+        .bind(channels)
+        .bind(&name)
+        .execute(&state.db_pool)
+        .await
+        .map_err(|e| AdminError::Internal(e.to_string()))?;
     }
 
     // Audit

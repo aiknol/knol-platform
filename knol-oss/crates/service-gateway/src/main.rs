@@ -783,7 +783,23 @@ async fn list_webhooks(
     .await
     .map_err(|e: sqlx::Error| MemoryError::Database(e.to_string()))?;
 
-    Ok(Json(rows))
+    // Mask secrets in the response — never expose raw or encrypted secrets
+    let masked: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|mut row| {
+            if let Some(obj) = row.as_object_mut() {
+                if obj.contains_key("secret") {
+                    obj.insert(
+                        "secret".to_string(),
+                        serde_json::Value::String("****".to_string()),
+                    );
+                }
+            }
+            row
+        })
+        .collect();
+
+    Ok(Json(masked))
 }
 
 async fn create_webhook(
@@ -794,7 +810,7 @@ async fn create_webhook(
     let url = body["url"]
         .as_str()
         .ok_or_else(|| MemoryError::Validation("Missing 'url' field".into()))?;
-    let secret = body["secret"].as_str().map(|s| s.to_string());
+    let raw_secret = body["secret"].as_str().map(|s| s.to_string());
     let description = body["description"].as_str().map(|s| s.to_string());
     let event_types: Vec<String> = body["event_types"]
         .as_array()
@@ -805,13 +821,29 @@ async fn create_webhook(
         })
         .unwrap_or_else(|| vec!["*".to_string()]);
 
+    // Encrypt the webhook secret at rest if an encryption key is configured
+    let stored_secret = match (&raw_secret, &state.webhook_encryption_key) {
+        (Some(secret), Some(key)) => {
+            let encrypted =
+                memory_common::webhook_crypto::encrypt_secret(secret, key).map_err(|e| {
+                    MemoryError::Internal(format!("Failed to encrypt webhook secret: {}", e))
+                })?;
+            Some(encrypted)
+        }
+        (Some(secret), None) => {
+            warn!("Storing webhook secret in plaintext — set WEBHOOK_ENCRYPTION_KEY for encryption at rest");
+            Some(secret.clone())
+        }
+        (None, _) => None,
+    };
+
     let id = sqlx::query_scalar::<_, Uuid>(
         r#"INSERT INTO webhooks (tenant_id, url, secret, event_types, description)
            VALUES ($1, $2, $3, $4, $5) RETURNING id"#,
     )
     .bind(ctx.tenant_id)
     .bind(url)
-    .bind(secret)
+    .bind(stored_secret)
     .bind(&event_types)
     .bind(description)
     .fetch_one(&state.db_pool)

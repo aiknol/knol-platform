@@ -15,7 +15,6 @@ use tracing::info;
 use uuid::Uuid;
 
 struct AppState {
-    db_pool: sqlx::PgPool,
     nats_js: async_nats::jetstream::Context,
 }
 
@@ -23,8 +22,7 @@ struct AppState {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
@@ -38,20 +36,27 @@ async fn main() -> anyhow::Result<()> {
     let db_pool = memory_db::create_pool(&database_url, 4).await?;
 
     let port: u16 = memory_common::db_config::load_u64(
-        &db_pool, "services.ingest_port", "INGEST_SERVICE_PORT", 8087,
-    ).await as u16;
+        &db_pool,
+        "services.ingest_port",
+        "INGEST_SERVICE_PORT",
+        8087,
+    )
+    .await as u16;
     let (_nats_client, nats_js) = memory_queue::connect(&nats_url).await?;
     memory_queue::ensure_stream(&nats_js).await?;
 
-    let state = Arc::new(AppState { db_pool, nats_js });
+    let state = Arc::new(AppState { nats_js });
 
     let app = Router::new()
         .route("/internal/connectors", get(list_connectors))
         .route("/internal/connectors/webhook", post(webhook_ingest))
         .route("/internal/connectors/bulk", post(bulk_ingest))
-        .route("/health", get(|| async {
-            axum::Json(serde_json::json!({"status": "ok", "service": "memory-ingest"}))
-        }))
+        .route(
+            "/health",
+            get(|| async {
+                axum::Json(serde_json::json!({"status": "ok", "service": "memory-ingest"}))
+            }),
+        )
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -122,7 +127,9 @@ async fn webhook_ingest(
             timestamp: chrono::Utc::now(),
         };
 
-        if let Err(e) = memory_queue::publish(&state.nats_js, memory_queue::SUBJECT_WRITE, &event).await {
+        if let Err(e) =
+            memory_queue::publish(&state.nats_js, memory_queue::SUBJECT_WRITE, &event).await
+        {
             tracing::error!("Failed to publish ingest event: {}", e);
         } else {
             ingested += 1;
@@ -158,7 +165,9 @@ async fn bulk_ingest(
             timestamp: chrono::Utc::now(),
         };
 
-        if let Err(e) = memory_queue::publish(&state.nats_js, memory_queue::SUBJECT_WRITE, &event).await {
+        if let Err(e) =
+            memory_queue::publish(&state.nats_js, memory_queue::SUBJECT_WRITE, &event).await
+        {
             tracing::error!("Failed to publish bulk event: {}", e);
         } else {
             ingested += 1;

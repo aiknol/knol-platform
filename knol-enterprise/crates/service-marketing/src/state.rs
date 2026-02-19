@@ -1,9 +1,9 @@
 //! Application state shared across all handlers and scheduler tasks.
 
-use std::collections::HashMap;
 use std::sync::Arc;
+use tracing::info;
 
-use crate::config::{ChannelConfig, ChannelCredentials};
+use crate::config::ChannelCredentials;
 use crate::rate_limiter::RateLimiter;
 
 /// Shared application state.
@@ -11,7 +11,6 @@ pub struct AppState {
     pub db_pool: sqlx::PgPool,
     pub http_client: reqwest::Client,
     pub rate_limiter: RateLimiter,
-    pub channel_configs: HashMap<String, ChannelConfig>,
     pub credentials: ChannelCredentials,
 }
 
@@ -32,12 +31,21 @@ impl AppState {
 
         // Load credentials from DB (encrypted) → env var → None fallback chain
         let credentials = crate::config_loader::load_credentials(&db_pool).await;
+        info!(
+            "Marketing channels configured: twitter={} linkedin={} reddit={} devto={} github={} email={} anthropic={}",
+            credentials.has_twitter(),
+            credentials.has_linkedin(),
+            credentials.has_reddit(),
+            credentials.has_devto(),
+            credentials.has_github(),
+            credentials.has_email(),
+            credentials.has_anthropic(),
+        );
 
         Ok(Arc::new(Self {
             db_pool,
             http_client,
             rate_limiter,
-            channel_configs,
             credentials,
         }))
     }

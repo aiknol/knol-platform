@@ -9,7 +9,7 @@
 //! whether they're talking to a static or dynamic provider.
 
 use async_trait::async_trait;
-use memory_common::{ExtractionResult, ExtractedMemory, MemoryVerification};
+use memory_common::{ExtractedMemory, ExtractionResult, MemoryVerification};
 use sqlx::PgPool;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -50,7 +50,10 @@ impl DynamicLlmProvider {
     }
 
     /// Create with a custom refresh interval.
-    pub async fn with_interval(pool: PgPool, refresh_interval: Duration) -> Result<Arc<Self>, LlmError> {
+    pub async fn with_interval(
+        pool: PgPool,
+        refresh_interval: Duration,
+    ) -> Result<Arc<Self>, LlmError> {
         let provider = build_provider_from_db(&pool).await?;
         let provider_name = provider.provider_name().to_string();
         let model_name = provider.model_name().to_string();
@@ -143,7 +146,9 @@ impl LlmProvider for DynamicLlmProvider {
         existing_entities: &[String],
     ) -> Result<ExtractionResult, LlmError> {
         let provider = self.get_provider().await;
-        provider.extract_memories(content, role, existing_entities).await
+        provider
+            .extract_memories(content, role, existing_entities)
+            .await
     }
 
     async fn extract_memories_with_options(

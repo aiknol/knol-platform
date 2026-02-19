@@ -71,7 +71,12 @@ async fn check_service_health(
 ) -> (String, u64, Option<String>) {
     let start = std::time::Instant::now();
 
-    match client.get(url).timeout(std::time::Duration::from_secs(3)).send().await {
+    match client
+        .get(url)
+        .timeout(std::time::Duration::from_secs(3))
+        .send()
+        .await
+    {
         Ok(resp) if resp.status().is_success() => {
             ("healthy".into(), start.elapsed().as_millis() as u64, None)
         }
@@ -88,7 +93,11 @@ async fn check_service_health(
             } else {
                 e.to_string()
             };
-            ("unreachable".into(), start.elapsed().as_millis() as u64, Some(msg))
+            (
+                "unreachable".into(),
+                start.elapsed().as_millis() as u64,
+                Some(msg),
+            )
         }
     }
 }

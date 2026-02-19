@@ -49,6 +49,7 @@ struct AppState {
     conflict_config: ConflictConfig,
     webhook_config: WebhookConfig,
     webhook_client: reqwest::Client,
+    webhook_encryption_key: Option<[u8; 32]>,
 }
 
 #[tokio::main]
@@ -228,6 +229,12 @@ async fn main() -> anyhow::Result<()> {
         .timeout(std::time::Duration::from_secs(webhook_timeout))
         .build()
         .unwrap_or_default();
+    let webhook_encryption_key = memory_common::webhook_crypto::load_encryption_key_from_env();
+    if webhook_encryption_key.is_some() {
+        info!("Webhook secret decryption: enabled");
+    } else {
+        info!("Webhook secret decryption: disabled (no encryption key set)");
+    }
     info!(
         "Webhooks: enabled={}, max_retries={}",
         webhook_enabled, webhook_max_retries
@@ -253,6 +260,7 @@ async fn main() -> anyhow::Result<()> {
         conflict_config,
         webhook_config,
         webhook_client,
+        webhook_encryption_key,
     });
 
     // Create consumer for write events
@@ -850,6 +858,7 @@ async fn store_extraction_with_verifications(
         let db_pool = state.db_pool.clone();
         let wh_client = state.webhook_client.clone();
         let wh_config = state.webhook_config.clone();
+        let wh_encryption_key = state.webhook_encryption_key;
         let summary = WebhookDispatchSummary {
             tenant_id: event.tenant_id,
             episode_id: event.episode_id,
@@ -861,7 +870,14 @@ async fn store_extraction_with_verifications(
         };
 
         tokio::spawn(async move {
-            dispatch_webhooks(&db_pool, &wh_client, &wh_config, summary).await;
+            dispatch_webhooks(
+                &db_pool,
+                &wh_client,
+                &wh_config,
+                &wh_encryption_key,
+                summary,
+            )
+            .await;
         });
     }
 
@@ -884,6 +900,7 @@ async fn dispatch_webhooks(
     db_pool: &sqlx::PgPool,
     wh_client: &reqwest::Client,
     wh_config: &WebhookConfig,
+    wh_encryption_key: &Option<[u8; 32]>,
     summary: WebhookDispatchSummary,
 ) {
     let WebhookDispatchSummary {
@@ -897,7 +914,7 @@ async fn dispatch_webhooks(
     } = summary;
 
     // Load registered webhooks for this tenant
-    let webhooks = match load_tenant_webhooks(db_pool, tenant_id).await {
+    let webhooks = match load_tenant_webhooks(db_pool, tenant_id, wh_encryption_key).await {
         Ok(w) => w,
         Err(e) => {
             debug!("No webhooks registered for tenant {}: {}", tenant_id, e);
@@ -1013,6 +1030,7 @@ async fn fire_to_subscribers(
 async fn load_tenant_webhooks(
     pool: &sqlx::PgPool,
     tenant_id: Uuid,
+    wh_encryption_key: &Option<[u8; 32]>,
 ) -> anyhow::Result<Vec<WebhookRegistration>> {
     // Try to load from webhooks table; if table doesn't exist yet, return empty
     let rows = sqlx::query_as::<_, WebhookRow>(
@@ -1036,11 +1054,25 @@ async fn load_tenant_webhooks(
                     .filter_map(|s| serde_json::from_str(&format!("\"{}\"", s)).ok())
                     .collect();
 
+                // Decrypt secret if it was stored encrypted (enc: prefix)
+                let decrypted_secret = r.secret.as_deref().and_then(|s| {
+                    if let Some(key) = &wh_encryption_key {
+                        memory_common::webhook_crypto::decrypt_secret_opt(Some(s), key)
+                    } else if s.starts_with(memory_common::webhook_crypto::ENCRYPTED_PREFIX) {
+                        tracing::warn!(
+                            "Webhook secret is encrypted but no decryption key is available"
+                        );
+                        None
+                    } else {
+                        Some(s.to_string())
+                    }
+                });
+
                 WebhookRegistration {
                     id: r.id,
                     tenant_id: r.tenant_id,
                     url: r.url,
-                    secret: r.secret,
+                    secret: decrypted_secret,
                     event_types,
                     active: r.active,
                     description: r.description,

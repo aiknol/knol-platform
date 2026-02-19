@@ -71,8 +71,6 @@ impl ConflictType {
 pub enum ConflictResolution {
     /// Keep the newer memory, archive the older
     KeepNewer,
-    /// Keep the memory with higher confidence
-    KeepHigherConfidence,
     /// Flag both for human review
     Flag,
     /// No action taken
@@ -94,10 +92,6 @@ struct MemoryConflict {
     created_at_1: chrono::DateTime<Utc>,
     /// Creation time of second memory
     created_at_2: chrono::DateTime<Utc>,
-    /// Confidence score of first memory
-    confidence_1: f32,
-    /// Confidence score of second memory
-    confidence_2: f32,
     /// Number of shared entities
     shared_entity_count: i64,
     /// Tenant ID
@@ -123,23 +117,15 @@ impl ConflictDetector {
         }
     }
 
-    /// Create with custom configuration
-    pub fn with_config(db_pool: PgPool, config: ConflictDetectionConfig) -> Self {
-        Self { db_pool, config }
-    }
-
     /// Main entry point: run full conflict detection and resolution pipeline
     pub async fn run_conflict_detection(&self) -> anyhow::Result<u64> {
         info!("Starting memory conflict detection pipeline");
 
         // Find potential conflicts
-        let potential_conflicts = self
-            .find_potential_conflicts()
-            .await
-            .map_err(|e| {
-                error!("Failed to find potential conflicts: {}", e);
-                e
-            })?;
+        let potential_conflicts = self.find_potential_conflicts().await.map_err(|e| {
+            error!("Failed to find potential conflicts: {}", e);
+            e
+        })?;
 
         if potential_conflicts.is_empty() {
             info!("No potential conflicts found");
@@ -182,8 +168,6 @@ impl ConflictDetector {
             content_2: String,
             created_at_1: chrono::DateTime<Utc>,
             created_at_2: chrono::DateTime<Utc>,
-            confidence_1: f32,
-            confidence_2: f32,
             shared_entity_count: Option<i64>,
             tenant_id: Uuid,
         }
@@ -197,8 +181,6 @@ impl ConflictDetector {
                 m2.content as content_2,
                 m1.created_at as created_at_1,
                 m2.created_at as created_at_2,
-                m1.confidence as confidence_1,
-                m2.confidence as confidence_2,
                 COUNT(DISTINCT e.id) as shared_entity_count,
                 m1.tenant_id
             FROM memories m1
@@ -216,8 +198,7 @@ impl ConflictDetector {
                 WHERE (memory_id_1 = m1.id AND memory_id_2 = m2.id)
                    OR (memory_id_1 = m2.id AND memory_id_2 = m1.id)
               )
-            GROUP BY m1.id, m2.id, m1.content, m2.content, m1.created_at, m2.created_at,
-                     m1.confidence, m2.confidence, m1.tenant_id
+            GROUP BY m1.id, m2.id, m1.content, m2.content, m1.created_at, m2.created_at, m1.tenant_id
             HAVING COUNT(DISTINCT e.id) > 0
             LIMIT $1
             "#,
@@ -229,8 +210,7 @@ impl ConflictDetector {
         let conflicts = rows
             .into_iter()
             .map(|row| {
-                let word_overlap =
-                    Self::calculate_word_overlap(&row.content_1, &row.content_2);
+                let word_overlap = Self::calculate_word_overlap(&row.content_1, &row.content_2);
 
                 MemoryConflict {
                     memory_id_1: row.memory_id_1,
@@ -239,8 +219,6 @@ impl ConflictDetector {
                     content_2: row.content_2,
                     created_at_1: row.created_at_1,
                     created_at_2: row.created_at_2,
-                    confidence_1: row.confidence_1,
-                    confidence_2: row.confidence_2,
                     shared_entity_count: row.shared_entity_count.unwrap_or(0),
                     tenant_id: row.tenant_id,
                     conflict_type: ConflictType::Ambiguous, // Will be classified below
@@ -340,9 +318,6 @@ impl ConflictDetector {
             ConflictResolution::KeepNewer => {
                 self.resolve_keep_newer(conflict).await?;
             }
-            ConflictResolution::KeepHigherConfidence => {
-                self.resolve_keep_higher_confidence(conflict).await?;
-            }
             ConflictResolution::Flag => {
                 self.resolve_flag_for_review(conflict).await?;
             }
@@ -383,38 +358,6 @@ impl ConflictDetector {
             older_id,
             newer_id,
             conflict.conflict_type.as_str()
-        );
-
-        Ok(())
-    }
-
-    /// Keep the memory with higher confidence, archive the other
-    async fn resolve_keep_higher_confidence(
-        &self,
-        conflict: &MemoryConflict,
-    ) -> anyhow::Result<()> {
-        let (archived_id, kept_id) = if conflict.confidence_1 >= conflict.confidence_2 {
-            (conflict.memory_id_2, conflict.memory_id_1)
-        } else {
-            (conflict.memory_id_1, conflict.memory_id_2)
-        };
-
-        let now = Utc::now();
-        sqlx::query(
-            r#"
-            UPDATE memories
-            SET status = 'archived', valid_to = $1, updated_at = $1
-            WHERE id = $2
-            "#,
-        )
-        .bind(now)
-        .bind(archived_id)
-        .execute(&self.db_pool)
-        .await?;
-
-        debug!(
-            "Archived lower confidence memory {} in favor of {} (confidence: {:.2} vs {:.2})",
-            archived_id, kept_id, conflict.confidence_1, conflict.confidence_2
         );
 
         Ok(())
@@ -504,10 +447,7 @@ impl ConflictDetector {
             .collect();
 
         let lower2 = content2.to_lowercase();
-        let words2: HashSet<&str> = lower2
-            .split_whitespace()
-            .filter(|w| w.len() > 2)
-            .collect();
+        let words2: HashSet<&str> = lower2.split_whitespace().filter(|w| w.len() > 2).collect();
 
         if words1.is_empty() || words2.is_empty() {
             return 0.0;
@@ -630,5 +570,4 @@ mod tests {
         // Should be false because both are positive
         assert!(!result);
     }
-
 }

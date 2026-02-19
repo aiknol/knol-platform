@@ -3,7 +3,7 @@
 //! Usage metering, plan limit enforcement, and billing data aggregation.
 
 use axum::{
-    extract::{Json, Query, State},
+    extract::{Json, State},
     http::HeaderMap,
     routing::{get, post},
     Router,
@@ -21,8 +21,7 @@ struct AppState {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
@@ -35,8 +34,12 @@ async fn main() -> anyhow::Result<()> {
     let db_pool = memory_db::create_pool(&database_url, 4).await?;
 
     let port: u16 = memory_common::db_config::load_u64(
-        &db_pool, "services.billing_port", "BILLING_SERVICE_PORT", 8086,
-    ).await as u16;
+        &db_pool,
+        "services.billing_port",
+        "BILLING_SERVICE_PORT",
+        8086,
+    )
+    .await as u16;
 
     let state = Arc::new(AppState { db_pool });
 
@@ -45,9 +48,12 @@ async fn main() -> anyhow::Result<()> {
         .route("/internal/usage/record", post(record_usage))
         .route("/internal/plan/check", get(check_plan_limits))
         .route("/internal/billing/reset-monthly", post(reset_monthly_usage))
-        .route("/health", get(|| async {
-            axum::Json(serde_json::json!({"status": "ok", "service": "memory-billing"}))
-        }))
+        .route(
+            "/health",
+            get(|| async {
+                axum::Json(serde_json::json!({"status": "ok", "service": "memory-billing"}))
+            }),
+        )
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -112,14 +118,12 @@ async fn record_usage(
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
 
-    sqlx::query(
-        "UPDATE tenants SET usage_ops_month = usage_ops_month + $1 WHERE id = $2",
-    )
-    .bind(body.ops_count)
-    .bind(tenant_id)
-    .execute(&state.db_pool)
-    .await
-    .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+    sqlx::query("UPDATE tenants SET usage_ops_month = usage_ops_month + $1 WHERE id = $2")
+        .bind(body.ops_count)
+        .bind(tenant_id)
+        .execute(&state.db_pool)
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
     Ok(Json(serde_json::json!({ "recorded": body.ops_count })))
 }
@@ -139,7 +143,10 @@ async fn check_plan_limits(
     .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
     let limits = get_plan_limits(&row.plan);
-    let within_limits = row.usage_limit.map(|l| row.usage_ops_month < l).unwrap_or(true);
+    let within_limits = row
+        .usage_limit
+        .map(|l| row.usage_ops_month < l)
+        .unwrap_or(true);
 
     Ok(Json(PlanLimitsResponse {
         plan: row.plan,
@@ -180,25 +187,39 @@ fn get_plan_limits(plan: &str) -> PlanLimits {
             max_memories_per_user: 100_000,
             max_users: 25,
             features: vec![
-                "vector_search".into(), "graph".into(), "temporal".into(),
-                "simulation".into(), "connectors".into(),
+                "vector_search".into(),
+                "graph".into(),
+                "temporal".into(),
+                "simulation".into(),
+                "connectors".into(),
             ],
         },
         "team" => PlanLimits {
             max_memories_per_user: 500_000,
             max_users: 100,
             features: vec![
-                "vector_search".into(), "graph".into(), "temporal".into(),
-                "simulation".into(), "connectors".into(), "audit".into(), "sso".into(),
+                "vector_search".into(),
+                "graph".into(),
+                "temporal".into(),
+                "simulation".into(),
+                "connectors".into(),
+                "audit".into(),
+                "sso".into(),
             ],
         },
         "enterprise" => PlanLimits {
             max_memories_per_user: i64::MAX,
             max_users: i64::MAX,
             features: vec![
-                "vector_search".into(), "graph".into(), "temporal".into(),
-                "simulation".into(), "connectors".into(), "audit".into(),
-                "sso".into(), "air_gapped".into(), "custom_ontology".into(),
+                "vector_search".into(),
+                "graph".into(),
+                "temporal".into(),
+                "simulation".into(),
+                "connectors".into(),
+                "audit".into(),
+                "sso".into(),
+                "air_gapped".into(),
+                "custom_ontology".into(),
                 "dedicated_infra".into(),
             ],
         },

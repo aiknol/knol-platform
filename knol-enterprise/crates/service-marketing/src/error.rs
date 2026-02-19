@@ -24,9 +24,6 @@ pub enum MarketingError {
     #[error("Database error: {0}")]
     Database(String),
 
-    #[error("Redis error: {0}")]
-    Redis(String),
-
     #[error("Campaign not found: {0}")]
     CampaignNotFound(String),
 

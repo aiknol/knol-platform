@@ -31,8 +31,7 @@ fn is_sensitive_config_key(key: &str, env_override: Option<&str>) -> bool {
         }
         let delimiters = [".", "_", "-"];
         delimiters.iter().any(|d| {
-            haystack.contains(&format!("{d}{marker}"))
-                || haystack.contains(&format!("{marker}{d}"))
+            haystack.contains(&format!("{d}{marker}")) || haystack.contains(&format!("{marker}{d}"))
         })
     }
 
@@ -48,7 +47,9 @@ fn is_sensitive_config_key(key: &str, env_override: Option<&str>) -> bool {
         "signing_key",
         "jwt",
     ];
-    markers.iter().any(|m| has_sensitive_marker(&key_l, m) || has_sensitive_marker(&env_l, m))
+    markers
+        .iter()
+        .any(|m| has_sensitive_marker(&key_l, m) || has_sensitive_marker(&env_l, m))
 }
 
 fn redact_config_value(
@@ -141,10 +142,18 @@ pub struct UpsertConfig {
     pub env_override: Option<String>,
 }
 
-fn default_string() -> String { "string".into() }
-fn default_general() -> String { "general".into() }
+fn default_string() -> String {
+    "string".into()
+}
+fn default_general() -> String {
+    "general".into()
+}
 
-fn validate_config_update(key: &str, value: &serde_json::Value, value_type: &str) -> Result<(), AdminError> {
+fn validate_config_update(
+    key: &str,
+    value: &serde_json::Value,
+    value_type: &str,
+) -> Result<(), AdminError> {
     let valid_types = ["string", "number", "boolean", "json", "string_array"];
     if !valid_types.contains(&value_type) {
         return Err(AdminError::BadRequest(format!(

@@ -16,7 +16,10 @@ mod state;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-use axum::{routing::{get, post}, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use tokio_cron_scheduler::{Job, JobScheduler};
 use tracing::{error, info};
 
@@ -44,26 +47,17 @@ async fn main() -> anyhow::Result<()> {
     // Build Axum router
     let app = Router::new()
         .route("/health", get(routes::health::health))
-        .route(
-            "/internal/marketing/status",
-            get(routes::status::status),
-        )
+        .route("/internal/marketing/status", get(routes::status::status))
         .route(
             "/internal/marketing/rate-limits",
             get(routes::status::rate_limits),
         )
-        .route(
-            "/internal/marketing/history",
-            get(routes::status::history),
-        )
+        .route("/internal/marketing/history", get(routes::status::history))
         .route(
             "/internal/marketing/trigger/{name}",
             post(routes::trigger::trigger),
         )
-        .route(
-            "/internal/marketing/preview",
-            get(routes::preview::preview),
-        )
+        .route("/internal/marketing/preview", get(routes::preview::preview))
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8088));
@@ -114,7 +108,10 @@ async fn start_scheduler(state: Arc<AppState>) -> anyhow::Result<JobScheduler> {
         })?;
 
         sched.add(job).await?;
-        info!("Scheduled campaign '{}' with cron '{}'", campaign.name, campaign.cron);
+        info!(
+            "Scheduled campaign '{}' with cron '{}'",
+            campaign.name, campaign.cron
+        );
     }
 
     sched.start().await?;

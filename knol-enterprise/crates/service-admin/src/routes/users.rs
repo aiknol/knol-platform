@@ -20,7 +20,7 @@ pub async fn list_users(
     }
 
     let rows = sqlx::query_as::<_, UserRow>(
-        "SELECT id, email, role, enabled, last_login_at, created_at, updated_at FROM admin_users ORDER BY created_at",
+        "SELECT id, email, role, enabled, last_login_at, created_at FROM admin_users ORDER BY created_at",
     )
     .fetch_all(&state.db_pool)
     .await
@@ -51,7 +51,9 @@ pub struct CreateUser {
     pub role: String,
 }
 
-fn default_role() -> String { "read_only".into() }
+fn default_role() -> String {
+    "read_only".into()
+}
 
 pub async fn create_user(
     State(state): State<Arc<AdminAppState>>,
@@ -63,12 +65,22 @@ pub async fn create_user(
     }
 
     if body.password.len() < 8 {
-        return Err(AdminError::BadRequest("Password must be at least 8 characters".into()));
+        return Err(AdminError::BadRequest(
+            "Password must be at least 8 characters".into(),
+        ));
     }
 
-    let valid_roles = ["super_admin", "config_admin", "marketing_admin", "read_only"];
+    let valid_roles = [
+        "super_admin",
+        "config_admin",
+        "marketing_admin",
+        "read_only",
+    ];
     if !valid_roles.contains(&body.role.as_str()) {
-        return Err(AdminError::BadRequest(format!("Invalid role: {}. Must be one of: {:?}", body.role, valid_roles)));
+        return Err(AdminError::BadRequest(format!(
+            "Invalid role: {}. Must be one of: {:?}",
+            body.role, valid_roles
+        )));
     }
 
     let hash = bcrypt::hash(&body.password, 12)
@@ -94,7 +106,9 @@ pub async fn create_user(
     .execute(&state.db_pool)
     .await;
 
-    Ok(Json(serde_json::json!({"id": id, "email": body.email, "role": body.role})))
+    Ok(Json(
+        serde_json::json!({"id": id, "email": body.email, "role": body.role}),
+    ))
 }
 
 #[derive(Deserialize)]
@@ -115,7 +129,9 @@ pub async fn update_user(
 
     // Prevent self-disable
     if id == claims.sub && body.enabled == Some(false) {
-        return Err(AdminError::BadRequest("Cannot disable your own account".into()));
+        return Err(AdminError::BadRequest(
+            "Cannot disable your own account".into(),
+        ));
     }
 
     if let Some(role) = &body.role {
@@ -159,7 +175,9 @@ pub async fn delete_user(
     }
 
     if id == claims.sub {
-        return Err(AdminError::BadRequest("Cannot delete your own account".into()));
+        return Err(AdminError::BadRequest(
+            "Cannot delete your own account".into(),
+        ));
     }
 
     // Disable rather than hard delete
@@ -196,5 +214,4 @@ struct UserRow {
     enabled: bool,
     last_login_at: Option<chrono::DateTime<chrono::Utc>>,
     created_at: chrono::DateTime<chrono::Utc>,
-    updated_at: chrono::DateTime<chrono::Utc>,
 }

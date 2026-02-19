@@ -1,9 +1,9 @@
-use std::sync::Arc;
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
 use serde::Deserialize;
+use std::sync::Arc;
 
 use crate::scheduler::campaigns;
 use crate::state::AppState;

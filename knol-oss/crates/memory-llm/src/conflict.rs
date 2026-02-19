@@ -183,12 +183,8 @@ pub fn detect_conflicts(
             };
 
             if let Some(ctype) = conflict_type {
-                let action = resolve_action(
-                    ctype,
-                    new_mem.confidence,
-                    existing_mem.confidence,
-                    config,
-                );
+                let action =
+                    resolve_action(ctype, new_mem.confidence, existing_mem.confidence, config);
 
                 conflicts.push(ConflictDetection {
                     existing_memory_id: existing_mem.id,
@@ -202,14 +198,20 @@ pub fn detect_conflicts(
 
                 debug!(
                     "Conflict detected: {:?} (similarity={:.2}, entities={:?})",
-                    ctype, similarity, conflicts.last().unwrap().shared_entities
+                    ctype,
+                    similarity,
+                    conflicts.last().unwrap().shared_entities
                 );
             }
         }
     }
 
     if !conflicts.is_empty() {
-        info!("Detected {} conflicts for {} new memories", conflicts.len(), new_memories.len());
+        info!(
+            "Detected {} conflicts for {} new memories",
+            conflicts.len(),
+            new_memories.len()
+        );
     }
 
     conflicts
@@ -290,10 +292,34 @@ fn token_jaccard(a: &str, b: &str) -> f32 {
 pub async fn build_conflict_config_from_db(pool: &sqlx::PgPool) -> ConflictConfig {
     use memory_common::db_config;
 
-    let enabled = db_config::load_bool(pool, "memory.conflict_detection_enabled", "CONFLICT_DETECTION_ENABLED", true).await;
-    let threshold = db_config::load_f64(pool, "memory.conflict_similarity_threshold", "CONFLICT_SIMILARITY_THRESHOLD", 0.80).await as f32;
-    let entity_threshold = db_config::load_f64(pool, "memory.conflict_entity_overlap", "CONFLICT_ENTITY_OVERLAP", 0.70).await as f32;
-    let resolution_str = db_config::load_string(pool, "memory.conflict_resolution", "CONFLICT_RESOLUTION", "newest_wins").await;
+    let enabled = db_config::load_bool(
+        pool,
+        "memory.conflict_detection_enabled",
+        "CONFLICT_DETECTION_ENABLED",
+        true,
+    )
+    .await;
+    let threshold = db_config::load_f64(
+        pool,
+        "memory.conflict_similarity_threshold",
+        "CONFLICT_SIMILARITY_THRESHOLD",
+        0.80,
+    )
+    .await as f32;
+    let entity_threshold = db_config::load_f64(
+        pool,
+        "memory.conflict_entity_overlap",
+        "CONFLICT_ENTITY_OVERLAP",
+        0.70,
+    )
+    .await as f32;
+    let resolution_str = db_config::load_string(
+        pool,
+        "memory.conflict_resolution",
+        "CONFLICT_RESOLUTION",
+        "newest_wins",
+    )
+    .await;
 
     let resolution = match resolution_str.as_str() {
         "highest_confidence" => ConflictResolution::HighestConfidence,
@@ -332,10 +358,7 @@ mod tests {
 
     #[test]
     fn test_token_jaccard_different() {
-        let score = token_jaccard(
-            "User prefers dark mode",
-            "The weather is sunny today",
-        );
+        let score = token_jaccard("User prefers dark mode", "The weather is sunny today");
         assert!(score < 0.2, "Expected <0.2, got {}", score);
     }
 
@@ -364,7 +387,12 @@ mod tests {
             created_at: Utc::now(),
         }];
 
-        let conflicts = detect_conflicts(&new_memories, &existing, &["User".into(), "Google".into()], &config);
+        let conflicts = detect_conflicts(
+            &new_memories,
+            &existing,
+            &["User".into(), "Google".into()],
+            &config,
+        );
         assert_eq!(conflicts.len(), 1);
         assert_eq!(conflicts[0].conflict_type, ConflictType::Duplicate);
         assert_eq!(conflicts[0].recommended_action, ConflictAction::SkipNew);
@@ -466,7 +494,12 @@ mod tests {
             created_at: Utc::now(),
         }];
 
-        let conflicts = detect_conflicts(&new_memories, &existing, &["User".into(), "Google".into()], &config);
+        let conflicts = detect_conflicts(
+            &new_memories,
+            &existing,
+            &["User".into(), "Google".into()],
+            &config,
+        );
         assert!(conflicts.is_empty());
     }
 

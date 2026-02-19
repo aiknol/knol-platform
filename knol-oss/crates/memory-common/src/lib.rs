@@ -10,6 +10,7 @@ pub mod policy;
 pub mod startup;
 pub mod types;
 pub mod webhook;
+pub mod webhook_crypto;
 
 pub use config::*;
 pub use error::*;

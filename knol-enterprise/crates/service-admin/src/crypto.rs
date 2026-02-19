@@ -13,8 +13,7 @@ use rand::RngCore;
 /// Encrypt plaintext using AES-256-GCM.
 /// Returns nonce (12 bytes) || ciphertext.
 pub fn encrypt(plaintext: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
-    let cipher = Aes256Gcm::new_from_slice(key)
-        .map_err(|e| format!("AES key error: {}", e))?;
+    let cipher = Aes256Gcm::new_from_slice(key).map_err(|e| format!("AES key error: {}", e))?;
 
     let mut nonce_bytes = [0u8; 12];
     rand::thread_rng().fill_bytes(&mut nonce_bytes);
@@ -37,8 +36,7 @@ pub fn decrypt(data: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
         return Err("Ciphertext too short (missing nonce)".into());
     }
 
-    let cipher = Aes256Gcm::new_from_slice(key)
-        .map_err(|e| format!("AES key error: {}", e))?;
+    let cipher = Aes256Gcm::new_from_slice(key).map_err(|e| format!("AES key error: {}", e))?;
 
     let nonce = Nonce::from_slice(&data[..12]);
     let ciphertext = &data[12..];

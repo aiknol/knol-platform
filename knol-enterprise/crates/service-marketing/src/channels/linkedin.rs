@@ -11,12 +11,13 @@ pub async fn publish(
     http_client: &reqwest::Client,
     credentials: &ChannelCredentials,
 ) -> Result<PublishResult, MarketingError> {
-    let token = credentials.linkedin_token.as_ref().ok_or_else(|| {
-        MarketingError::Channel {
+    let token = credentials
+        .linkedin_token
+        .as_ref()
+        .ok_or_else(|| MarketingError::Channel {
             channel: "linkedin".into(),
             message: "LinkedIn credentials not configured".into(),
-        }
-    })?;
+        })?;
     let person_urn = credentials
         .linkedin_person_urn
         .as_deref()
@@ -60,7 +61,11 @@ pub async fn publish(
         Ok(PublishResult::success("linkedin", post_id, None))
     } else {
         let text = resp.text().await.unwrap_or_default();
-        warn!("LinkedIn: HTTP {} — {}", status, &text[..text.len().min(200)]);
+        warn!(
+            "LinkedIn: HTTP {} — {}",
+            status,
+            &text[..text.len().min(200)]
+        );
         Ok(PublishResult::failure(
             "linkedin",
             format!("HTTP {}: {}", status, &text[..text.len().min(200)]),

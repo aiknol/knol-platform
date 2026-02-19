@@ -100,6 +100,7 @@ pub fn get_templates(category: &str) -> Option<&'static [&'static str]> {
 }
 
 /// List all available template categories.
+#[cfg(test)]
 pub fn all_categories() -> &'static [&'static str] {
     &[
         "tweet_launch",
@@ -125,11 +126,7 @@ mod tests {
     #[test]
     fn all_categories_resolve() {
         for cat in all_categories() {
-            assert!(
-                get_templates(cat).is_some(),
-                "Category '{}' not found",
-                cat
-            );
+            assert!(get_templates(cat).is_some(), "Category '{}' not found", cat);
             assert!(
                 !get_templates(cat).unwrap().is_empty(),
                 "Category '{}' is empty",

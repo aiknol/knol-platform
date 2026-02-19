@@ -156,12 +156,12 @@ impl Default for WebhookConfig {
 
 /// Compute HMAC-SHA256 signature for webhook payload verification.
 pub fn compute_signature(payload: &[u8], secret: &str) -> String {
-    use sha2::Sha256;
     use hmac::{Hmac, Mac};
+    use sha2::Sha256;
 
     type HmacSha256 = Hmac<Sha256>;
-    let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
-        .expect("HMAC can accept any key length");
+    let mut mac =
+        HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC can accept any key length");
     mac.update(payload);
     let result = mac.finalize();
     hex::encode(result.into_bytes())
@@ -222,7 +222,11 @@ pub async fn deliver_webhook(
                     status_code: Some(status),
                     success,
                     attempt,
-                    error: if success { None } else { Some(format!("HTTP {}", status)) },
+                    error: if success {
+                        None
+                    } else {
+                        Some(format!("HTTP {}", status))
+                    },
                     delivered_at: Utc::now(),
                 };
             }
@@ -250,7 +254,10 @@ mod tests {
     #[test]
     fn test_webhook_event_type_as_str() {
         assert_eq!(WebhookEventType::MemoryCreated.as_str(), "memory.created");
-        assert_eq!(WebhookEventType::ConflictDetected.as_str(), "memory.conflict");
+        assert_eq!(
+            WebhookEventType::ConflictDetected.as_str(),
+            "memory.conflict"
+        );
         assert_eq!(WebhookEventType::All.as_str(), "*");
     }
 
@@ -313,7 +320,10 @@ mod tests {
             tenant_id: Uuid::new_v4(),
             url: "https://example.com/webhook".into(),
             secret: Some("whsec_test123".into()),
-            event_types: vec![WebhookEventType::MemoryCreated, WebhookEventType::ConflictDetected],
+            event_types: vec![
+                WebhookEventType::MemoryCreated,
+                WebhookEventType::ConflictDetected,
+            ],
             active: true,
             description: Some("Test webhook".into()),
             created_at: Utc::now(),

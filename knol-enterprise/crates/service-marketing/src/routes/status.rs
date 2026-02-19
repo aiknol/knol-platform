@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use axum::{extract::State, Json};
+use std::sync::Arc;
 
 use crate::scheduler::campaigns;
 use crate::state::AppState;

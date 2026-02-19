@@ -5,12 +5,12 @@
 //! - **Weekly** (Tue 3pm UTC): Blog + Dev.to + LinkedIn + Reddit
 //! - **Monthly** (1st 4pm UTC): Newsletter + GitHub metadata + tweet thread
 
-use std::sync::Arc;
 use chrono::Datelike;
+use std::sync::Arc;
 use tokio::time::Duration;
 use tracing::{error, info, warn};
 
-use crate::channels::{self, PublishContent};
+use crate::channels;
 use crate::content::generator;
 use crate::error::MarketingError;
 use crate::state::AppState;
@@ -114,7 +114,10 @@ pub async fn execute_campaign(
         return Err(MarketingError::CampaignPaused(campaign_name.to_string()));
     }
 
-    info!("Campaign '{}': starting (dry_run={})", campaign_name, dry_run);
+    info!(
+        "Campaign '{}': starting (dry_run={})",
+        campaign_name, dry_run
+    );
 
     let mut results = Vec::new();
 
@@ -197,7 +200,10 @@ pub async fn execute_campaign(
             }
             Err(e) => {
                 // No limits configured — proceed
-                info!("Campaign '{}': no rate limit for {} ({})", campaign_name, task.channel, e);
+                info!(
+                    "Campaign '{}': no rate limit for {} ({})",
+                    campaign_name, task.channel, e
+                );
             }
         }
 

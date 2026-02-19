@@ -24,9 +24,7 @@ use crate::AdminAppState;
 ///   "tagline": "Give your AI persistent memory"
 /// }
 /// ```
-pub async fn demo_config(
-    State(state): State<Arc<AdminAppState>>,
-) -> Json<serde_json::Value> {
+pub async fn demo_config(State(state): State<Arc<AdminAppState>>) -> Json<serde_json::Value> {
     let pool = &state.db_pool;
 
     // Helper: load a config value, stripping JSON quotes for string types.
@@ -65,7 +63,11 @@ pub async fn demo_config(
 
     let provider = load("demo.llm_provider", "gemini").await;
     let model_override = load("demo.llm_model", "").await;
-    let github_url = load("demo.github_url", "https://github.com/pankajb64/memorylayer").await;
+    let github_url = load(
+        "demo.github_url",
+        "https://github.com/pankajb64/memorylayer",
+    )
+    .await;
     let tagline = load("demo.tagline", "Give your AI persistent memory").await;
 
     // Determine model and credential name based on provider
@@ -83,7 +85,11 @@ pub async fn demo_config(
             _ => "llm.gemini_model",
         };
         let m = load(model_key, default_model).await;
-        if m.is_empty() { default_model.to_string() } else { m }
+        if m.is_empty() {
+            default_model.to_string()
+        } else {
+            m
+        }
     } else {
         model_override
     };

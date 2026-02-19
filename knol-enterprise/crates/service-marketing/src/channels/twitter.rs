@@ -26,7 +26,10 @@ fn oauth_sign(
     let mut params = BTreeMap::new();
     params.insert("oauth_consumer_key".to_string(), consumer_key.to_string());
     params.insert("oauth_nonce".to_string(), nonce);
-    params.insert("oauth_signature_method".to_string(), "HMAC-SHA1".to_string());
+    params.insert(
+        "oauth_signature_method".to_string(),
+        "HMAC-SHA1".to_string(),
+    );
     params.insert("oauth_timestamp".to_string(), timestamp);
     params.insert("oauth_token".to_string(), token.to_string());
     params.insert("oauth_version".to_string(), "1.0".to_string());
@@ -60,8 +63,8 @@ fn oauth_sign(
     );
 
     // HMAC-SHA1 signature
-    let mut mac = Hmac::<Sha1>::new_from_slice(signing_key.as_bytes())
-        .expect("HMAC accepts any key length");
+    let mut mac =
+        Hmac::<Sha1>::new_from_slice(signing_key.as_bytes()).expect("HMAC accepts any key length");
     mac.update(base_string.as_bytes());
     let signature = base64::Engine::encode(
         &base64::engine::general_purpose::STANDARD,
@@ -92,12 +95,13 @@ pub async fn publish(
     http_client: &reqwest::Client,
     credentials: &ChannelCredentials,
 ) -> Result<PublishResult, MarketingError> {
-    let creds = credentials.twitter.as_ref().ok_or_else(|| {
-        MarketingError::Channel {
+    let creds = credentials
+        .twitter
+        .as_ref()
+        .ok_or_else(|| MarketingError::Channel {
             channel: "twitter".into(),
             message: "Twitter credentials not configured".into(),
-        }
-    })?;
+        })?;
 
     let url = "https://api.twitter.com/2/tweets";
     let oauth_params = oauth_sign(
@@ -134,7 +138,10 @@ pub async fn publish(
             .as_ref()
             .map(|id| format!("https://twitter.com/i/status/{}", id));
 
-        info!("Twitter: posted tweet {}", tweet_id.as_deref().unwrap_or("?"));
+        info!(
+            "Twitter: posted tweet {}",
+            tweet_id.as_deref().unwrap_or("?")
+        );
         Ok(PublishResult::success("twitter", tweet_id, tweet_url))
     } else if status.as_u16() == 429 {
         warn!("Twitter: rate limited (429)");
@@ -145,7 +152,14 @@ pub async fn publish(
             window: "api".into(),
         })
     } else {
-        warn!("Twitter: HTTP {} — {}", status, &text[..text.len().min(200)]);
-        Ok(PublishResult::failure("twitter", format!("HTTP {}: {}", status, &text[..text.len().min(200)])))
+        warn!(
+            "Twitter: HTTP {} — {}",
+            status,
+            &text[..text.len().min(200)]
+        );
+        Ok(PublishResult::failure(
+            "twitter",
+            format!("HTTP {}: {}", status, &text[..text.len().min(200)]),
+        ))
     }
 }

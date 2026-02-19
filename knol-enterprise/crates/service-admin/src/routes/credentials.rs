@@ -50,7 +50,9 @@ pub struct UpsertCredential {
     pub description: String,
 }
 
-fn default_general() -> String { "general".into() }
+fn default_general() -> String {
+    "general".into()
+}
 
 pub async fn upsert_credential(
     State(state): State<Arc<AdminAppState>>,
@@ -169,7 +171,13 @@ pub async fn test_credential(
         "anthropic" => test_anthropic_key(&state, &value).await,
         "openai" => test_openai_key(&state, &value).await,
         "gemini" | "google" => test_gemini_key(&state, &value).await,
-        _ => (true, format!("Credential '{}' decrypted successfully (no specific test for '{}')", name, row.service)),
+        _ => (
+            true,
+            format!(
+                "Credential '{}' decrypted successfully (no specific test for '{}')",
+                name, row.service
+            ),
+        ),
     };
 
     Ok(Json(serde_json::json!({
@@ -233,7 +241,10 @@ async fn test_anthropic_key(state: &AdminAppState, key: &str) -> (bool, String) 
 
     match resp {
         Ok(r) if r.status().is_success() => (true, "Anthropic API key is valid".into()),
-        Ok(r) if r.status().as_u16() == 401 => (false, "Anthropic API key is invalid (401 Unauthorized)".into()),
+        Ok(r) if r.status().as_u16() == 401 => (
+            false,
+            "Anthropic API key is invalid (401 Unauthorized)".into(),
+        ),
         Ok(r) => {
             let status = r.status();
             let body = r.text().await.unwrap_or_default();
@@ -241,7 +252,14 @@ async fn test_anthropic_key(state: &AdminAppState, key: &str) -> (bool, String) 
                 // 400 (bad request) or 429 (rate limited) means the key itself is valid
                 (true, format!("Anthropic API key is valid (got {})", status))
             } else {
-                (false, format!("Anthropic API returned {}: {}", status, &body[..body.len().min(200)]))
+                (
+                    false,
+                    format!(
+                        "Anthropic API returned {}: {}",
+                        status,
+                        &body[..body.len().min(200)]
+                    ),
+                )
             }
         }
         Err(e) => (false, format!("Request failed: {}", e)),
@@ -258,7 +276,9 @@ async fn test_openai_key(state: &AdminAppState, key: &str) -> (bool, String) {
 
     match resp {
         Ok(r) if r.status().is_success() => (true, "OpenAI API key is valid".into()),
-        Ok(r) if r.status().as_u16() == 401 => (false, "OpenAI API key is invalid (401 Unauthorized)".into()),
+        Ok(r) if r.status().as_u16() == 401 => {
+            (false, "OpenAI API key is invalid (401 Unauthorized)".into())
+        }
         Ok(r) => (false, format!("OpenAI API returned {}", r.status())),
         Err(e) => (false, format!("Request failed: {}", e)),
     }
@@ -278,7 +298,10 @@ async fn test_gemini_key(state: &AdminAppState, key: &str) -> (bool, String) {
             if body.contains("API_KEY_INVALID") || body.contains("expired") {
                 (false, "Gemini API key is invalid or expired".into())
             } else {
-                (false, format!("Gemini API error: {}", &body[..body.len().min(200)]))
+                (
+                    false,
+                    format!("Gemini API error: {}", &body[..body.len().min(200)]),
+                )
             }
         }
         Ok(r) => (false, format!("Gemini API returned {}", r.status())),
@@ -287,11 +310,8 @@ async fn test_gemini_key(state: &AdminAppState, key: &str) -> (bool, String) {
 }
 
 /// Load a decrypted credential by name — used by other services via config_loader.
-pub async fn load_credential(
-    pool: &sqlx::PgPool,
-    key: &[u8; 32],
-    name: &str,
-) -> Option<String> {
+#[allow(dead_code)]
+pub async fn load_credential(pool: &sqlx::PgPool, key: &[u8; 32], name: &str) -> Option<String> {
     let row = sqlx::query_as::<_, CredentialRow>(
         "SELECT encrypted_value, service FROM system_credentials WHERE name = $1",
     )

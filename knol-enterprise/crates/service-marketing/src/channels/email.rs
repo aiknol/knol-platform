@@ -10,12 +10,13 @@ pub async fn publish(
     content: &PublishContent,
     credentials: &ChannelCredentials,
 ) -> Result<PublishResult, MarketingError> {
-    let smtp_host = credentials.smtp_host.as_ref().ok_or_else(|| {
-        MarketingError::Channel {
+    let smtp_host = credentials
+        .smtp_host
+        .as_ref()
+        .ok_or_else(|| MarketingError::Channel {
             channel: "email".into(),
             message: "SMTP credentials not configured".into(),
-        }
-    })?;
+        })?;
     let smtp_user = credentials.smtp_user.as_deref().unwrap_or("");
     let smtp_pass = credentials.smtp_pass.as_deref().unwrap_or("");
     let from_addr = "noreply@aiknol.com";
@@ -56,6 +57,7 @@ pub async fn publish(
             channel: "email".into(),
             message: format!("SMTP connection error: {}", e),
         })?
+        .port(credentials.smtp_port)
         .credentials(lettre::transport::smtp::authentication::Credentials::new(
             smtp_user.to_string(),
             smtp_pass.to_string(),

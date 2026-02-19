@@ -1646,14 +1646,17 @@ dependencies = [
 name = "memory-common"
 version = "0.1.0"
 dependencies = [
+ "aes-gcm",
  "anyhow",
  "axum",
+ "base64 0.22.1",
  "chrono",
  "envy",
  "hex",
  "hmac",
  "lazy_static",
  "prometheus",
+ "rand 0.8.5",
  "regex",
  "reqwest",
  "serde",

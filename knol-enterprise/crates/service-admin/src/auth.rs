@@ -20,7 +20,7 @@ use crate::AdminAppState;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AdminClaims {
-    pub sub: Uuid,       // admin_id
+    pub sub: Uuid, // admin_id
     pub email: String,
     pub role: String,
     pub exp: i64,
@@ -180,7 +180,9 @@ pub async fn change_password(
     }
 
     if body.new_password.len() < 8 {
-        return Err(AdminError::BadRequest("Password must be at least 8 characters".into()));
+        return Err(AdminError::BadRequest(
+            "Password must be at least 8 characters".into(),
+        ));
     }
 
     let new_hash = bcrypt::hash(&body.new_password, 12)
@@ -212,7 +214,11 @@ pub async fn admin_auth_middleware(
     let token = match token {
         Some(t) => t,
         None => {
-            return (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Missing Authorization header"}))).into_response();
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({"error": "Missing Authorization header"})),
+            )
+                .into_response();
         }
     };
 
@@ -223,13 +229,21 @@ pub async fn admin_auth_middleware(
     ) {
         Ok(data) => data.claims,
         Err(_e) => {
-            return (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Invalid token"}))).into_response();
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({"error": "Invalid token"})),
+            )
+                .into_response();
         }
     };
 
     // Check token is not expired (jsonwebtoken does this, but double-check)
     if claims.exp < Utc::now().timestamp() {
-        return (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Token expired"}))).into_response();
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Token expired"})),
+        )
+            .into_response();
     }
 
     // Enforce server-side session revocation:
@@ -244,7 +258,11 @@ pub async fn admin_auth_middleware(
     .await
     .unwrap_or(false);
     if !session_valid {
-        return (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"error": "Invalid or revoked session"}))).into_response();
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Invalid or revoked session"})),
+        )
+            .into_response();
     }
 
     // Insert claims as request extension
@@ -287,9 +305,7 @@ pub async fn seed_initial_admin(pool: &sqlx::PgPool) -> anyhow::Result<()> {
 
     // Require explicit bootstrap password for the first admin user.
     let password = std::env::var("ADMIN_INITIAL_PASSWORD").map_err(|_| {
-        anyhow::anyhow!(
-            "ADMIN_INITIAL_PASSWORD must be set to bootstrap the initial admin user"
-        )
+        anyhow::anyhow!("ADMIN_INITIAL_PASSWORD must be set to bootstrap the initial admin user")
     })?;
 
     let hash = bcrypt::hash(&password, 12)?;
@@ -347,7 +363,11 @@ impl IntoResponse for AdminError {
 // hex encoding helper (avoid pulling in the `hex` crate)
 mod hex {
     pub fn encode(bytes: impl AsRef<[u8]>) -> String {
-        bytes.as_ref().iter().map(|b| format!("{:02x}", b)).collect()
+        bytes
+            .as_ref()
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect()
     }
 }
 

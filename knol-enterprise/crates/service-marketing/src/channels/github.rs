@@ -14,12 +14,13 @@ pub async fn publish(
     http_client: &reqwest::Client,
     credentials: &ChannelCredentials,
 ) -> Result<PublishResult, MarketingError> {
-    let token = credentials.github_token.as_ref().ok_or_else(|| {
-        MarketingError::Channel {
+    let token = credentials
+        .github_token
+        .as_ref()
+        .ok_or_else(|| MarketingError::Channel {
             channel: "github".into(),
             message: "GitHub credentials not configured".into(),
-        }
-    })?;
+        })?;
 
     // GitHub adapter supports two modes:
     // 1. Create a release (if title looks like a version tag)
@@ -94,10 +95,7 @@ async fn update_repo_metadata(
     token: &str,
     content: &PublishContent,
 ) -> Result<PublishResult, MarketingError> {
-    let url = format!(
-        "https://api.github.com/repos/{}/{}",
-        REPO_OWNER, REPO_NAME
-    );
+    let url = format!("https://api.github.com/repos/{}/{}", REPO_OWNER, REPO_NAME);
 
     let mut payload = serde_json::Map::new();
 
@@ -151,9 +149,6 @@ async fn update_repo_metadata(
     } else {
         let text = resp.text().await.unwrap_or_default();
         warn!("GitHub: HTTP {} — {}", status, &text[..text.len().min(200)]);
-        Ok(PublishResult::failure(
-            "github",
-            format!("HTTP {}", status),
-        ))
+        Ok(PublishResult::failure("github", format!("HTTP {}", status)))
     }
 }

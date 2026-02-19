@@ -27,6 +27,7 @@ impl std::fmt::Display for WindowType {
 
 impl WindowType {
     /// Duration of the window in seconds.
+    #[cfg(test)]
     pub fn duration_secs(&self) -> i64 {
         match self {
             WindowType::Minute => 60,
@@ -57,75 +58,123 @@ pub struct ChannelConfig {
 pub fn default_channel_configs() -> HashMap<String, ChannelConfig> {
     let mut configs = HashMap::new();
 
-    configs.insert("twitter".into(), ChannelConfig {
-        name: "twitter".into(),
-        enabled: true,
-        rate_limits: vec![
-            RateWindow { window: WindowType::Daily, limit: 45 },   // actual: 50
-            RateWindow { window: WindowType::Monthly, limit: 1350 }, // actual: 1500
-        ],
-        cooldown_between_posts_secs: 2,
-    });
+    configs.insert(
+        "twitter".into(),
+        ChannelConfig {
+            name: "twitter".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 45,
+                }, // actual: 50
+                RateWindow {
+                    window: WindowType::Monthly,
+                    limit: 1350,
+                }, // actual: 1500
+            ],
+            cooldown_between_posts_secs: 2,
+        },
+    );
 
-    configs.insert("linkedin".into(), ChannelConfig {
-        name: "linkedin".into(),
-        enabled: true,
-        rate_limits: vec![
-            RateWindow { window: WindowType::Daily, limit: 22 }, // actual: 25
-        ],
-        cooldown_between_posts_secs: 5,
-    });
+    configs.insert(
+        "linkedin".into(),
+        ChannelConfig {
+            name: "linkedin".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 22,
+                }, // actual: 25
+            ],
+            cooldown_between_posts_secs: 5,
+        },
+    );
 
-    configs.insert("reddit".into(), ChannelConfig {
-        name: "reddit".into(),
-        enabled: true,
-        rate_limits: vec![
-            RateWindow { window: WindowType::Daily, limit: 9 },    // actual: 10
-            RateWindow { window: WindowType::Minute, limit: 54 },  // actual: 60
-        ],
-        cooldown_between_posts_secs: 5,
-    });
+    configs.insert(
+        "reddit".into(),
+        ChannelConfig {
+            name: "reddit".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 9,
+                }, // actual: 10
+                RateWindow {
+                    window: WindowType::Minute,
+                    limit: 54,
+                }, // actual: 60
+            ],
+            cooldown_between_posts_secs: 5,
+        },
+    );
 
-    configs.insert("devto".into(), ChannelConfig {
-        name: "devto".into(),
-        enabled: true,
-        rate_limits: vec![
-            RateWindow { window: WindowType::Daily, limit: 27 }, // actual: 30
-        ],
-        cooldown_between_posts_secs: 3,
-    });
+    configs.insert(
+        "devto".into(),
+        ChannelConfig {
+            name: "devto".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 27,
+                }, // actual: 30
+            ],
+            cooldown_between_posts_secs: 3,
+        },
+    );
 
-    configs.insert("github".into(), ChannelConfig {
-        name: "github".into(),
-        enabled: true,
-        rate_limits: vec![
-            RateWindow { window: WindowType::Hourly, limit: 4500 }, // actual: 5000
-        ],
-        cooldown_between_posts_secs: 1,
-    });
+    configs.insert(
+        "github".into(),
+        ChannelConfig {
+            name: "github".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Hourly,
+                    limit: 4500,
+                }, // actual: 5000
+            ],
+            cooldown_between_posts_secs: 1,
+        },
+    );
 
-    configs.insert("email".into(), ChannelConfig {
-        name: "email".into(),
-        enabled: true,
-        rate_limits: vec![
-            RateWindow { window: WindowType::Daily, limit: 400 }, // actual: 450 (Gmail 500)
-        ],
-        cooldown_between_posts_secs: 0,
-    });
+    configs.insert(
+        "email".into(),
+        ChannelConfig {
+            name: "email".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 400,
+                }, // actual: 450 (Gmail 500)
+            ],
+            cooldown_between_posts_secs: 0,
+        },
+    );
 
-    configs.insert("blog".into(), ChannelConfig {
-        name: "blog".into(),
-        enabled: true,
-        rate_limits: vec![], // No rate limit (self-hosted)
-        cooldown_between_posts_secs: 0,
-    });
+    configs.insert(
+        "blog".into(),
+        ChannelConfig {
+            name: "blog".into(),
+            enabled: true,
+            rate_limits: vec![], // No rate limit (self-hosted)
+            cooldown_between_posts_secs: 0,
+        },
+    );
 
-    configs.insert("hackernews".into(), ChannelConfig {
-        name: "hackernews".into(),
-        enabled: true,
-        rate_limits: vec![], // Manual only — monitoring via Algolia
-        cooldown_between_posts_secs: 0,
-    });
+    configs.insert(
+        "hackernews".into(),
+        ChannelConfig {
+            name: "hackernews".into(),
+            enabled: true,
+            rate_limits: vec![], // Manual only — monitoring via Algolia
+            cooldown_between_posts_secs: 0,
+        },
+    );
 
     configs
 }
@@ -159,49 +208,28 @@ pub struct ChannelCredentials {
 }
 
 impl ChannelCredentials {
-    /// Load credentials from environment variables.
-    pub fn from_env() -> Self {
-        let twitter = match (
-            std::env::var("TWITTER_API_KEY").ok(),
-            std::env::var("TWITTER_API_SECRET").ok(),
-            std::env::var("TWITTER_ACCESS_TOKEN").ok(),
-            std::env::var("TWITTER_ACCESS_TOKEN_SECRET").ok(),
-        ) {
-            (Some(k), Some(s), Some(t), Some(ts)) if !k.is_empty() => {
-                Some(TwitterCredentials {
-                    api_key: k,
-                    api_secret: s,
-                    access_token: t,
-                    access_token_secret: ts,
-                })
-            }
-            _ => None,
-        };
-
-        Self {
-            twitter,
-            linkedin_token: std::env::var("LINKEDIN_ACCESS_TOKEN").ok().filter(|s| !s.is_empty()),
-            linkedin_person_urn: std::env::var("LINKEDIN_PERSON_URN").ok().filter(|s| !s.is_empty()),
-            reddit_client_id: std::env::var("REDDIT_CLIENT_ID").ok().filter(|s| !s.is_empty()),
-            reddit_client_secret: std::env::var("REDDIT_CLIENT_SECRET").ok().filter(|s| !s.is_empty()),
-            reddit_username: std::env::var("REDDIT_USERNAME").ok().filter(|s| !s.is_empty()),
-            reddit_password: std::env::var("REDDIT_PASSWORD").ok().filter(|s| !s.is_empty()),
-            devto_api_key: std::env::var("DEVTO_API_KEY").ok().filter(|s| !s.is_empty()),
-            github_token: std::env::var("GITHUB_TOKEN").ok().filter(|s| !s.is_empty()),
-            smtp_host: std::env::var("SMTP_HOST").ok().filter(|s| !s.is_empty()),
-            smtp_port: std::env::var("SMTP_PORT").ok().and_then(|s| s.parse().ok()).unwrap_or(587),
-            smtp_user: std::env::var("SMTP_USER").ok().filter(|s| !s.is_empty()),
-            smtp_pass: std::env::var("SMTP_PASS").ok().filter(|s| !s.is_empty()),
-            anthropic_api_key: std::env::var("ANTHROPIC_API_KEY").ok().filter(|s| !s.is_empty()),
-        }
+    pub fn has_twitter(&self) -> bool {
+        self.twitter.is_some()
+    }
+    pub fn has_linkedin(&self) -> bool {
+        self.linkedin_token.is_some()
+    }
+    pub fn has_reddit(&self) -> bool {
+        self.reddit_client_id.is_some() && self.reddit_username.is_some()
+    }
+    pub fn has_devto(&self) -> bool {
+        self.devto_api_key.is_some()
+    }
+    pub fn has_github(&self) -> bool {
+        self.github_token.is_some()
+    }
+    pub fn has_email(&self) -> bool {
+        self.smtp_host.is_some() && self.smtp_user.is_some()
     }
 
-    pub fn has_twitter(&self) -> bool { self.twitter.is_some() }
-    pub fn has_linkedin(&self) -> bool { self.linkedin_token.is_some() }
-    pub fn has_reddit(&self) -> bool { self.reddit_client_id.is_some() && self.reddit_username.is_some() }
-    pub fn has_devto(&self) -> bool { self.devto_api_key.is_some() }
-    pub fn has_github(&self) -> bool { self.github_token.is_some() }
-    pub fn has_email(&self) -> bool { self.smtp_host.is_some() && self.smtp_user.is_some() }
+    pub fn has_anthropic(&self) -> bool {
+        self.anthropic_api_key.is_some()
+    }
 }
 
 #[cfg(test)]
@@ -247,7 +275,16 @@ mod tests {
     #[test]
     fn test_default_channel_configs_has_all_channels() {
         let configs = default_channel_configs();
-        let expected = ["twitter", "linkedin", "reddit", "devto", "github", "email", "blog", "hackernews"];
+        let expected = [
+            "twitter",
+            "linkedin",
+            "reddit",
+            "devto",
+            "github",
+            "email",
+            "blog",
+            "hackernews",
+        ];
         for ch in &expected {
             assert!(configs.contains_key(*ch), "Missing channel: {}", ch);
         }
@@ -310,11 +347,19 @@ mod tests {
         let configs = default_channel_configs();
         // Twitter daily: actual 50, configured 45 (90%)
         let twitter = &configs["twitter"];
-        let daily = twitter.rate_limits.iter().find(|r| r.window == WindowType::Daily).unwrap();
+        let daily = twitter
+            .rate_limits
+            .iter()
+            .find(|r| r.window == WindowType::Daily)
+            .unwrap();
         assert!(daily.limit <= 50 && daily.limit >= 40);
         // LinkedIn daily: actual 25, configured 22
         let linkedin = &configs["linkedin"];
-        let daily = linkedin.rate_limits.iter().find(|r| r.window == WindowType::Daily).unwrap();
+        let daily = linkedin
+            .rate_limits
+            .iter()
+            .find(|r| r.window == WindowType::Daily)
+            .unwrap();
         assert!(daily.limit <= 25 && daily.limit >= 20);
     }
 
@@ -354,8 +399,10 @@ mod tests {
     fn test_creds_with_all_channels() {
         let c = ChannelCredentials {
             twitter: Some(TwitterCredentials {
-                api_key: "k".into(), api_secret: "s".into(),
-                access_token: "t".into(), access_token_secret: "ts".into(),
+                api_key: "k".into(),
+                api_secret: "s".into(),
+                access_token: "t".into(),
+                access_token_secret: "ts".into(),
             }),
             linkedin_token: Some("tok".into()),
             linkedin_person_urn: None,
@@ -401,7 +448,11 @@ mod tests {
     fn test_github_hourly_limit() {
         let configs = default_channel_configs();
         let gh = &configs["github"];
-        let hourly = gh.rate_limits.iter().find(|r| r.window == WindowType::Hourly).unwrap();
+        let hourly = gh
+            .rate_limits
+            .iter()
+            .find(|r| r.window == WindowType::Hourly)
+            .unwrap();
         assert_eq!(hourly.limit, 4500); // 90% of 5000
     }
 }

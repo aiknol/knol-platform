@@ -61,12 +61,40 @@ pub fn triage_content(content: &str, config: &TriageConfig) -> TriageDecision {
         // Check if it's a known greeting/ack pattern
         let lower = trimmed.to_lowercase();
         let trivial = [
-            "hi", "hello", "hey", "ok", "okay", "thanks", "thank you",
-            "yes", "no", "sure", "bye", "goodbye", "lol", "haha", "hmm",
-            "yep", "nope", "cool", "nice", "great", "wow", "gotcha",
-            "k", "ty", "thx", "np", "gg", "brb", "afk",
+            "hi",
+            "hello",
+            "hey",
+            "ok",
+            "okay",
+            "thanks",
+            "thank you",
+            "yes",
+            "no",
+            "sure",
+            "bye",
+            "goodbye",
+            "lol",
+            "haha",
+            "hmm",
+            "yep",
+            "nope",
+            "cool",
+            "nice",
+            "great",
+            "wow",
+            "gotcha",
+            "k",
+            "ty",
+            "thx",
+            "np",
+            "gg",
+            "brb",
+            "afk",
         ];
-        if trivial.iter().any(|t| lower == *t || lower.starts_with(&format!("{} ", t))) {
+        if trivial
+            .iter()
+            .any(|t| lower == *t || lower.starts_with(&format!("{} ", t)))
+        {
             return TriageDecision::Skip {
                 reason: "trivial greeting or acknowledgment",
             };
@@ -106,9 +134,8 @@ fn is_pure_question(text: &str) -> bool {
     // Must start with a question word
     let lower = trimmed.to_lowercase();
     let question_starters = [
-        "what ", "when ", "where ", "who ", "why ", "how ", "which ",
-        "is ", "are ", "was ", "were ", "do ", "does ", "did ",
-        "can ", "could ", "will ", "would ", "should ", "shall ",
+        "what ", "when ", "where ", "who ", "why ", "how ", "which ", "is ", "are ", "was ",
+        "were ", "do ", "does ", "did ", "can ", "could ", "will ", "would ", "should ", "shall ",
         "have ", "has ", "had ",
     ];
 
@@ -178,11 +205,15 @@ mod tests {
     fn test_skip_empty() {
         assert_eq!(
             triage_content("", &default_config()),
-            TriageDecision::Skip { reason: "empty content" }
+            TriageDecision::Skip {
+                reason: "empty content"
+            }
         );
         assert_eq!(
             triage_content("   ", &default_config()),
-            TriageDecision::Skip { reason: "empty content" }
+            TriageDecision::Skip {
+                reason: "empty content"
+            }
         );
     }
 
@@ -190,15 +221,21 @@ mod tests {
     fn test_skip_greetings() {
         assert_eq!(
             triage_content("hi", &default_config()),
-            TriageDecision::Skip { reason: "trivial greeting or acknowledgment" }
+            TriageDecision::Skip {
+                reason: "trivial greeting or acknowledgment"
+            }
         );
         assert_eq!(
             triage_content("thanks", &default_config()),
-            TriageDecision::Skip { reason: "trivial greeting or acknowledgment" }
+            TriageDecision::Skip {
+                reason: "trivial greeting or acknowledgment"
+            }
         );
         assert_eq!(
             triage_content("ok", &default_config()),
-            TriageDecision::Skip { reason: "trivial greeting or acknowledgment" }
+            TriageDecision::Skip {
+                reason: "trivial greeting or acknowledgment"
+            }
         );
     }
 
@@ -206,7 +243,9 @@ mod tests {
     fn test_skip_short() {
         assert_eq!(
             triage_content("yep", &default_config()),
-            TriageDecision::Skip { reason: "trivial greeting or acknowledgment" }
+            TriageDecision::Skip {
+                reason: "trivial greeting or acknowledgment"
+            }
         );
     }
 
@@ -214,11 +253,15 @@ mod tests {
     fn test_skip_pure_question() {
         assert_eq!(
             triage_content("What time is it?", &default_config()),
-            TriageDecision::Skip { reason: "short question with no extractable assertions" }
+            TriageDecision::Skip {
+                reason: "short question with no extractable assertions"
+            }
         );
         assert_eq!(
             triage_content("How are you?", &default_config()),
-            TriageDecision::Skip { reason: "short question with no extractable assertions" }
+            TriageDecision::Skip {
+                reason: "short question with no extractable assertions"
+            }
         );
     }
 
@@ -238,12 +281,18 @@ mod tests {
     #[test]
     fn test_full_long_content() {
         let long = "I work at Google as a senior ML engineer. I've been there for 5 years now and I lead the TPU compiler team. We're working on next-gen hardware acceleration.";
-        assert_eq!(triage_content(long, &default_config()), TriageDecision::Full);
+        assert_eq!(
+            triage_content(long, &default_config()),
+            TriageDecision::Full
+        );
     }
 
     #[test]
     fn test_disabled_always_full() {
-        let config = TriageConfig { enabled: false, ..default_config() };
+        let config = TriageConfig {
+            enabled: false,
+            ..default_config()
+        };
         assert_eq!(triage_content("hi", &config), TriageDecision::Full);
     }
 
@@ -294,7 +343,10 @@ mod tests {
     #[test]
     fn test_prune_entities_max_cap() {
         let entities: Vec<String> = (0..50).map(|i| format!("Entity{}", i)).collect();
-        let content = (0..50).map(|i| format!("Entity{}", i)).collect::<Vec<_>>().join(" ");
+        let content = (0..50)
+            .map(|i| format!("Entity{}", i))
+            .collect::<Vec<_>>()
+            .join(" ");
         let result = prune_entity_context(&content, &entities, 5);
         assert_eq!(result.len(), 5);
     }
@@ -309,7 +361,12 @@ mod tests {
     fn test_short_question_skipped() {
         // Short questions (< 10 words) are skipped even if they embed facts
         let result = triage_content("Did you know I work at Google?", &default_config());
-        assert_eq!(result, TriageDecision::Skip { reason: "short question with no extractable assertions" });
+        assert_eq!(
+            result,
+            TriageDecision::Skip {
+                reason: "short question with no extractable assertions"
+            }
+        );
     }
 
     #[test]

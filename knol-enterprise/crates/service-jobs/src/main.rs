@@ -3,24 +3,25 @@
 //! Background cron jobs: importance decay, dedup scan, retention enforcement,
 //! stale edge cleanup, memory consolidation, and conflict detection.
 
-use chrono::Utc;
 use std::sync::Arc;
-use tracing::{error, info, warn};
+use tracing::{error, info};
 
-mod consolidation;
 mod conflict;
+mod consolidation;
 
 struct AppState {
     db_pool: sqlx::PgPool,
     llm_client: memory_llm::AnthropicClient,
 }
 
+type JobFuture = std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>>;
+type JobFn = fn(Arc<AppState>) -> JobFuture;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
@@ -36,11 +37,18 @@ async fn main() -> anyhow::Result<()> {
     let anthropic_api_key = std::env::var("ANTHROPIC_API_KEY").unwrap_or_default();
     // Model from admin panel DB → env → default
     let anthropic_model = memory_common::db_config::load_str(
-        &db_pool, "llm.anthropic_model", "ANTHROPIC_MODEL", "claude-3-haiku-20240307"
-    ).await;
+        &db_pool,
+        "llm.anthropic_model",
+        "ANTHROPIC_MODEL",
+        "claude-3-haiku-20240307",
+    )
+    .await;
     let llm_client = memory_llm::AnthropicClient::new(anthropic_api_key, anthropic_model);
 
-    let state = Arc::new(AppState { db_pool, llm_client });
+    let state = Arc::new(AppState {
+        db_pool,
+        llm_client,
+    });
 
     // Run all jobs concurrently
     let decay_state = state.clone();
@@ -66,7 +74,7 @@ async fn run_periodic(
     state: Arc<AppState>,
     name: &'static str,
     interval: std::time::Duration,
-    job: fn(Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>>,
+    job: JobFn,
 ) {
     info!("Job '{}' scheduled every {:?}", name, interval);
     loop {
@@ -80,7 +88,7 @@ async fn run_periodic(
 }
 
 /// Decay importance scores using exponential decay: importance *= e^(-λ * days_since_update)
-fn importance_decay(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>> {
+fn importance_decay(state: Arc<AppState>) -> JobFuture {
     Box::pin(async move {
         let decay_lambda = 0.01_f64;
         let result = sqlx::query(
@@ -118,7 +126,7 @@ fn importance_decay(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::
 }
 
 /// Scan for and mark duplicate memories.
-fn dedup_scan(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>> {
+fn dedup_scan(state: Arc<AppState>) -> JobFuture {
     Box::pin(async move {
         // Find duplicate content_hashes within the same tenant
         let result = sqlx::query(
@@ -143,7 +151,7 @@ fn dedup_scan(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future
 }
 
 /// Enforce retention policies (delete memories past their retention period).
-fn retention_enforce(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>> {
+fn retention_enforce(state: Arc<AppState>) -> JobFuture {
     Box::pin(async move {
         // Check tenant-level retention policies
         let result = sqlx::query(
@@ -181,7 +189,7 @@ fn retention_enforce(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future:
 }
 
 /// Clean up stale edges (edges where source or target entity is deleted/merged).
-fn stale_edge_cleanup(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>> {
+fn stale_edge_cleanup(state: Arc<AppState>) -> JobFuture {
     Box::pin(async move {
         let result = sqlx::query(
             r#"
@@ -202,7 +210,7 @@ fn stale_edge_cleanup(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future
 }
 
 /// Consolidate episodic memories into semantic memories using LLM synthesis.
-fn memory_consolidation(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>> {
+fn memory_consolidation(state: Arc<AppState>) -> JobFuture {
     Box::pin(async move {
         let engine = consolidation::ConsolidationEngine::new(
             state.db_pool.clone(),
@@ -220,7 +228,7 @@ fn memory_consolidation(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::futu
 }
 
 /// Detect and resolve conflicts between memories in same tenant/scope.
-fn conflict_detection(state: Arc<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>> {
+fn conflict_detection(state: Arc<AppState>) -> JobFuture {
     Box::pin(async move {
         let detector = conflict::ConflictDetector::new(state.db_pool.clone());
 

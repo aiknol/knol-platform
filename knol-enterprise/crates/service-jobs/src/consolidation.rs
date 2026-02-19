@@ -8,11 +8,11 @@
 //! 4. Storing consolidated memories and marking originals as consolidated
 
 use chrono::{Duration, Utc};
+use memory_llm::{AnthropicClient, LlmProvider};
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 use tracing::{debug, error, info, warn};
 use uuid::Uuid;
-use memory_llm::{AnthropicClient, LlmProvider};
 
 /// Configuration for consolidation behavior
 #[derive(Debug, Clone)]
@@ -48,17 +48,6 @@ struct MemoryCluster {
     tenant_id: Uuid,
 }
 
-/// Result of consolidation for a single cluster
-#[derive(Debug)]
-struct ConsolidationResult {
-    /// ID of newly created semantic memory
-    semantic_memory_id: Uuid,
-    /// Episodic memory IDs that were consolidated
-    consolidated_episodic_ids: Vec<Uuid>,
-    /// Confidence of the semantic synthesis
-    confidence: f32,
-}
-
 /// Main consolidation engine
 pub struct ConsolidationEngine {
     db_pool: PgPool,
@@ -76,45 +65,32 @@ impl ConsolidationEngine {
         }
     }
 
-    /// Create with custom configuration
-    pub fn with_config(
-        db_pool: PgPool,
-        llm_client: AnthropicClient,
-        config: ConsolidationConfig,
-    ) -> Self {
-        Self {
-            db_pool,
-            llm_client,
-            config,
-        }
-    }
-
     /// Main entry point: run full consolidation pipeline
     pub async fn run_consolidation(&self) -> anyhow::Result<u64> {
         info!("Starting memory consolidation pipeline");
 
         // Find consolidation candidates
-        let candidates = self
-            .find_consolidation_candidates()
-            .await
-            .map_err(|e| {
-                error!("Failed to find consolidation candidates: {}", e);
-                e
-            })?;
+        let candidates = self.find_consolidation_candidates().await.map_err(|e| {
+            error!("Failed to find consolidation candidates: {}", e);
+            e
+        })?;
 
         if candidates.is_empty() {
             info!("No consolidation candidates found");
             return Ok(0);
         }
 
-        info!("Found {} consolidation candidate memories", candidates.len());
+        info!(
+            "Found {} consolidation candidate memories",
+            candidates.len()
+        );
 
         // Group by tenant for isolated processing
         let mut by_tenant: HashMap<Uuid, Vec<(Uuid, String, Vec<String>)>> = HashMap::new();
         for (memory_id, content, entities, tenant_id) in candidates {
             by_tenant
                 .entry(tenant_id)
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push((memory_id, content, entities));
         }
 
@@ -125,10 +101,7 @@ impl ConsolidationEngine {
             match self.process_tenant_memories(tenant_id, memories).await {
                 Ok(count) => total_consolidated += count,
                 Err(e) => {
-                    warn!(
-                        "Failed to process memories for tenant {}: {}",
-                        tenant_id, e
-                    );
+                    warn!("Failed to process memories for tenant {}: {}", tenant_id, e);
                 }
             }
         }
@@ -226,7 +199,10 @@ impl ConsolidationEngine {
             match self.consolidate_cluster(cluster).await {
                 Ok(_) => consolidated_count += 1,
                 Err(e) => {
-                    warn!("Failed to consolidate cluster for tenant {}: {}", tenant_id, e);
+                    warn!(
+                        "Failed to consolidate cluster for tenant {}: {}",
+                        tenant_id, e
+                    );
                 }
             }
         }
@@ -267,10 +243,7 @@ impl ConsolidationEngine {
                 }
 
                 // Check if memories share entities
-                let shared_count = entities1
-                    .iter()
-                    .filter(|e| entities2.contains(e))
-                    .count();
+                let shared_count = entities1.iter().filter(|e| entities2.contains(e)).count();
 
                 if shared_count > 0 || Self::content_similar(content1, content2) {
                     cluster_ids.push(*id2);
@@ -293,7 +266,11 @@ impl ConsolidationEngine {
             }
         }
 
-        debug!("Clustered {} memories into {} clusters", memories.len(), clusters.len());
+        debug!(
+            "Clustered {} memories into {} clusters",
+            memories.len(),
+            clusters.len()
+        );
         Ok(clusters)
     }
 
@@ -323,10 +300,8 @@ impl ConsolidationEngine {
         );
 
         // Synthesize cluster into semantic memory
-        let (semantic_content, confidence) = self
-            .synthesize_cluster(&cluster)
-            .await
-            .map_err(|e| {
+        let (semantic_content, confidence) =
+            self.synthesize_cluster(&cluster).await.map_err(|e| {
                 error!("Failed to synthesize cluster: {}", e);
                 e
             })?;
@@ -345,10 +320,7 @@ impl ConsolidationEngine {
     }
 
     /// Use LLM to synthesize episodic memories into semantic summary
-    async fn synthesize_cluster(
-        &self,
-        cluster: &MemoryCluster,
-    ) -> anyhow::Result<(String, f32)> {
+    async fn synthesize_cluster(&self, cluster: &MemoryCluster) -> anyhow::Result<(String, f32)> {
         let consolidation_prompt = self.build_consolidation_prompt(cluster)?;
 
         debug!(
@@ -370,14 +342,17 @@ impl ConsolidationEngine {
         let content = if let Some(memory) = response.memories.first() {
             memory.content.clone()
         } else {
-            format!("Synthesis of {} related memories about: {}",
-                    cluster.memory_ids.len(),
-                    cluster.shared_entities.join(", "))
+            format!(
+                "Synthesis of {} related memories about: {}",
+                cluster.memory_ids.len(),
+                cluster.shared_entities.join(", ")
+            )
         };
 
-        let confidence = response.memories
+        let confidence = response
+            .memories
             .first()
-            .map(|m| m.confidence as f32)
+            .map(|m| m.confidence)
             .unwrap_or(0.7);
 
         Ok((content, confidence))
@@ -421,6 +396,7 @@ Your synthesis:
     }
 
     /// Parse LLM synthesis response
+    #[cfg(test)]
     fn parse_synthesis_response(response: &str) -> anyhow::Result<(String, f32)> {
         // Extract JSON from response
         if let Ok(json) = serde_json::from_str::<serde_json::Value>(response) {
