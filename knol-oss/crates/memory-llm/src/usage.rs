@@ -12,6 +12,7 @@ use uuid::Uuid;
 ///
 /// Fails silently (with a warning log) if the table doesn't exist or the
 /// insert fails — token logging must never block the extraction pipeline.
+#[allow(clippy::too_many_arguments)]
 pub async fn log_token_usage(
     pool: &PgPool,
     tenant_id: Uuid,
@@ -46,10 +47,7 @@ pub async fn log_token_usage(
             "Token usage logged: tenant={} provider={} type={} tokens={}",
             tenant_id, provider, call_type, total
         ),
-        Err(e) => warn!(
-            "Failed to log token usage (non-fatal): {}",
-            e
-        ),
+        Err(e) => warn!("Failed to log token usage (non-fatal): {}", e),
     }
 }
 
@@ -62,6 +60,5 @@ mod tests {
     #[test]
     fn test_module_compiles() {
         // If this test runs, the module compiles successfully.
-        assert!(true);
     }
 }

@@ -19,8 +19,8 @@ use axum::{
     Router,
 };
 use memory_common::{
-    MemoryItem, MemorySearchRequest, MemorySearchResponse, SearchResult,
-    MemoryExportRequest, MemoryExport, ExportStats,
+    ExportStats, MemoryExport, MemoryExportRequest, MemoryItem, MemorySearchRequest,
+    MemorySearchResponse, SearchResult,
 };
 use memory_vector::VectorSearchHit;
 use std::{collections::HashMap, net::SocketAddr, sync::Arc};
@@ -29,7 +29,6 @@ use uuid::Uuid;
 
 struct AppState {
     db_pool: sqlx::PgPool,
-    llm: std::sync::Arc<dyn memory_llm::LlmProvider>,
     embedder: memory_llm::EmbeddingProvider,
     decay_config: memory_llm::DecayConfig,
 }
@@ -38,13 +37,14 @@ struct AppState {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
 
     info!("Starting Memory Retrieve Service...");
+
+    memory_common::startup::validate_env("service-retrieve")?;
 
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgresql://memory:memory_dev@localhost:5432/memory".into());
@@ -52,40 +52,54 @@ async fn main() -> anyhow::Result<()> {
     let db_pool = memory_db::create_pool(&database_url, 6).await?;
 
     let port: u16 = memory_common::db_config::load_u64(
-        &db_pool, "services.retrieve_port", "RETRIEVE_SERVICE_PORT", 8082,
-    ).await as u16;
-
-    // Build dynamic LLM provider — reloads config/keys from DB every 60s
-    let llm: std::sync::Arc<dyn memory_llm::LlmProvider> =
-        memory_llm::DynamicLlmProvider::new(db_pool.clone())
-            .await
-            .expect("Failed to initialize LLM provider");
-    info!("LLM provider: dynamic (auto-refreshes from admin DB)");
+        &db_pool,
+        "services.retrieve_port",
+        "RETRIEVE_SERVICE_PORT",
+        8082,
+    )
+    .await as u16;
 
     // Build embedding provider from DB config
     let embedder = memory_llm::EmbeddingProvider::from_db(&db_pool)
         .await
         .unwrap_or_else(|e| {
-            warn!("Failed to initialize embedding provider from DB: {}. Using local fallback.", e);
+            warn!(
+                "Failed to initialize embedding provider from DB: {}. Using local fallback.",
+                e
+            );
             memory_llm::EmbeddingProvider::new(memory_llm::EmbeddingConfig {
                 provider: "local".into(),
                 ..Default::default()
             })
         });
-    info!("Embedding provider: {} ({}D)", embedder.provider_name(), embedder.dimensions());
+    info!(
+        "Embedding provider: {} ({}D)",
+        embedder.provider_name(),
+        embedder.dimensions()
+    );
 
     // Load decay config
     let decay_config = memory_llm::build_decay_config_from_db(&db_pool).await;
-    info!("Decay scoring: enabled={}, function={:?}", decay_config.enabled, decay_config.function);
+    info!(
+        "Decay scoring: enabled={}, function={:?}",
+        decay_config.enabled, decay_config.function
+    );
 
-    let state = Arc::new(AppState { db_pool, llm, embedder, decay_config });
+    let state = Arc::new(AppState {
+        db_pool,
+        embedder,
+        decay_config,
+    });
 
     let app = Router::new()
         .route("/internal/search", post(search))
         .route("/internal/export", post(export_memories))
-        .route("/health", get(|| async {
-            axum::Json(serde_json::json!({"status": "ok", "service": "memory-retrieve"}))
-        }))
+        .route(
+            "/health",
+            get(|| async {
+                axum::Json(serde_json::json!({"status": "ok", "service": "memory-retrieve"}))
+            }),
+        )
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -101,7 +115,9 @@ async fn main() -> anyhow::Result<()> {
 
 async fn shutdown_signal() {
     let ctrl_c = async {
-        tokio::signal::ctrl_c().await.expect("Failed to install Ctrl+C handler");
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C handler");
     };
     #[cfg(unix)]
     let terminate = async {
@@ -136,29 +152,40 @@ fn extract_user_id(headers: &HeaderMap) -> Option<Uuid> {
 /// Classify query intent to determine retrieval strategy.
 #[derive(Debug, Clone, Copy)]
 enum QueryIntent {
-    Preference,   // "What does the user prefer?" → vector-first
-    Temporal,     // "When did X happen?" → graph + temporal filter
-    Relational,   // "Who works at X?" → graph traversal
-    General,      // Catch-all → hybrid (vector + graph + text)
+    Preference, // "What does the user prefer?" → vector-first
+    Temporal,   // "When did X happen?" → graph + temporal filter
+    Relational, // "Who works at X?" → graph traversal
+    General,    // Catch-all → hybrid (vector + graph + text)
 }
 
 fn classify_intent(query: &str) -> QueryIntent {
     let q = query.to_lowercase();
 
-    if q.contains("prefer") || q.contains("like") || q.contains("favorite")
-        || q.contains("want") || q.contains("choice")
+    if q.contains("prefer")
+        || q.contains("like")
+        || q.contains("favorite")
+        || q.contains("want")
+        || q.contains("choice")
     {
         return QueryIntent::Preference;
     }
 
-    if q.contains("when") || q.contains("timeline") || q.contains("history")
-        || q.contains("last time") || q.contains("recently") || q.contains("past")
+    if q.contains("when")
+        || q.contains("timeline")
+        || q.contains("history")
+        || q.contains("last time")
+        || q.contains("recently")
+        || q.contains("past")
     {
         return QueryIntent::Temporal;
     }
 
-    if q.contains("who") || q.contains("relationship") || q.contains("connected")
-        || q.contains("between") || q.contains("works at") || q.contains("manages")
+    if q.contains("who")
+        || q.contains("relationship")
+        || q.contains("connected")
+        || q.contains("between")
+        || q.contains("works at")
+        || q.contains("manages")
         || q.contains("related to")
     {
         return QueryIntent::Relational;
@@ -168,10 +195,7 @@ fn classify_intent(query: &str) -> QueryIntent {
 }
 
 /// Reciprocal Rank Fusion: score(m) = Σ w_i / (k + rank_i(m))
-pub fn rrf_fuse(
-    ranked_lists: &[(&[Uuid], f64)],
-    k: f64,
-) -> Vec<(Uuid, f64)> {
+pub fn rrf_fuse(ranked_lists: &[(&[Uuid], f64)], k: f64) -> Vec<(Uuid, f64)> {
     let mut scores: HashMap<Uuid, f64> = HashMap::new();
 
     for (ids, weight) in ranked_lists {
@@ -188,13 +212,7 @@ pub fn rrf_fuse(
 #[derive(Debug, Clone)]
 struct BM25Result {
     id: Uuid,
-    content: String,
     score: f32,
-}
-
-struct ScopeLevel {
-    level: u8,
-    memory_ids: Vec<(Uuid, f32)>,
 }
 
 async fn bm25_search(
@@ -203,14 +221,14 @@ async fn bm25_search(
     query: &str,
     limit: i64,
 ) -> Result<Vec<BM25Result>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (Uuid, String, f32)>(
-        "SELECT id, content, ts_rank_cd(search_vector, plainto_tsquery('english', $1)) as score
+    let results = sqlx::query_as::<_, (Uuid, f32)>(
+        "SELECT id, ts_rank_cd(search_vector, plainto_tsquery('english', $1)) as score
          FROM memories
          WHERE search_vector @@ plainto_tsquery('english', $1)
            AND tenant_id = $2
            AND status = 'active'
          ORDER BY score DESC
-         LIMIT $3"
+         LIMIT $3",
     )
     .bind(query)
     .bind(tenant_id)
@@ -218,7 +236,10 @@ async fn bm25_search(
     .fetch_all(db_pool)
     .await?;
 
-    Ok(results.into_iter().map(|(id, content, score)| BM25Result { id, content, score }).collect())
+    Ok(results
+        .into_iter()
+        .map(|(id, score)| BM25Result { id, score })
+        .collect())
 }
 
 async fn scope_cascade_retrieval(
@@ -230,32 +251,35 @@ async fn scope_cascade_retrieval(
     org_id: Option<Uuid>,
 ) -> Result<Vec<(Uuid, f32)>, sqlx::Error> {
     let mut scope_conditions = Vec::new();
-    let mut scope_params: Vec<String> = Vec::new();
-    let mut param_count = 2;
+    let mut scope_params = Vec::new();
 
     if let Some(sid) = session_id {
-        scope_conditions.push(format!("(scope_type = 'session' AND scope_id = ${}", param_count));
-        scope_params.push(sid.to_string());
-        param_count += 1;
-        scope_conditions.push(")".to_string());
+        let param_index = 2 + scope_params.len();
+        scope_conditions.push(format!(
+            "(scope_type = 'session' AND scope_id = ${param_index})"
+        ));
+        scope_params.push(sid);
     }
     if let Some(uid) = user_id {
-        scope_conditions.push(format!("(scope_type = 'user' AND scope_id = ${}", param_count));
-        scope_params.push(uid.to_string());
-        param_count += 1;
-        scope_conditions.push(")".to_string());
+        let param_index = 2 + scope_params.len();
+        scope_conditions.push(format!(
+            "(scope_type = 'user' AND scope_id = ${param_index})"
+        ));
+        scope_params.push(uid);
     }
     if let Some(aid) = agent_id {
-        scope_conditions.push(format!("(scope_type = 'agent' AND scope_id = ${}", param_count));
-        scope_params.push(aid.to_string());
-        param_count += 1;
-        scope_conditions.push(")".to_string());
+        let param_index = 2 + scope_params.len();
+        scope_conditions.push(format!(
+            "(scope_type = 'agent' AND scope_id = ${param_index})"
+        ));
+        scope_params.push(aid);
     }
     if let Some(oid) = org_id {
-        scope_conditions.push(format!("(scope_type = 'org' AND scope_id = ${}", param_count));
-        scope_params.push(oid.to_string());
-        param_count += 1;
-        scope_conditions.push(")".to_string());
+        let param_index = 2 + scope_params.len();
+        scope_conditions.push(format!(
+            "(scope_type = 'org' AND scope_id = ${param_index})"
+        ));
+        scope_params.push(oid);
     }
 
     if scope_conditions.is_empty() {
@@ -277,13 +301,10 @@ async fn scope_cascade_retrieval(
         scope_where
     );
 
-    let mut query = sqlx::query_as::<_, (Uuid, f32)>(&query_str)
-        .bind(tenant_id);
+    let mut query = sqlx::query_as::<_, (Uuid, f32)>(&query_str).bind(tenant_id);
 
-    for param in scope_params {
-        if let Ok(id) = Uuid::parse_str(&param) {
-            query = query.bind(id);
-        }
+    for scope_id in scope_params {
+        query = query.bind(scope_id);
     }
 
     query.fetch_all(db_pool).await
@@ -301,17 +322,16 @@ async fn search(
     let intent = classify_intent(&req.query);
     let graph_depth = req.graph_depth.unwrap_or(2);
 
-    debug!("Search query='{}' intent={:?} tenant={}", req.query, intent, tenant_id);
+    debug!(
+        "Search query='{}' intent={:?} tenant={}",
+        req.query, intent, tenant_id
+    );
 
     // Step 0: Generate real query embedding using configured provider
-    let query_embedding = state
-        .embedder
-        .embed(&req.query)
-        .await
-        .unwrap_or_else(|e| {
-            warn!("Embedding generation failed: {}. Using zero vector.", e);
-            vec![0.0f32; state.embedder.dimensions()]
-        });
+    let query_embedding = state.embedder.embed(&req.query).await.unwrap_or_else(|e| {
+        warn!("Embedding generation failed: {}. Using zero vector.", e);
+        vec![0.0f32; state.embedder.dimensions()]
+    });
 
     // Step 1: Vector search with real embeddings
     let vector_hits = memory_vector::search_similar(
@@ -345,7 +365,10 @@ async fn search(
     }
 
     // Step 3: Scope cascade with session support (FIXED: now uses session_id from request)
-    let session_uuid = req.session_id.as_ref().and_then(|s| Uuid::parse_str(s).ok());
+    let session_uuid = req
+        .session_id
+        .as_ref()
+        .and_then(|s| Uuid::parse_str(s).ok());
     let agent_uuid = req.agent_id.as_ref().and_then(|s| Uuid::parse_str(s).ok());
 
     let scope_results = scope_cascade_retrieval(
@@ -371,9 +394,10 @@ async fn search(
     // Step 4: Graph search with configurable N-hop traversal
     let mut graph_ids: Vec<Uuid> = Vec::new();
     if matches!(intent, QueryIntent::Relational | QueryIntent::General) {
-        let entities = memory_graph::search_entities_by_name(&state.db_pool, tenant_id, &req.query, 5)
-            .await
-            .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+        let entities =
+            memory_graph::search_entities_by_name(&state.db_pool, tenant_id, &req.query, 5)
+                .await
+                .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
         for entity in &entities {
             if graph_depth <= 2 {
@@ -518,12 +542,10 @@ async fn search(
         let memory_ids: Vec<Uuid> = results.iter().map(|r| r.memory.id).collect();
         tokio::spawn(async move {
             for mid in memory_ids {
-                let _ = sqlx::query(
-                    "UPDATE memories SET updated_at = now() WHERE id = $1"
-                )
-                .bind(mid)
-                .execute(&pool)
-                .await;
+                let _ = sqlx::query("UPDATE memories SET updated_at = now() WHERE id = $1")
+                    .bind(mid)
+                    .execute(&pool)
+                    .await;
             }
         });
     }
@@ -578,11 +600,11 @@ async fn export_memories(
     .await
     .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
 
-    let memory_items: Vec<MemoryItem> = memories.iter().map(|r| row_to_memory(r)).collect();
+    let memory_items: Vec<MemoryItem> = memories.iter().map(row_to_memory).collect();
 
     // Export entities and edges if requested
     let mut entities = Vec::new();
-    let mut edges = Vec::new();
+    let edges = Vec::new();
 
     if req.include_graph {
         let entity_rows = memory_graph::list_entities(&state.db_pool, tenant_id, None, 10000)
@@ -625,7 +647,10 @@ async fn export_memories(
         edges,
     };
 
-    info!("Export completed in {}ms: {} memories, {} entities", export_ms, export.stats.total_memories, export.stats.total_entities);
+    info!(
+        "Export completed in {}ms: {} memories, {} entities",
+        export_ms, export.stats.total_memories, export.stats.total_entities
+    );
 
     Ok(Json(export))
 }

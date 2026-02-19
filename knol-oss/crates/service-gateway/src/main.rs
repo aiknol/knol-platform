@@ -8,7 +8,7 @@ use axum::{
     http::{header, HeaderValue, Method, Request, StatusCode},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::{get, post, put, delete},
+    routing::{delete, get, post, put},
     Router,
 };
 use memory_common::{
@@ -39,6 +39,8 @@ async fn main() -> anyhow::Result<()> {
 
     info!("Starting Memory Gateway...");
 
+    memory_common::startup::validate_env("service-gateway")?;
+
     let state = AppState::from_env().await?;
     let addr = SocketAddr::from(([0, 0, 0, 0], state.port));
 
@@ -60,7 +62,13 @@ fn create_router(state: AppState) -> Router {
     let shared_state = Arc::new(state);
 
     let cors_base = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::PATCH])
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::PATCH,
+        ])
         .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION]);
 
     let cors_raw = shared_state.cors_origins.trim();
@@ -95,7 +103,10 @@ fn create_router(state: AppState) -> Router {
         .route("/v1/graph/entities/:id/expand", get(expand_entity))
         .route("/v1/graph/entities/:id/traverse", get(traverse_entity))
         .route("/v1/graph/path/:from/:to", get(find_graph_path))
-        .route("/v1/graph/entities/:id/neighbors", get(get_entity_neighbors))
+        .route(
+            "/v1/graph/entities/:id/neighbors",
+            get(get_entity_neighbors),
+        )
         .route("/v1/memory/export", post(export_memories))
         .route("/v1/webhooks", get(list_webhooks))
         .layer(middleware::from_fn(require_read_only));
@@ -154,16 +165,16 @@ async fn auth_middleware(
         .and_then(|v| v.to_str().ok())
         .ok_or_else(|| MemoryError::Auth("Missing Authorization header".into()))?;
 
-    let api_key = auth_header
-        .strip_prefix("Bearer ")
-        .ok_or_else(|| MemoryError::Auth("Invalid Authorization format. Use: Bearer <api_key>".into()))?;
+    let api_key = auth_header.strip_prefix("Bearer ").ok_or_else(|| {
+        MemoryError::Auth("Invalid Authorization format. Use: Bearer <api_key>".into())
+    })?;
 
     // Hash the API key
     let key_hash = hash_api_key(api_key);
 
     // First try tenant_api_keys table (RBAC-aware), then fall back to legacy tenants.api_key_hash
     let (tenant, role) = if let Some(api_key_row) = sqlx::query_as::<_, ApiKeyRow>(
-        r#"SELECT ak.tenant_id, ak.role, ak.active, ak.expires_at,
+        r#"SELECT ak.role, ak.expires_at,
                   t.id, t.name, t.slug, t.plan, t.usage_ops_month, t.usage_limit
            FROM tenant_api_keys ak
            JOIN tenants t ON t.id = ak.tenant_id
@@ -185,10 +196,11 @@ async fn auth_middleware(
         let pool = state.db_pool.clone();
         let kh = key_hash.clone();
         tokio::spawn(async move {
-            let _ = sqlx::query("UPDATE tenant_api_keys SET last_used_at = now() WHERE key_hash = $1")
-                .bind(kh)
-                .execute(&pool)
-                .await;
+            let _ =
+                sqlx::query("UPDATE tenant_api_keys SET last_used_at = now() WHERE key_hash = $1")
+                    .bind(kh)
+                    .execute(&pool)
+                    .await;
         });
 
         let tenant = TenantRow {
@@ -258,9 +270,10 @@ async fn rate_limit_middleware(
         _ => (10, 60),
     };
 
-    let allowed = memory_cache::check_rate_limit(&state.redis_client, &rate_key, max_rps, window_secs)
-        .await
-        .map_err(|e| MemoryError::Cache(e.to_string()))?;
+    let allowed =
+        memory_cache::check_rate_limit(&state.redis_client, &rate_key, max_rps, window_secs)
+            .await
+            .map_err(|e| MemoryError::Cache(e.to_string()))?;
 
     if !allowed {
         return Err(MemoryError::RateLimited);
@@ -328,7 +341,10 @@ async fn write_memory(
         .http_client
         .post(format!("{}/internal/ingest", state.write_service_url))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .header("x-user-id", ctx.user_id.map(|u| u.to_string()).unwrap_or_default())
+        .header(
+            "x-user-id",
+            ctx.user_id.map(|u| u.to_string()).unwrap_or_default(),
+        )
         .json(&req)
         .send()
         .await
@@ -341,10 +357,11 @@ async fn write_memory(
     let pool = state.db_pool.clone();
     let tid = ctx.tenant_id;
     tokio::spawn(async move {
-        let _ = sqlx::query("UPDATE tenants SET usage_ops_month = usage_ops_month + 1 WHERE id = $1")
-            .bind(tid)
-            .execute(&pool)
-            .await;
+        let _ =
+            sqlx::query("UPDATE tenants SET usage_ops_month = usage_ops_month + 1 WHERE id = $1")
+                .bind(tid)
+                .execute(&pool)
+                .await;
     });
 
     Ok(Json(response))
@@ -379,7 +396,10 @@ async fn search_memory(
         .http_client
         .post(format!("{}/internal/search", state.retrieve_service_url))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .header("x-user-id", ctx.user_id.map(|u| u.to_string()).unwrap_or_default())
+        .header(
+            "x-user-id",
+            ctx.user_id.map(|u| u.to_string()).unwrap_or_default(),
+        )
         .json(&req)
         .send()
         .await
@@ -420,7 +440,10 @@ async fn update_memory(
 ) -> Result<Json<serde_json::Value>, MemoryError> {
     let response: serde_json::Value = state
         .http_client
-        .put(format!("{}/internal/memory/{}", state.admin_service_url, id))
+        .put(format!(
+            "{}/internal/memory/{}",
+            state.admin_service_url, id
+        ))
         .header("x-tenant-id", ctx.tenant_id.to_string())
         .json(&body)
         .send()
@@ -440,7 +463,10 @@ async fn delete_memory(
 ) -> Result<StatusCode, MemoryError> {
     let _: serde_json::Value = state
         .http_client
-        .delete(format!("{}/internal/memory/{}", state.admin_service_url, id))
+        .delete(format!(
+            "{}/internal/memory/{}",
+            state.admin_service_url, id
+        ))
         .header("x-tenant-id", ctx.tenant_id.to_string())
         .send()
         .await
@@ -475,7 +501,10 @@ async fn list_entities(
     .await
     .map_err(|e| MemoryError::Database(e.to_string()))?;
 
-    let json: Vec<serde_json::Value> = rows.iter().map(|r| serde_json::to_value(r).unwrap()).collect();
+    let json: Vec<serde_json::Value> = rows
+        .iter()
+        .map(|r| serde_json::to_value(r).unwrap())
+        .collect();
     Ok(Json(json))
 }
 
@@ -675,16 +704,10 @@ async fn traverse_entity(
     let depth = params.depth.unwrap_or(2).min(5);
     let max_results = params.limit.unwrap_or(50) as i64;
 
-    let results = memory_graph::expand_nhop(
-        &state.db_pool,
-        ctx.tenant_id,
-        id,
-        depth,
-        None,
-        max_results,
-    )
-    .await
-    .map_err(|e| MemoryError::Database(e.to_string()))?;
+    let results =
+        memory_graph::expand_nhop(&state.db_pool, ctx.tenant_id, id, depth, None, max_results)
+            .await
+            .map_err(|e| MemoryError::Database(e.to_string()))?;
 
     let entities: Vec<serde_json::Value> = results
         .iter()
@@ -768,13 +791,18 @@ async fn create_webhook(
     ctx: axum::Extension<TenantContext>,
     Json(body): Json<serde_json::Value>,
 ) -> Result<(StatusCode, Json<serde_json::Value>), MemoryError> {
-    let url = body["url"].as_str()
+    let url = body["url"]
+        .as_str()
         .ok_or_else(|| MemoryError::Validation("Missing 'url' field".into()))?;
     let secret = body["secret"].as_str().map(|s| s.to_string());
     let description = body["description"].as_str().map(|s| s.to_string());
     let event_types: Vec<String> = body["event_types"]
         .as_array()
-        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                .collect()
+        })
         .unwrap_or_else(|| vec!["*".to_string()]);
 
     let id = sqlx::query_scalar::<_, Uuid>(
@@ -790,12 +818,15 @@ async fn create_webhook(
     .await
     .map_err(|e| MemoryError::Database(e.to_string()))?;
 
-    Ok((StatusCode::CREATED, Json(serde_json::json!({
-        "id": id,
-        "url": url,
-        "event_types": event_types,
-        "active": true,
-    }))))
+    Ok((
+        StatusCode::CREATED,
+        Json(serde_json::json!({
+            "id": id,
+            "url": url,
+            "event_types": event_types,
+            "active": true,
+        })),
+    ))
 }
 
 async fn delete_webhook(
@@ -803,12 +834,14 @@ async fn delete_webhook(
     ctx: axum::Extension<TenantContext>,
     Path(id): Path<Uuid>,
 ) -> Result<StatusCode, MemoryError> {
-    sqlx::query("UPDATE webhooks SET active = false, updated_at = now() WHERE id = $1 AND tenant_id = $2")
-        .bind(id)
-        .bind(ctx.tenant_id)
-        .execute(&state.db_pool)
-        .await
-        .map_err(|e| MemoryError::Database(e.to_string()))?;
+    sqlx::query(
+        "UPDATE webhooks SET active = false, updated_at = now() WHERE id = $1 AND tenant_id = $2",
+    )
+    .bind(id)
+    .bind(ctx.tenant_id)
+    .execute(&state.db_pool)
+    .await
+    .map_err(|e| MemoryError::Database(e.to_string()))?;
 
     Ok(StatusCode::NO_CONTENT)
 }
@@ -836,10 +869,7 @@ fn hash_api_key(key: &str) -> String {
 /// Row returned from the tenant_api_keys JOIN tenants lookup.
 #[derive(Debug, sqlx::FromRow)]
 struct ApiKeyRow {
-    // From tenant_api_keys
-    tenant_id: Uuid,
     role: String,
-    active: bool,
     expires_at: Option<chrono::DateTime<chrono::Utc>>,
     // From tenants (aliased via JOIN)
     id: Uuid,

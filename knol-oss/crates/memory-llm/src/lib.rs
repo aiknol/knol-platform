@@ -28,40 +28,53 @@
 //! let result = provider.extract_memories("I like Rust", "user", &[]).await?;
 //! ```
 
-pub mod error;
-pub mod types;
-pub mod prompt;
-pub mod provider;
-pub mod guardrails;
-pub mod triage;
+pub mod anthropic;
 pub mod cache;
-pub mod usage;
+pub mod conflict;
+pub mod decay;
 pub mod dynamic;
 pub mod embedding;
-pub mod decay;
-pub mod conflict;
-pub mod anthropic;
-pub mod openai;
-pub mod gemini;
+pub mod error;
 pub mod factory;
+pub mod gemini;
+pub mod guardrails;
+pub mod openai;
+pub mod prompt;
+pub mod provider;
+pub mod triage;
+pub mod types;
+pub mod usage;
 
 // ── Public re-exports ──
 
-pub use error::LlmError;
-pub use types::{TokenUsage, BatchExtractionConfig, ExtractionMessage, LlmProviderKind};
-pub use provider::{LlmProvider, ExtractionOptions};
 pub use anthropic::AnthropicProvider;
-pub use openai::OpenAiProvider;
-pub use gemini::GeminiProvider;
-pub use factory::{LlmConfig, build_provider, build_provider_from_db, build_guardrail_config_from_db, build_grounding_config_from_db, build_triage_config_from_db};
-pub use guardrails::{GuardrailConfig, sanitize_extraction, validate_input, detect_prompt_injection};
-pub use triage::{TriageConfig, TriageDecision, triage_content, dynamic_output_tokens, prune_entity_context};
-pub use cache::{LlmCacheConfig, cache_key, get_cached, set_cached};
-pub use usage::log_token_usage;
+pub use cache::{cache_key, get_cached, set_cached, LlmCacheConfig};
+pub use conflict::{
+    build_conflict_config_from_db, detect_conflicts, ConflictAction, ConflictConfig,
+    ConflictDetection, ConflictResolution, ConflictType, ExistingMemory,
+};
+pub use decay::{
+    apply_access_boost, batch_decay_scores, build_decay_config_from_db, decayed_score, DecayConfig,
+    DecayFunction,
+};
 pub use dynamic::DynamicLlmProvider;
 pub use embedding::{EmbeddingConfig, EmbeddingProvider};
-pub use decay::{DecayConfig, DecayFunction, decayed_score, apply_access_boost, batch_decay_scores, build_decay_config_from_db};
-pub use conflict::{ConflictConfig, ConflictResolution, ConflictDetection, ConflictType, ConflictAction, ExistingMemory, detect_conflicts, build_conflict_config_from_db};
+pub use error::LlmError;
+pub use factory::{
+    build_grounding_config_from_db, build_guardrail_config_from_db, build_provider,
+    build_provider_from_db, build_triage_config_from_db, LlmConfig,
+};
+pub use gemini::GeminiProvider;
+pub use guardrails::{
+    detect_prompt_injection, sanitize_extraction, validate_input, GuardrailConfig,
+};
+pub use openai::OpenAiProvider;
+pub use provider::{ExtractionOptions, LlmProvider};
+pub use triage::{
+    dynamic_output_tokens, prune_entity_context, triage_content, TriageConfig, TriageDecision,
+};
+pub use types::{BatchExtractionConfig, ExtractionMessage, LlmProviderKind, TokenUsage};
+pub use usage::log_token_usage;
 
 // ── Backward compatibility ──
 // Existing code references `memory_llm::AnthropicClient`. Keep that working.
@@ -75,8 +88,16 @@ mod tests {
 
     #[test]
     fn test_token_usage_add() {
-        let mut u1 = TokenUsage { input_tokens: 100, output_tokens: 50, total_tokens: 150 };
-        let u2 = TokenUsage { input_tokens: 200, output_tokens: 100, total_tokens: 300 };
+        let mut u1 = TokenUsage {
+            input_tokens: 100,
+            output_tokens: 50,
+            total_tokens: 150,
+        };
+        let u2 = TokenUsage {
+            input_tokens: 200,
+            output_tokens: 100,
+            total_tokens: 300,
+        };
         u1.add(&u2);
         assert_eq!(u1.input_tokens, 300);
         assert_eq!(u1.output_tokens, 150);
@@ -119,14 +140,38 @@ mod tests {
 
     #[test]
     fn test_provider_kind_parsing() {
-        assert_eq!(LlmProviderKind::from_str_loose("anthropic"), LlmProviderKind::Anthropic);
-        assert_eq!(LlmProviderKind::from_str_loose("openai"), LlmProviderKind::OpenAi);
-        assert_eq!(LlmProviderKind::from_str_loose("OpenAI"), LlmProviderKind::OpenAi);
-        assert_eq!(LlmProviderKind::from_str_loose("open-ai"), LlmProviderKind::OpenAi);
-        assert_eq!(LlmProviderKind::from_str_loose("gemini"), LlmProviderKind::Gemini);
-        assert_eq!(LlmProviderKind::from_str_loose("google"), LlmProviderKind::Gemini);
-        assert_eq!(LlmProviderKind::from_str_loose("Google-AI"), LlmProviderKind::Gemini);
-        assert_eq!(LlmProviderKind::from_str_loose("unknown"), LlmProviderKind::Anthropic); // default
+        assert_eq!(
+            LlmProviderKind::from_str_loose("anthropic"),
+            LlmProviderKind::Anthropic
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("openai"),
+            LlmProviderKind::OpenAi
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("OpenAI"),
+            LlmProviderKind::OpenAi
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("open-ai"),
+            LlmProviderKind::OpenAi
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("gemini"),
+            LlmProviderKind::Gemini
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("google"),
+            LlmProviderKind::Gemini
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("Google-AI"),
+            LlmProviderKind::Gemini
+        );
+        assert_eq!(
+            LlmProviderKind::from_str_loose("unknown"),
+            LlmProviderKind::Anthropic
+        ); // default
     }
 
     #[test]
@@ -156,7 +201,7 @@ mod tests {
         };
         let json = serde_json::to_string(&config).unwrap();
         let parsed: memory_common::GroundingConfig = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.enable_verification, true);
+        assert!(parsed.enable_verification);
         assert_eq!(parsed.min_verification_score, 0.7);
     }
 
@@ -218,7 +263,10 @@ mod tests {
             source_offset_start: None,
             source_offset_end: None,
         }];
-        let prompt = build_verification_prompt(&memories, "Alex told me he works at TechCorp as a senior engineer.");
+        let prompt = build_verification_prompt(
+            &memories,
+            "Alex told me he works at TechCorp as a senior engineer.",
+        );
         assert!(prompt.contains("Alex works at TechCorp"));
         assert!(prompt.contains("Alex told me he works at TechCorp"));
         assert!(prompt.contains("verifications"));
@@ -233,8 +281,14 @@ mod tests {
         ]}"#;
         let results = parse_verification_response(json).unwrap();
         assert_eq!(results.len(), 2);
-        assert_eq!(results[0].status, memory_common::VerificationStatus::Verified);
+        assert_eq!(
+            results[0].status,
+            memory_common::VerificationStatus::Verified
+        );
         assert_eq!(results[0].score, 0.95);
-        assert_eq!(results[1].status, memory_common::VerificationStatus::Contested);
+        assert_eq!(
+            results[1].status,
+            memory_common::VerificationStatus::Contested
+        );
     }
 }
