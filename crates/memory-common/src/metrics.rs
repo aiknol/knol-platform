@@ -25,15 +25,11 @@
 //! let handler = metrics_handler();
 //! ```
 
-use prometheus::{
-    Counter, CounterVec, Gauge, Histogram, HistogramVec, IntCounterVec, Registry,
-    TextEncoder, Encoder,
-};
+use axum::{http::StatusCode, response::IntoResponse};
 use lazy_static::lazy_static;
-use axum::{http::StatusCode, response::IntoResponse, body::Body};
-use std::sync::Mutex;
+use prometheus::{Counter, CounterVec, Gauge, Histogram, HistogramVec, Registry, TextEncoder};
 
-/// Global metrics registry and collectors
+// Global metrics registry and collectors.
 lazy_static! {
     /// The global MemoryMetrics singleton instance
     pub static ref METRICS: MemoryMetrics = MemoryMetrics::new();
@@ -89,20 +85,24 @@ impl MemoryMetrics {
                 .namespace("memory")
                 .subsystem("http"),
             &["method", "path", "status"],
-        ).expect("Failed to create http_requests_total");
+        )
+        .expect("Failed to create http_requests_total");
 
         // HTTP Request Duration Seconds
         // Labels: method, path
         let http_request_duration_seconds = HistogramVec::new(
             prometheus::HistogramOpts::new(
                 "http_request_duration_seconds",
-                "HTTP request duration in seconds"
+                "HTTP request duration in seconds",
             )
             .namespace("memory")
             .subsystem("http")
-            .buckets(vec![0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]),
+            .buckets(vec![
+                0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0,
+            ]),
             &["method", "path"],
-        ).expect("Failed to create http_request_duration_seconds");
+        )
+        .expect("Failed to create http_request_duration_seconds");
 
         // Memory Operations Total
         // Labels: operation (write/read/delete/search), status (success/error)
@@ -111,38 +111,39 @@ impl MemoryMetrics {
                 .namespace("memory")
                 .subsystem("operations"),
             &["operation", "status"],
-        ).expect("Failed to create memory_operations_total");
+        )
+        .expect("Failed to create memory_operations_total");
 
         // Extraction Duration Seconds
         let extraction_duration_seconds = Histogram::with_opts(
             prometheus::HistogramOpts::new(
                 "extraction_duration_seconds",
-                "Time spent extracting information in seconds"
+                "Time spent extracting information in seconds",
             )
             .namespace("memory")
             .subsystem("extraction")
             .buckets(vec![0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0]),
-        ).expect("Failed to create extraction_duration_seconds");
+        )
+        .expect("Failed to create extraction_duration_seconds");
 
         // Active Memories Gauge
         let active_memories_gauge = Gauge::with_opts(
             prometheus::Opts::new("active_memories_gauge", "Number of active memories")
                 .namespace("memory")
                 .subsystem("memories"),
-        ).expect("Failed to create active_memories_gauge");
+        )
+        .expect("Failed to create active_memories_gauge");
 
         // Search Latency Seconds
         // Labels: intent_type
         let search_latency_seconds = HistogramVec::new(
-            prometheus::HistogramOpts::new(
-                "search_latency_seconds",
-                "Search latency in seconds"
-            )
-            .namespace("memory")
-            .subsystem("search")
-            .buckets(vec![0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]),
+            prometheus::HistogramOpts::new("search_latency_seconds", "Search latency in seconds")
+                .namespace("memory")
+                .subsystem("search")
+                .buckets(vec![0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]),
             &["intent_type"],
-        ).expect("Failed to create search_latency_seconds");
+        )
+        .expect("Failed to create search_latency_seconds");
 
         // Queue Messages Total
         // Labels: subject, status (queued/processed/failed)
@@ -151,21 +152,24 @@ impl MemoryMetrics {
                 .namespace("memory")
                 .subsystem("queue"),
             &["subject", "status"],
-        ).expect("Failed to create queue_messages_total");
+        )
+        .expect("Failed to create queue_messages_total");
 
         // Cache Hits Total
         let cache_hits_total = Counter::with_opts(
             prometheus::Opts::new("cache_hits_total", "Total cache hits")
                 .namespace("memory")
                 .subsystem("cache"),
-        ).expect("Failed to create cache_hits_total");
+        )
+        .expect("Failed to create cache_hits_total");
 
         // Cache Misses Total
         let cache_misses_total = Counter::with_opts(
             prometheus::Opts::new("cache_misses_total", "Total cache misses")
                 .namespace("memory")
                 .subsystem("cache"),
-        ).expect("Failed to create cache_misses_total");
+        )
+        .expect("Failed to create cache_misses_total");
 
         // Consolidation Runs Total
         // Labels: status (success/error)
@@ -174,7 +178,8 @@ impl MemoryMetrics {
                 .namespace("memory")
                 .subsystem("consolidation"),
             &["status"],
-        ).expect("Failed to create consolidation_runs_total");
+        )
+        .expect("Failed to create consolidation_runs_total");
 
         // Conflicts Detected Total
         // Labels: conflict_type
@@ -183,30 +188,42 @@ impl MemoryMetrics {
                 .namespace("memory")
                 .subsystem("conflicts"),
             &["conflict_type"],
-        ).expect("Failed to create conflicts_detected_total");
+        )
+        .expect("Failed to create conflicts_detected_total");
 
         // Register all metrics
-        registry.register(Box::new(http_requests_total.clone()))
+        registry
+            .register(Box::new(http_requests_total.clone()))
             .expect("Failed to register http_requests_total");
-        registry.register(Box::new(http_request_duration_seconds.clone()))
+        registry
+            .register(Box::new(http_request_duration_seconds.clone()))
             .expect("Failed to register http_request_duration_seconds");
-        registry.register(Box::new(memory_operations_total.clone()))
+        registry
+            .register(Box::new(memory_operations_total.clone()))
             .expect("Failed to register memory_operations_total");
-        registry.register(Box::new(extraction_duration_seconds.clone()))
+        registry
+            .register(Box::new(extraction_duration_seconds.clone()))
             .expect("Failed to register extraction_duration_seconds");
-        registry.register(Box::new(active_memories_gauge.clone()))
+        registry
+            .register(Box::new(active_memories_gauge.clone()))
             .expect("Failed to register active_memories_gauge");
-        registry.register(Box::new(search_latency_seconds.clone()))
+        registry
+            .register(Box::new(search_latency_seconds.clone()))
             .expect("Failed to register search_latency_seconds");
-        registry.register(Box::new(queue_messages_total.clone()))
+        registry
+            .register(Box::new(queue_messages_total.clone()))
             .expect("Failed to register queue_messages_total");
-        registry.register(Box::new(cache_hits_total.clone()))
+        registry
+            .register(Box::new(cache_hits_total.clone()))
             .expect("Failed to register cache_hits_total");
-        registry.register(Box::new(cache_misses_total.clone()))
+        registry
+            .register(Box::new(cache_misses_total.clone()))
             .expect("Failed to register cache_misses_total");
-        registry.register(Box::new(consolidation_runs_total.clone()))
+        registry
+            .register(Box::new(consolidation_runs_total.clone()))
             .expect("Failed to register consolidation_runs_total");
-        registry.register(Box::new(conflicts_detected_total.clone()))
+        registry
+            .register(Box::new(conflicts_detected_total.clone()))
             .expect("Failed to register conflicts_detected_total");
 
         Self {
@@ -229,7 +246,9 @@ impl MemoryMetrics {
     pub fn gather_metrics(&self) -> String {
         let encoder = TextEncoder::new();
         let metric_families = self.registry.gather();
-        encoder.encode_to_string(&metric_families).unwrap_or_default()
+        encoder
+            .encode_to_string(&metric_families)
+            .unwrap_or_default()
     }
 
     /// Record an HTTP request
@@ -370,10 +389,7 @@ mod tests {
         let metrics1 = &METRICS;
         let metrics2 = &METRICS;
         // Both references should point to the same instance
-        assert!(std::ptr::eq(
-            metrics1 as *const _,
-            metrics2 as *const _
-        ));
+        assert!(std::ptr::eq(metrics1 as *const _, metrics2 as *const _));
     }
 
     #[test]
