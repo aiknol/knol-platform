@@ -264,6 +264,8 @@ The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check
 
 - `cargo fmt --all -- --check` in `knol-oss/`
 - `cargo fmt --all -- --check` in `knol-enterprise/`
+- `cargo clippy --workspace --all-targets -- -D warnings` in `knol-oss/`
+- `cargo clippy --workspace --all-targets -- -D warnings` in `knol-enterprise/`
 
 ## License
 

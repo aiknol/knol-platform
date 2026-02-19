@@ -40,7 +40,11 @@ fn test_decay_365_days() {
 fn test_decay_preserves_minimum() {
     let min_importance = 0.05;
     let decayed = calculate_decay(0.1, 0.01, 100.0);
-    let clamped = if decayed < min_importance { min_importance } else { decayed };
+    let clamped = if decayed < min_importance {
+        min_importance
+    } else {
+        decayed
+    };
     // After 100 days with lambda=0.01, 0.1 * e^(-1.0) ≈ 0.0368
     assert!(clamped >= min_importance);
 }
@@ -88,7 +92,6 @@ fn test_consolidation_config_defaults() {
 #[test]
 fn test_consolidation_min_age_filter() {
     let config = ConsolidationConfig::default();
-    let now = chrono::Utc::now();
     let memory_age_hours = 48i64;
 
     let is_eligible = memory_age_hours >= config.min_age_hours;
@@ -113,7 +116,9 @@ fn content_similar(content1: &str, content2: &str) -> bool {
     let intersection = words1.intersection(&words2).count();
     let union = words1.union(&words2).count();
 
-    if union == 0 { return false; }
+    if union == 0 {
+        return false;
+    }
     let similarity = intersection as f32 / union as f32;
     similarity > 0.3
 }
@@ -149,7 +154,7 @@ fn test_content_similar_empty() {
 fn test_cluster_formation_minimum_size() {
     // Simulate cluster formation with min_cluster_size = 3
     let min_cluster_size = 3;
-    let memories = vec![
+    let memories = [
         "John discussed project deadlines",
         "John reviewed project milestones",
         "John updated project timeline",
@@ -209,7 +214,6 @@ enum ConflictType {
 #[derive(Debug, PartialEq)]
 enum ConflictResolution {
     KeepNewer,
-    KeepHigherConfidence,
     Flag,
     NoAction,
 }
@@ -227,7 +231,10 @@ fn classify_conflict(
     if word_overlap > config.duplicate_similarity_threshold {
         return ConflictType::Duplicate;
     }
-    if shared_entities > 0 && word_overlap > config.contradiction_similarity_threshold && has_contradiction {
+    if shared_entities > 0
+        && word_overlap > config.contradiction_similarity_threshold
+        && has_contradiction
+    {
         return ConflictType::Contradiction;
     }
     ConflictType::Ambiguous
@@ -272,10 +279,22 @@ fn test_classify_ambiguous_no_signals() {
 
 #[test]
 fn test_resolution_for_all_types() {
-    assert_eq!(determine_resolution(&ConflictType::Duplicate), ConflictResolution::KeepNewer);
-    assert_eq!(determine_resolution(&ConflictType::Superseded), ConflictResolution::KeepNewer);
-    assert_eq!(determine_resolution(&ConflictType::Contradiction), ConflictResolution::Flag);
-    assert_eq!(determine_resolution(&ConflictType::Ambiguous), ConflictResolution::NoAction);
+    assert_eq!(
+        determine_resolution(&ConflictType::Duplicate),
+        ConflictResolution::KeepNewer
+    );
+    assert_eq!(
+        determine_resolution(&ConflictType::Superseded),
+        ConflictResolution::KeepNewer
+    );
+    assert_eq!(
+        determine_resolution(&ConflictType::Contradiction),
+        ConflictResolution::Flag
+    );
+    assert_eq!(
+        determine_resolution(&ConflictType::Ambiguous),
+        ConflictResolution::NoAction
+    );
 }
 
 // ── Negation Heuristic Tests ──
@@ -292,7 +311,11 @@ fn expresses_contradiction(content1: &str, content2: &str) -> bool {
     let words2: HashSet<&str> = c2.split_whitespace().filter(|w| w.len() > 2).collect();
     let intersection = words1.intersection(&words2).count();
     let union = words1.union(&words2).count();
-    let overlap = if union > 0 { intersection as f32 / union as f32 } else { 0.0 };
+    let overlap = if union > 0 {
+        intersection as f32 / union as f32
+    } else {
+        0.0
+    };
 
     has_neg_1 != has_neg_2 && overlap > 0.3
 }
@@ -335,12 +358,12 @@ fn test_no_contradiction_unrelated_topics() {
 fn test_job_intervals() {
     use std::time::Duration;
 
-    let decay_interval = Duration::from_secs(3600);       // 1 hour
-    let dedup_interval = Duration::from_secs(7200);       // 2 hours
-    let retention_interval = Duration::from_secs(86400);  // 24 hours
-    let cleanup_interval = Duration::from_secs(86400);    // 24 hours
+    let decay_interval = Duration::from_secs(3600); // 1 hour
+    let dedup_interval = Duration::from_secs(7200); // 2 hours
+    let retention_interval = Duration::from_secs(86400); // 24 hours
+    let cleanup_interval = Duration::from_secs(86400); // 24 hours
     let consolidation_interval = Duration::from_secs(43200); // 12 hours
-    let conflict_interval = Duration::from_secs(14400);   // 4 hours
+    let conflict_interval = Duration::from_secs(14400); // 4 hours
 
     assert_eq!(decay_interval.as_secs(), 3600);
     assert_eq!(dedup_interval.as_secs(), 7200);
@@ -364,10 +387,14 @@ fn calculate_word_overlap(content1: &str, content2: &str) -> f32 {
     let lower2 = content2.to_lowercase();
     let words2: HashSet<&str> = lower2.split_whitespace().filter(|w| w.len() > 2).collect();
 
-    if words1.is_empty() || words2.is_empty() { return 0.0; }
+    if words1.is_empty() || words2.is_empty() {
+        return 0.0;
+    }
     let intersection = words1.intersection(&words2).count();
     let union = words1.union(&words2).count();
-    if union == 0 { return 0.0; }
+    if union == 0 {
+        return 0.0;
+    }
     intersection as f32 / union as f32
 }
 
@@ -380,28 +407,20 @@ fn test_word_overlap_identical() {
 
 #[test]
 fn test_word_overlap_partial() {
-    let overlap = calculate_word_overlap(
-        "John likes coffee and tea",
-        "John likes coffee and juice",
-    );
+    let overlap =
+        calculate_word_overlap("John likes coffee and tea", "John likes coffee and juice");
     assert!(overlap > 0.5);
     assert!(overlap < 1.0);
 }
 
 #[test]
 fn test_word_overlap_none() {
-    let overlap = calculate_word_overlap(
-        "apple banana cherry",
-        "dog elephant fish",
-    );
+    let overlap = calculate_word_overlap("apple banana cherry", "dog elephant fish");
     assert_eq!(overlap, 0.0);
 }
 
 #[test]
 fn test_word_overlap_case_insensitive() {
-    let overlap = calculate_word_overlap(
-        "HELLO WORLD TEST",
-        "hello world test",
-    );
+    let overlap = calculate_word_overlap("HELLO WORLD TEST", "hello world test");
     assert!((overlap - 1.0).abs() < 0.01);
 }

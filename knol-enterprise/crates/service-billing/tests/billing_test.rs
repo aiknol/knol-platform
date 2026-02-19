@@ -2,8 +2,6 @@
 //!
 //! Tests plan limits, feature mappings, and usage tracking without a database.
 
-use serde_json;
-
 /// Plan tier configuration for testing (mirrors main.rs logic)
 struct PlanLimits {
     max_memories_per_user: i64,
@@ -27,25 +25,39 @@ fn get_plan_limits(plan: &str) -> PlanLimits {
             max_memories_per_user: 100_000,
             max_users: 25,
             features: vec![
-                "vector_search".into(), "graph".into(), "temporal".into(),
-                "simulation".into(), "connectors".into(),
+                "vector_search".into(),
+                "graph".into(),
+                "temporal".into(),
+                "simulation".into(),
+                "connectors".into(),
             ],
         },
         "team" => PlanLimits {
             max_memories_per_user: 500_000,
             max_users: 100,
             features: vec![
-                "vector_search".into(), "graph".into(), "temporal".into(),
-                "simulation".into(), "connectors".into(), "audit".into(), "sso".into(),
+                "vector_search".into(),
+                "graph".into(),
+                "temporal".into(),
+                "simulation".into(),
+                "connectors".into(),
+                "audit".into(),
+                "sso".into(),
             ],
         },
         "enterprise" => PlanLimits {
             max_memories_per_user: i64::MAX,
             max_users: i64::MAX,
             features: vec![
-                "vector_search".into(), "graph".into(), "temporal".into(),
-                "simulation".into(), "connectors".into(), "audit".into(),
-                "sso".into(), "air_gapped".into(), "custom_ontology".into(),
+                "vector_search".into(),
+                "graph".into(),
+                "temporal".into(),
+                "simulation".into(),
+                "connectors".into(),
+                "audit".into(),
+                "sso".into(),
+                "air_gapped".into(),
+                "custom_ontology".into(),
                 "dedicated_infra".into(),
             ],
         },

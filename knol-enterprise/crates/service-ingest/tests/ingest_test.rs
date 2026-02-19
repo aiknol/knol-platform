@@ -3,7 +3,6 @@
 //! Tests connector info, webhook payloads, and bulk ingestion request handling.
 
 use serde::{Deserialize, Serialize};
-use serde_json;
 use uuid::Uuid;
 
 // ── Replicated types for testing (mirrors main.rs) ──
@@ -45,7 +44,7 @@ struct BulkIngestRequest {
 
 #[test]
 fn test_connectors_list() {
-    let connectors = vec![
+    let connectors = [
         ConnectorInfo {
             id: "webhook".into(),
             name: "Webhook".into(),
@@ -73,8 +72,20 @@ fn test_connectors_list() {
     ];
 
     assert_eq!(connectors.len(), 4);
-    assert_eq!(connectors.iter().filter(|c| c.status == "available").count(), 1);
-    assert_eq!(connectors.iter().filter(|c| c.status == "coming_soon").count(), 3);
+    assert_eq!(
+        connectors
+            .iter()
+            .filter(|c| c.status == "available")
+            .count(),
+        1
+    );
+    assert_eq!(
+        connectors
+            .iter()
+            .filter(|c| c.status == "coming_soon")
+            .count(),
+        3
+    );
 }
 
 #[test]
@@ -108,6 +119,10 @@ fn test_webhook_payload_single_item() {
     let payload: WebhookPayload = serde_json::from_value(json).unwrap();
     assert_eq!(payload.source, "custom-crm");
     assert_eq!(payload.items.len(), 1);
+    assert_eq!(
+        payload.items[0].content,
+        "Customer John called about order #1234"
+    );
     assert_eq!(payload.items[0].role.as_deref().unwrap(), "user");
 }
 
@@ -178,7 +193,10 @@ fn test_webhook_role_defaults() {
     });
 
     let payload: WebhookPayload = serde_json::from_value(json).unwrap();
-    let role = payload.items[0].role.clone().unwrap_or_else(|| "system".into());
+    let role = payload.items[0]
+        .role
+        .clone()
+        .unwrap_or_else(|| "system".into());
     assert_eq!(role, "system");
 }
 
@@ -264,7 +282,7 @@ fn test_write_event_construction_from_webhook() {
 #[test]
 fn test_ingestion_count_tracking() {
     // Simulate the ingestion counting logic
-    let items = vec!["item1", "item2", "item3", "item4", "item5"];
+    let items = ["item1", "item2", "item3", "item4", "item5"];
     let mut ingested = 0;
     let mut failed = 0;
 

@@ -7,7 +7,6 @@
 
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -66,24 +65,27 @@ impl MemoryStore {
     ) -> Uuid {
         let id = Uuid::new_v4();
         let now = Utc::now();
-        self.memories.insert(id, Memory {
+        self.memories.insert(
             id,
-            tenant_id,
-            user_id,
-            content: content.to_string(),
-            kind: kind.to_string(),
-            scope: "user".to_string(),
-            confidence: 0.85,
-            importance: 0.7,
-            status: "active".to_string(),
-            valid_from: now,
-            valid_to: None,
-            metadata: serde_json::json!({}),
-            created_at: now,
-            updated_at: now,
-            tags: vec![],
-            entities,
-        });
+            Memory {
+                id,
+                tenant_id,
+                user_id,
+                content: content.to_string(),
+                kind: kind.to_string(),
+                scope: "user".to_string(),
+                confidence: 0.85,
+                importance: 0.7,
+                status: "active".to_string(),
+                valid_from: now,
+                valid_to: None,
+                metadata: serde_json::json!({}),
+                created_at: now,
+                updated_at: now,
+                tags: vec![],
+                entities,
+            },
+        );
         id
     }
 
@@ -92,15 +94,29 @@ impl MemoryStore {
         let query_lower = query.to_lowercase();
         let query_words: HashSet<&str> = query_lower.split_whitespace().collect();
 
-        let mut results: Vec<(&Memory, f32)> = self.memories.values()
+        let mut results: Vec<(&Memory, f32)> = self
+            .memories
+            .values()
             .filter(|m| m.tenant_id == tenant_id && m.status == "active")
             .filter_map(|m| {
                 let content_lower = m.content.to_lowercase();
-                let content_words: HashSet<String> = content_lower.split_whitespace().map(String::from).collect();
-                let intersection = query_words.iter().filter(|w| content_words.contains(**w)).count();
+                let content_words: HashSet<String> =
+                    content_lower.split_whitespace().map(String::from).collect();
+                let intersection = query_words
+                    .iter()
+                    .filter(|w| content_words.contains(**w))
+                    .count();
                 let union = query_words.len() + content_words.len() - intersection;
-                let score = if union > 0 { intersection as f32 / union as f32 } else { 0.0 };
-                if score > 0.0 { Some((m, score)) } else { None }
+                let score = if union > 0 {
+                    intersection as f32 / union as f32
+                } else {
+                    0.0
+                };
+                if score > 0.0 {
+                    Some((m, score))
+                } else {
+                    None
+                }
             })
             .collect();
 
@@ -161,7 +177,12 @@ impl MemoryStore {
     }
 
     /// Simulate: Merge memories
-    fn merge_memories(&mut self, source_ids: &[Uuid], merged_content: &str, tenant_id: Uuid) -> Option<Uuid> {
+    fn merge_memories(
+        &mut self,
+        source_ids: &[Uuid],
+        merged_content: &str,
+        tenant_id: Uuid,
+    ) -> Option<Uuid> {
         // Mark sources as superseded
         for sid in source_ids {
             if let Some(m) = self.memories.get_mut(sid) {
@@ -210,7 +231,8 @@ impl MemoryStore {
 
     /// Simulate: Point-in-time replay
     fn replay_at(&self, tenant_id: Uuid, point_in_time: chrono::DateTime<Utc>) -> Vec<&Memory> {
-        self.memories.values()
+        self.memories
+            .values()
             .filter(|m| {
                 m.tenant_id == tenant_id
                     && m.status != "deleted"
@@ -230,17 +252,41 @@ fn test_full_write_search_cycle() {
     let user_id = Some(Uuid::new_v4());
 
     // Write phase: ingest several memories
-    store.ingest_memory(tenant_id, user_id, "John prefers dark mode in all applications", "preference", vec!["John".into()]);
-    store.ingest_memory(tenant_id, user_id, "Meeting with Sarah about the Q3 roadmap", "event", vec!["Sarah".into()]);
-    store.ingest_memory(tenant_id, user_id, "The project deadline is December 15th", "fact", vec!["project".into()]);
+    store.ingest_memory(
+        tenant_id,
+        user_id,
+        "John prefers dark mode in all applications",
+        "preference",
+        vec!["John".into()],
+    );
+    store.ingest_memory(
+        tenant_id,
+        user_id,
+        "Meeting with Sarah about the Q3 roadmap",
+        "event",
+        vec!["Sarah".into()],
+    );
+    store.ingest_memory(
+        tenant_id,
+        user_id,
+        "The project deadline is December 15th",
+        "fact",
+        vec!["project".into()],
+    );
 
     // Search phase: query for relevant memories
     let results = store.search(tenant_id, "dark mode preference", 10);
-    assert!(!results.is_empty(), "Should find memories matching 'dark mode'");
+    assert!(
+        !results.is_empty(),
+        "Should find memories matching 'dark mode'"
+    );
     assert!(results[0].content.contains("dark mode"));
 
     let results = store.search(tenant_id, "project deadline december", 10);
-    assert!(!results.is_empty(), "Should find memories matching 'deadline'");
+    assert!(
+        !results.is_empty(),
+        "Should find memories matching 'deadline'"
+    );
 }
 
 #[test]
@@ -248,7 +294,13 @@ fn test_write_update_search_cycle() {
     let mut store = MemoryStore::new();
     let tenant_id = Uuid::new_v4();
 
-    let id = store.ingest_memory(tenant_id, None, "User prefers light theme", "preference", vec![]);
+    let id = store.ingest_memory(
+        tenant_id,
+        None,
+        "User prefers light theme",
+        "preference",
+        vec![],
+    );
 
     // Update the memory
     store.update_memory(id, Some("User prefers dark theme"), None);
@@ -268,7 +320,13 @@ fn test_write_delete_search_cycle() {
     let mut store = MemoryStore::new();
     let tenant_id = Uuid::new_v4();
 
-    let id = store.ingest_memory(tenant_id, None, "Temporary note about something", "event", vec![]);
+    let id = store.ingest_memory(
+        tenant_id,
+        None,
+        "Temporary note about something",
+        "event",
+        vec![],
+    );
     assert_eq!(store.search(tenant_id, "temporary note", 10).len(), 1);
 
     // Delete the memory
@@ -290,16 +348,36 @@ fn test_merge_supersedes_source_memories() {
     let mut store = MemoryStore::new();
     let tenant_id = Uuid::new_v4();
 
-    let id1 = store.ingest_memory(tenant_id, None, "John had lunch at noon", "event", vec!["John".into()]);
-    let id2 = store.ingest_memory(tenant_id, None, "John discussed project at lunch", "event", vec!["John".into()]);
-    let id3 = store.ingest_memory(tenant_id, None, "John mentioned deadline concerns at lunch", "event", vec!["John".into()]);
+    let id1 = store.ingest_memory(
+        tenant_id,
+        None,
+        "John had lunch at noon",
+        "event",
+        vec!["John".into()],
+    );
+    let id2 = store.ingest_memory(
+        tenant_id,
+        None,
+        "John discussed project at lunch",
+        "event",
+        vec!["John".into()],
+    );
+    let id3 = store.ingest_memory(
+        tenant_id,
+        None,
+        "John mentioned deadline concerns at lunch",
+        "event",
+        vec!["John".into()],
+    );
 
     // Merge all three into one semantic memory
-    let merged_id = store.merge_memories(
-        &[id1, id2, id3],
-        "John regularly has lunch meetings where he discusses project deadlines and concerns",
-        tenant_id,
-    ).unwrap();
+    let merged_id = store
+        .merge_memories(
+            &[id1, id2, id3],
+            "John regularly has lunch meetings where he discusses project deadlines and concerns",
+            tenant_id,
+        )
+        .unwrap();
 
     // Source memories should be superseded
     assert_eq!(store.memories[&id1].status, "superseded");
@@ -326,7 +404,13 @@ fn test_tenant_isolation() {
     let tenant_b = Uuid::new_v4();
 
     store.ingest_memory(tenant_a, None, "Secret data for tenant A", "fact", vec![]);
-    store.ingest_memory(tenant_b, None, "Different data for tenant B", "fact", vec![]);
+    store.ingest_memory(
+        tenant_b,
+        None,
+        "Different data for tenant B",
+        "fact",
+        vec![],
+    );
 
     // Tenant A should only see their own data
     let results_a = store.search(tenant_a, "data", 10);
@@ -362,13 +446,22 @@ fn test_point_in_time_replay() {
     // Replay at current time: should see "Current fact" but not "Old fact"
     let replay_now = store.replay_at(tenant_id, now);
     let contents: Vec<&str> = replay_now.iter().map(|m| m.content.as_str()).collect();
-    assert!(contents.contains(&"Current fact"), "Current fact should be visible at now");
-    assert!(!contents.contains(&"Old fact"), "Old fact should NOT be visible at now");
+    assert!(
+        contents.contains(&"Current fact"),
+        "Current fact should be visible at now"
+    );
+    assert!(
+        !contents.contains(&"Old fact"),
+        "Old fact should NOT be visible at now"
+    );
 
     // Replay at 30 days ago: should see "Old fact" but not "Current fact"
     let replay_past = store.replay_at(tenant_id, now - Duration::days(30));
     let past_contents: Vec<&str> = replay_past.iter().map(|m| m.content.as_str()).collect();
-    assert!(past_contents.contains(&"Old fact"), "Old fact should be visible 30 days ago");
+    assert!(
+        past_contents.contains(&"Old fact"),
+        "Old fact should be visible 30 days ago"
+    );
 }
 
 #[test]
@@ -391,12 +484,22 @@ fn test_audit_trail_completeness() {
     store.merge_memories(&[id1, id3], "Merged content", tenant_id);
 
     // Verify audit completeness
-    assert!(store.audit_log.len() >= 4, "Should have at least 4 audit entries (update + delete + 2 merge)");
+    assert!(
+        store.audit_log.len() >= 4,
+        "Should have at least 4 audit entries (update + delete + 2 merge)"
+    );
 
     let actions: Vec<&str> = store.audit_log.iter().map(|a| a.action.as_str()).collect();
     assert!(actions.contains(&"update"));
     assert!(actions.contains(&"delete"));
     assert!(actions.contains(&"merge"));
+    assert!(store.audit_log.iter().all(|a| a.tenant_id == tenant_id));
+    assert!(store
+        .audit_log
+        .iter()
+        .all(|a| store.memories.contains_key(&a.memory_id)));
+    assert!(store.audit_log.iter().any(|a| a.diff.is_some()));
+    assert!(store.audit_log.iter().all(|a| a.timestamp <= Utc::now()));
 }
 
 #[test]
@@ -426,9 +529,27 @@ fn test_search_returns_most_relevant_first() {
     let mut store = MemoryStore::new();
     let tenant_id = Uuid::new_v4();
 
-    store.ingest_memory(tenant_id, None, "The project deadline is next Friday", "fact", vec![]);
-    store.ingest_memory(tenant_id, None, "Complete unrelated topic about cooking", "fact", vec![]);
-    store.ingest_memory(tenant_id, None, "The project milestone review meeting", "event", vec![]);
+    store.ingest_memory(
+        tenant_id,
+        None,
+        "The project deadline is next Friday",
+        "fact",
+        vec![],
+    );
+    store.ingest_memory(
+        tenant_id,
+        None,
+        "Complete unrelated topic about cooking",
+        "fact",
+        vec![],
+    );
+    store.ingest_memory(
+        tenant_id,
+        None,
+        "The project milestone review meeting",
+        "event",
+        vec![],
+    );
 
     let results = store.search(tenant_id, "project deadline", 10);
     assert!(!results.is_empty());

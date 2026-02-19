@@ -11,7 +11,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{info, warn};
 
-use crate::config::{ChannelConfig, RateWindow, WindowType};
+use crate::config::{ChannelConfig, WindowType};
 
 /// Result of a rate limit check.
 #[derive(Debug, Clone, Serialize)]
@@ -45,21 +45,11 @@ impl RateLimiter {
     fn bucket_key(channel: &str, window: &WindowType) -> String {
         let now = Utc::now();
         match window {
-            WindowType::Minute => format!(
-                "mktg:rl:{}:minute:{}",
-                channel,
-                now.format("%Y%m%d%H%M")
-            ),
-            WindowType::Hourly => format!(
-                "mktg:rl:{}:hourly:{}",
-                channel,
-                now.format("%Y%m%d%H")
-            ),
-            WindowType::Daily => format!(
-                "mktg:rl:{}:daily:{}",
-                channel,
-                now.format("%Y%m%d")
-            ),
+            WindowType::Minute => {
+                format!("mktg:rl:{}:minute:{}", channel, now.format("%Y%m%d%H%M"))
+            }
+            WindowType::Hourly => format!("mktg:rl:{}:hourly:{}", channel, now.format("%Y%m%d%H")),
+            WindowType::Daily => format!("mktg:rl:{}:daily:{}", channel, now.format("%Y%m%d")),
             WindowType::Monthly => format!(
                 "mktg:rl:{}:monthly:{}{:02}",
                 channel,
@@ -106,7 +96,11 @@ impl RateLimiter {
                 window: rate_window.window,
                 current: *current,
                 limit: rate_window.limit,
-                remaining: if allowed { rate_window.limit - *current } else { 0 },
+                remaining: if allowed {
+                    rate_window.limit - *current
+                } else {
+                    0
+                },
                 allowed,
                 bucket_key: key,
             });
@@ -133,10 +127,7 @@ impl RateLimiter {
     }
 
     /// Check rate limit status without incrementing (read-only).
-    pub async fn check_status(
-        &self,
-        channel: &str,
-    ) -> Vec<RateLimitStatus> {
+    pub async fn check_status(&self, channel: &str) -> Vec<RateLimitStatus> {
         let config = match self.configs.get(channel) {
             Some(c) => c,
             None => return vec![],
@@ -187,7 +178,7 @@ impl RateLimiter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::default_channel_configs;
+    use crate::config::{default_channel_configs, RateWindow};
 
     #[tokio::test]
     async fn test_rate_limiter_allows_within_limit() {
@@ -205,9 +196,10 @@ mod tests {
     async fn test_rate_limiter_blocks_at_limit() {
         let mut configs = default_channel_configs();
         // Set very low limit for testing
-        configs.get_mut("twitter").unwrap().rate_limits = vec![
-            RateWindow { window: WindowType::Daily, limit: 2 },
-        ];
+        configs.get_mut("twitter").unwrap().rate_limits = vec![RateWindow {
+            window: WindowType::Daily,
+            limit: 2,
+        }];
 
         let limiter = RateLimiter::new(configs);
 

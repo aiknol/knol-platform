@@ -4,7 +4,6 @@
 
 use chrono::{Duration, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use uuid::Uuid;
 
 // ── Replicated types for testing (mirrors main.rs) ──
@@ -257,8 +256,7 @@ fn test_validity_window_logic() {
     let query_time = Utc.with_ymd_and_hms(2025, 3, 15, 0, 0, 0).unwrap();
 
     // Memory should be visible at query_time
-    let is_valid = query_time >= valid_from
-        && valid_to.map(|vt| query_time < vt).unwrap_or(true);
+    let is_valid = query_time >= valid_from && valid_to.map(|vt| query_time < vt).unwrap_or(true);
     assert!(is_valid);
 }
 
@@ -277,8 +275,7 @@ fn test_validity_window_after_end() {
     let valid_to = Some(Utc.with_ymd_and_hms(2025, 3, 1, 0, 0, 0).unwrap());
     let query_time = Utc.with_ymd_and_hms(2025, 6, 15, 0, 0, 0).unwrap();
 
-    let is_valid = query_time >= valid_from
-        && valid_to.map(|vt| query_time < vt).unwrap_or(true);
+    let is_valid = query_time >= valid_from && valid_to.map(|vt| query_time < vt).unwrap_or(true);
     assert!(!is_valid);
 }
 
@@ -288,7 +285,6 @@ fn test_validity_window_no_end_always_valid() {
     let valid_to: Option<chrono::DateTime<Utc>> = None;
     let query_time = Utc.with_ymd_and_hms(2099, 12, 31, 0, 0, 0).unwrap();
 
-    let is_valid = query_time >= valid_from
-        && valid_to.map(|vt| query_time < vt).unwrap_or(true);
+    let is_valid = query_time >= valid_from && valid_to.map(|vt| query_time < vt).unwrap_or(true);
     assert!(is_valid);
 }

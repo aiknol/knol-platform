@@ -15,8 +15,8 @@ cargo check --workspace --manifest-path "$ROOT_DIR/knol-oss/Cargo.toml"
 cargo check --workspace --manifest-path "$ROOT_DIR/knol-enterprise/Cargo.toml"
 
 echo "==> Rust clippy"
-(cd "$ROOT_DIR/knol-oss" && cargo clippy --workspace -- -D warnings)
-(cd "$ROOT_DIR/knol-enterprise" && cargo clippy --workspace -- -D warnings)
+(cd "$ROOT_DIR/knol-oss" && cargo clippy --workspace --all-targets -- -D warnings)
+(cd "$ROOT_DIR/knol-enterprise" && cargo clippy --workspace --all-targets -- -D warnings)
 
 echo "==> Rust tests"
 (cd "$ROOT_DIR/knol-oss" && cargo test --workspace --lib)
