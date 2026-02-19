@@ -50,10 +50,7 @@ pub fn cache_key(content: &str, role: &str, entity_names: &[String]) -> String {
 }
 
 /// Try to retrieve a cached extraction result from Redis.
-pub async fn get_cached(
-    redis: &fred::prelude::RedisClient,
-    key: &str,
-) -> Option<ExtractionResult> {
+pub async fn get_cached(redis: &fred::prelude::RedisClient, key: &str) -> Option<ExtractionResult> {
     match memory_cache::get::<ExtractionResult>(redis, key).await {
         Ok(Some(result)) => {
             debug!("LLM cache HIT: {}", key);

@@ -10,7 +10,9 @@ pub const SUBJECT_EXTRACT: &str = "memory.extract";
 
 /// Connect to NATS and return a JetStream context.
 pub async fn connect(nats_url: &str) -> Result<(async_nats::Client, Context), QueueError> {
-    let client = async_nats::connect(nats_url).await.map_err(QueueError::Connect)?;
+    let client = async_nats::connect(nats_url)
+        .await
+        .map_err(QueueError::Connect)?;
     let jetstream = jetstream::new(client.clone());
     info!("Connected to NATS at {}", nats_url);
     Ok((client, jetstream))
@@ -21,10 +23,7 @@ pub async fn ensure_stream(js: &Context) -> Result<Stream, QueueError> {
     let stream = js
         .get_or_create_stream(jetstream::stream::Config {
             name: STREAM_NAME.to_string(),
-            subjects: vec![
-                SUBJECT_WRITE.to_string(),
-                SUBJECT_EXTRACT.to_string(),
-            ],
+            subjects: vec![SUBJECT_WRITE.to_string(), SUBJECT_EXTRACT.to_string()],
             retention: jetstream::stream::RetentionPolicy::WorkQueue,
             max_age: std::time::Duration::from_secs(86400 * 7), // 7 days
             storage: jetstream::stream::StorageType::File,
@@ -58,7 +57,10 @@ pub async fn create_consumer(
     consumer_name: &str,
     filter_subject: &str,
 ) -> Result<PullConsumer, QueueError> {
-    let stream = js.get_stream(stream_name).await.map_err(|e| QueueError::GetStream(e.to_string()))?;
+    let stream = js
+        .get_stream(stream_name)
+        .await
+        .map_err(|e| QueueError::GetStream(e.to_string()))?;
     let consumer = stream
         .get_or_create_consumer(
             consumer_name,
@@ -73,7 +75,10 @@ pub async fn create_consumer(
         )
         .await
         .map_err(QueueError::Consumer)?;
-    info!("Consumer '{}' ready on subject '{}'", consumer_name, filter_subject);
+    info!(
+        "Consumer '{}' ready on subject '{}'",
+        consumer_name, filter_subject
+    );
     Ok(consumer)
 }
 
@@ -113,7 +118,8 @@ mod tests {
 
     #[test]
     fn test_deserialize_valid_json() {
-        let data = br#"{"content":"test","kind":"fact","confidence":0.9,"importance":0.7,"tags":[]}"#;
+        let data =
+            br#"{"content":"test","kind":"fact","confidence":0.9,"importance":0.7,"tags":[]}"#;
         let result: Result<memory_common::ExtractedMemory, _> = deserialize_message(data);
         assert!(result.is_ok());
         let mem = result.unwrap();

@@ -1,14 +1,11 @@
 //! Tests for the Reciprocal Rank Fusion algorithm.
 //! NOTE: This tests the algorithm logic extracted from the service.
 
-use uuid::Uuid;
 use std::collections::HashMap;
+use uuid::Uuid;
 
 /// RRF fusion: score(m) = Σ w_i / (k + rank_i(m))
-fn rrf_fusion(
-    ranked_lists: &[(&[Uuid], f64)],
-    k: f64,
-) -> Vec<(Uuid, f64)> {
+fn rrf_fusion(ranked_lists: &[(&[Uuid], f64)], k: f64) -> Vec<(Uuid, f64)> {
     let mut scores: HashMap<Uuid, f64> = HashMap::new();
     for (ids, weight) in ranked_lists {
         for (rank, id) in ids.iter().enumerate() {

@@ -818,8 +818,14 @@ mod tests {
     #[test]
     fn test_tenant_role_from_str_loose() {
         assert_eq!(TenantRole::from_str_loose("admin"), TenantRole::Admin);
-        assert_eq!(TenantRole::from_str_loose("developer"), TenantRole::Developer);
-        assert_eq!(TenantRole::from_str_loose("read_only"), TenantRole::ReadOnly);
+        assert_eq!(
+            TenantRole::from_str_loose("developer"),
+            TenantRole::Developer
+        );
+        assert_eq!(
+            TenantRole::from_str_loose("read_only"),
+            TenantRole::ReadOnly
+        );
         assert_eq!(TenantRole::from_str_loose("readonly"), TenantRole::ReadOnly);
         // Unknown defaults to ReadOnly (least privilege)
         assert_eq!(TenantRole::from_str_loose("unknown"), TenantRole::ReadOnly);
@@ -837,7 +843,8 @@ mod tests {
     #[test]
     fn test_tenant_context_default_role() {
         // When deserializing without role field, should default to Admin (backward compat)
-        let json = r#"{"tenant_id":"550e8400-e29b-41d4-a716-446655440000","user_id":null,"plan":"free"}"#;
+        let json =
+            r#"{"tenant_id":"550e8400-e29b-41d4-a716-446655440000","user_id":null,"plan":"free"}"#;
         let ctx: TenantContext = serde_json::from_str(json).unwrap();
         assert_eq!(ctx.role, TenantRole::Admin);
     }

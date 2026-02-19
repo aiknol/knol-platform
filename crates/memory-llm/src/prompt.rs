@@ -3,10 +3,10 @@
 //! The system prompt is the same regardless of provider — it instructs the model
 //! to return structured JSON with memories, entities, and relationships.
 
-use memory_common::{ExtractionResult, ExtractedMemory, MemoryVerification, VerificationStatus};
+use crate::error::LlmError;
+use memory_common::{ExtractedMemory, ExtractionResult, MemoryVerification, VerificationStatus};
 use serde::Deserialize;
 use tracing::warn;
-use crate::error::LlmError;
 
 /// Build the extraction system prompt, optionally including known entity context.
 pub fn build_system_prompt(existing_entities: &[String]) -> String {
@@ -67,10 +67,7 @@ Return empty arrays if no meaningful content."#
 pub fn build_verification_prompt(memories: &[ExtractedMemory], source_content: &str) -> String {
     let mut memory_list = String::new();
     for (i, mem) in memories.iter().enumerate() {
-        memory_list.push_str(&format!(
-            "  {}: \"{}\"\n",
-            i, mem.content
-        ));
+        memory_list.push_str(&format!("  {}: \"{}\"\n", i, mem.content));
     }
 
     format!(
@@ -113,9 +110,7 @@ pub fn validate_extraction_result(result: &ExtractionResult) -> Result<(), LlmEr
             ));
         }
         if memory.kind.is_empty() {
-            return Err(LlmError::Parse(
-                "Memory kind cannot be empty".to_string(),
-            ));
+            return Err(LlmError::Parse("Memory kind cannot be empty".to_string()));
         }
         if !(0.0..=1.0).contains(&memory.confidence) {
             return Err(LlmError::Parse(format!(
@@ -127,9 +122,7 @@ pub fn validate_extraction_result(result: &ExtractionResult) -> Result<(), LlmEr
 
     for entity in &result.entities {
         if entity.name.is_empty() {
-            return Err(LlmError::Parse(
-                "Entity name cannot be empty".to_string(),
-            ));
+            return Err(LlmError::Parse("Entity name cannot be empty".to_string()));
         }
     }
 
@@ -172,7 +165,11 @@ pub fn parse_verification_response(text: &str) -> Result<Vec<MemoryVerification>
     }
 
     let parsed: VerificationResponse = serde_json::from_str(text).map_err(|e| {
-        warn!("Verification parse error: {}. Raw: {}", e, &text[..text.len().min(500)]);
+        warn!(
+            "Verification parse error: {}. Raw: {}",
+            e,
+            &text[..text.len().min(500)]
+        );
         LlmError::Parse(format!("Verification response parse error: {}", e))
     })?;
 
@@ -335,7 +332,9 @@ mod tests {
             relationships: vec![make_rel("", "target", None)],
         };
         let err = validate_extraction_result(&result).unwrap_err();
-        assert!(err.to_string().contains("source and target cannot be empty"));
+        assert!(err
+            .to_string()
+            .contains("source and target cannot be empty"));
     }
 
     #[test]
@@ -346,7 +345,9 @@ mod tests {
             relationships: vec![make_rel("source", "", None)],
         };
         let err = validate_extraction_result(&result).unwrap_err();
-        assert!(err.to_string().contains("source and target cannot be empty"));
+        assert!(err
+            .to_string()
+            .contains("source and target cannot be empty"));
     }
 
     #[test]

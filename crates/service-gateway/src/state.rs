@@ -13,6 +13,7 @@ pub struct AppState {
     pub retrieve_service_url: String,
     pub admin_service_url: String,
     pub cors_origins: String,
+    pub webhook_encryption_key: Option<[u8; 32]>,
 }
 
 impl AppState {
@@ -27,20 +28,31 @@ impl AppState {
         let http_client = reqwest::Client::new();
 
         // Port: DB → env → default
-        let port = db_config::load_u64(
-            &db_pool, "services.gateway_port", "GATEWAY_PORT", 8080,
-        ).await as u16;
+        let port = db_config::load_u64(&db_pool, "services.gateway_port", "GATEWAY_PORT", 8080)
+            .await as u16;
 
         // Service URLs: DB → env → default
         let write_service_url = db_config::load_str(
-            &db_pool, "gateway.write_service_url", "WRITE_SERVICE_URL", "http://localhost:8081"
-        ).await;
+            &db_pool,
+            "gateway.write_service_url",
+            "WRITE_SERVICE_URL",
+            "http://localhost:8081",
+        )
+        .await;
         let retrieve_service_url = db_config::load_str(
-            &db_pool, "gateway.retrieve_service_url", "RETRIEVE_SERVICE_URL", "http://localhost:8082"
-        ).await;
+            &db_pool,
+            "gateway.retrieve_service_url",
+            "RETRIEVE_SERVICE_URL",
+            "http://localhost:8082",
+        )
+        .await;
         let admin_service_url = db_config::load_str(
-            &db_pool, "gateway.admin_service_url", "ADMIN_SERVICE_URL", "http://localhost:8084"
-        ).await;
+            &db_pool,
+            "gateway.admin_service_url",
+            "ADMIN_SERVICE_URL",
+            "http://localhost:8084",
+        )
+        .await;
         let cors_origins = db_config::load_str(
             &db_pool,
             "gateway.cors_origins",
@@ -48,6 +60,13 @@ impl AppState {
             "http://localhost:3005,http://localhost:3006,http://localhost:8080",
         )
         .await;
+
+        let webhook_encryption_key = memory_common::webhook_crypto::load_encryption_key_from_env();
+        if webhook_encryption_key.is_some() {
+            tracing::info!("Webhook secret encryption: enabled");
+        } else {
+            tracing::warn!("Webhook secret encryption: disabled (set WEBHOOK_ENCRYPTION_KEY or ADMIN_ENCRYPTION_KEY)");
+        }
 
         Ok(Self {
             db_pool,
@@ -58,6 +77,7 @@ impl AppState {
             retrieve_service_url,
             admin_service_url,
             cors_origins,
+            webhook_encryption_key,
         })
     }
 }

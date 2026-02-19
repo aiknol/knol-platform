@@ -1,7 +1,7 @@
 //! Anthropic Claude provider implementation.
 
 use async_trait::async_trait;
-use memory_common::{ExtractionResult, ExtractedMemory, MemoryVerification};
+use memory_common::{ExtractedMemory, ExtractionResult, MemoryVerification};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -10,8 +10,11 @@ use tokio::sync::Mutex;
 use tracing::{debug, error, warn};
 
 use crate::error::LlmError;
-use crate::guardrails::{GuardrailConfig, sanitize_extraction};
-use crate::prompt::{build_system_prompt_ext, build_verification_prompt, parse_verification_response, validate_extraction_result};
+use crate::guardrails::{sanitize_extraction, GuardrailConfig};
+use crate::prompt::{
+    build_system_prompt_ext, build_verification_prompt, parse_verification_response,
+    validate_extraction_result,
+};
 use crate::provider::{ExtractionOptions, LlmProvider};
 use crate::types::TokenUsage;
 
@@ -57,7 +60,13 @@ impl AnthropicProvider {
         role: &str,
         existing_entities: &[String],
     ) -> Result<ExtractionResult, LlmError> {
-        self.call_api_with_options(content, role, existing_entities, &ExtractionOptions::default()).await
+        self.call_api_with_options(
+            content,
+            role,
+            existing_entities,
+            &ExtractionOptions::default(),
+        )
+        .await
     }
 
     async fn call_api_with_options(
@@ -81,7 +90,10 @@ impl AnthropicProvider {
             }],
         };
 
-        debug!("Sending extraction request to Anthropic API ({} chars)", content.len());
+        debug!(
+            "Sending extraction request to Anthropic API ({} chars)",
+            content.len()
+        );
 
         let response = self
             .client
@@ -97,7 +109,10 @@ impl AnthropicProvider {
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(LlmError::Api(format!("Anthropic HTTP {}: {}", status, body)));
+            return Err(LlmError::Api(format!(
+                "Anthropic HTTP {}: {}",
+                status, body
+            )));
         }
 
         let api_response: AnthropicResponse = response.json().await.map_err(LlmError::Request)?;
@@ -132,7 +147,11 @@ impl AnthropicProvider {
         }
 
         let result: ExtractionResult = serde_json::from_str(&text).map_err(|e| {
-            let preview = if text.len() > 500 { &text[..500] } else { &text };
+            let preview = if text.len() > 500 {
+                &text[..500]
+            } else {
+                &text
+            };
             warn!("Anthropic parse error: {}. Raw: {}", e, preview);
             LlmError::Parse(e.to_string())
         })?;
@@ -159,7 +178,13 @@ impl LlmProvider for AnthropicProvider {
         role: &str,
         existing_entities: &[String],
     ) -> Result<ExtractionResult, LlmError> {
-        self.extract_memories_with_options(content, role, existing_entities, &ExtractionOptions::default()).await
+        self.extract_memories_with_options(
+            content,
+            role,
+            existing_entities,
+            &ExtractionOptions::default(),
+        )
+        .await
     }
 
     async fn extract_memories_with_options(
@@ -171,7 +196,10 @@ impl LlmProvider for AnthropicProvider {
     ) -> Result<ExtractionResult, LlmError> {
         let mut last_error = None;
         for attempt in 0..=MAX_RETRIES {
-            match self.call_api_with_options(content, role, existing_entities, options).await {
+            match self
+                .call_api_with_options(content, role, existing_entities, options)
+                .await
+            {
                 Ok(result) => return Ok(result),
                 Err(e) => {
                     if attempt < MAX_RETRIES {
@@ -217,7 +245,10 @@ impl LlmProvider for AnthropicProvider {
             }],
         };
 
-        debug!("Sending verification request to Anthropic API ({} memories)", memories.len());
+        debug!(
+            "Sending verification request to Anthropic API ({} memories)",
+            memories.len()
+        );
 
         let response = self
             .client
@@ -233,7 +264,10 @@ impl LlmProvider for AnthropicProvider {
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(LlmError::Api(format!("Anthropic verification HTTP {}: {}", status, body)));
+            return Err(LlmError::Api(format!(
+                "Anthropic verification HTTP {}: {}",
+                status, body
+            )));
         }
 
         let api_response: AnthropicResponse = response.json().await.map_err(LlmError::Request)?;
@@ -249,7 +283,13 @@ impl LlmProvider for AnthropicProvider {
         let text: String = api_response
             .content
             .iter()
-            .filter_map(|b| if b.block_type == "text" { Some(b.text.as_str()) } else { None })
+            .filter_map(|b| {
+                if b.block_type == "text" {
+                    Some(b.text.as_str())
+                } else {
+                    None
+                }
+            })
             .collect();
 
         parse_verification_response(&text)

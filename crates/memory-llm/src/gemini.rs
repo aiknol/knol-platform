@@ -4,7 +4,7 @@
 //! and Vertex AI.
 
 use async_trait::async_trait;
-use memory_common::{ExtractionResult, ExtractedMemory, MemoryVerification};
+use memory_common::{ExtractedMemory, ExtractionResult, MemoryVerification};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -13,8 +13,11 @@ use tokio::sync::Mutex;
 use tracing::{debug, error, warn};
 
 use crate::error::LlmError;
-use crate::guardrails::{GuardrailConfig, sanitize_extraction};
-use crate::prompt::{build_system_prompt_ext, build_verification_prompt, parse_verification_response, validate_extraction_result};
+use crate::guardrails::{sanitize_extraction, GuardrailConfig};
+use crate::prompt::{
+    build_system_prompt_ext, build_verification_prompt, parse_verification_response,
+    validate_extraction_result,
+};
 use crate::provider::{ExtractionOptions, LlmProvider};
 use crate::types::TokenUsage;
 
@@ -77,7 +80,13 @@ impl GeminiProvider {
         role: &str,
         existing_entities: &[String],
     ) -> Result<ExtractionResult, LlmError> {
-        self.call_api_with_options(content, role, existing_entities, &ExtractionOptions::default()).await
+        self.call_api_with_options(
+            content,
+            role,
+            existing_entities,
+            &ExtractionOptions::default(),
+        )
+        .await
     }
 
     async fn call_api_with_options(
@@ -99,9 +108,7 @@ impl GeminiProvider {
             }),
             contents: vec![GeminiContent {
                 role: Some("user".to_string()),
-                parts: vec![GeminiPart {
-                    text: user_message,
-                }],
+                parts: vec![GeminiPart { text: user_message }],
             }],
             generation_config: Some(GenerationConfig {
                 temperature: Some(0.0),
@@ -191,7 +198,13 @@ impl LlmProvider for GeminiProvider {
         role: &str,
         existing_entities: &[String],
     ) -> Result<ExtractionResult, LlmError> {
-        self.extract_memories_with_options(content, role, existing_entities, &ExtractionOptions::default()).await
+        self.extract_memories_with_options(
+            content,
+            role,
+            existing_entities,
+            &ExtractionOptions::default(),
+        )
+        .await
     }
 
     async fn extract_memories_with_options(
@@ -203,7 +216,10 @@ impl LlmProvider for GeminiProvider {
     ) -> Result<ExtractionResult, LlmError> {
         let mut last_error = None;
         for attempt in 0..=MAX_RETRIES {
-            match self.call_api_with_options(content, role, existing_entities, options).await {
+            match self
+                .call_api_with_options(content, role, existing_entities, options)
+                .await
+            {
                 Ok(result) => return Ok(result),
                 Err(e) => {
                     if attempt < MAX_RETRIES {
@@ -253,7 +269,10 @@ impl LlmProvider for GeminiProvider {
         };
 
         let url = self.endpoint_url();
-        debug!("Sending verification request to Gemini API ({} memories)", memories.len());
+        debug!(
+            "Sending verification request to Gemini API ({} memories)",
+            memories.len()
+        );
 
         let response = self
             .client
@@ -268,7 +287,10 @@ impl LlmProvider for GeminiProvider {
         if !response.status().is_success() {
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            return Err(LlmError::Api(format!("Gemini verification HTTP {}: {}", status, body)));
+            return Err(LlmError::Api(format!(
+                "Gemini verification HTTP {}: {}",
+                status, body
+            )));
         }
 
         let api_response: GeminiResponse = response.json().await.map_err(LlmError::Request)?;

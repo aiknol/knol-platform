@@ -114,33 +114,45 @@ impl EmbeddingProvider {
     pub async fn from_db(pool: &sqlx::PgPool) -> Result<Self, LlmError> {
         use memory_common::db_config;
 
-        let provider = db_config::load_string(
-            pool, "embedding.provider", "EMBEDDING_PROVIDER", "openai",
-        ).await;
-        let api_key = db_config::load_string(
-            pool, "embedding.api_key", "EMBEDDING_API_KEY", "",
-        ).await;
+        let provider =
+            db_config::load_string(pool, "embedding.provider", "EMBEDDING_PROVIDER", "openai")
+                .await;
+        let api_key =
+            db_config::load_string(pool, "embedding.api_key", "EMBEDDING_API_KEY", "").await;
         let model = db_config::load_string(
-            pool, "embedding.model", "EMBEDDING_MODEL", "text-embedding-3-small",
-        ).await;
-        let dimensions = db_config::load_u64(
-            pool, "embedding.dimensions", "EMBEDDING_DIMENSIONS", 1024,
-        ).await as usize;
+            pool,
+            "embedding.model",
+            "EMBEDDING_MODEL",
+            "text-embedding-3-small",
+        )
+        .await;
+        let dimensions =
+            db_config::load_u64(pool, "embedding.dimensions", "EMBEDDING_DIMENSIONS", 1024).await
+                as usize;
         let cache_enabled = db_config::load_bool(
-            pool, "embedding.cache_enabled", "EMBEDDING_CACHE_ENABLED", true,
-        ).await;
+            pool,
+            "embedding.cache_enabled",
+            "EMBEDDING_CACHE_ENABLED",
+            true,
+        )
+        .await;
         let cache_max = db_config::load_u64(
-            pool, "embedding.cache_max_entries", "EMBEDDING_CACHE_MAX", 10000,
-        ).await as usize;
+            pool,
+            "embedding.cache_max_entries",
+            "EMBEDDING_CACHE_MAX",
+            10000,
+        )
+        .await as usize;
 
         // If no dedicated embedding key, try the main LLM key
         let effective_key = if api_key.is_empty() {
-            let llm_provider = db_config::load_string(
-                pool, "llm.provider", "LLM_PROVIDER", "gemini",
-            ).await;
+            let llm_provider =
+                db_config::load_string(pool, "llm.provider", "LLM_PROVIDER", "gemini").await;
             match llm_provider.to_lowercase().as_str() {
                 "openai" => db_config::load_string(pool, "llm.api_key", "OPENAI_API_KEY", "").await,
-                "gemini" | "google" => db_config::load_string(pool, "llm.api_key", "GEMINI_API_KEY", "").await,
+                "gemini" | "google" => {
+                    db_config::load_string(pool, "llm.api_key", "GEMINI_API_KEY", "").await
+                }
                 _ => db_config::load_string(pool, "llm.api_key", "ANTHROPIC_API_KEY", "").await,
             }
         } else {
@@ -212,7 +224,10 @@ impl EmbeddingProvider {
             "gemini" | "google" => self.embed_gemini(&uncached_texts).await?,
             "local" => self.embed_local(&uncached_texts).await?,
             other => {
-                warn!("Unknown embedding provider '{}', falling back to OpenAI", other);
+                warn!(
+                    "Unknown embedding provider '{}', falling back to OpenAI",
+                    other
+                );
                 self.embed_openai(&uncached_texts).await?
             }
         };
@@ -236,7 +251,10 @@ impl EmbeddingProvider {
 
     /// OpenAI embedding API (also compatible with Azure OpenAI, Together, etc.).
     async fn embed_openai(&self, texts: &[&str]) -> Result<Vec<Vec<f32>>, LlmError> {
-        let url = self.config.api_url.as_deref()
+        let url = self
+            .config
+            .api_url
+            .as_deref()
             .unwrap_or("https://api.openai.com/v1/embeddings");
 
         let body = serde_json::json!({
@@ -264,29 +282,31 @@ impl EmbeddingProvider {
             )));
         }
 
-        let json: OpenAiEmbeddingResponse = resp
-            .json()
-            .await
-            .map_err(|e| LlmError::Parse(format!("Failed to parse OpenAI embedding response: {}", e)))?;
+        let json: OpenAiEmbeddingResponse = resp.json().await.map_err(|e| {
+            LlmError::Parse(format!("Failed to parse OpenAI embedding response: {}", e))
+        })?;
 
-        let mut embeddings: Vec<Vec<f32>> = json
-            .data
-            .into_iter()
-            .map(|d| d.embedding)
-            .collect();
+        let mut embeddings: Vec<Vec<f32>> = json.data.into_iter().map(|d| d.embedding).collect();
 
         // Ensure correct dimensions (truncate or pad if necessary)
         for emb in &mut embeddings {
             normalize_dimensions(emb, self.config.dimensions);
         }
 
-        debug!("OpenAI embedding: {} texts, {} tokens used", texts.len(), json.usage.total_tokens);
+        debug!(
+            "OpenAI embedding: {} texts, {} tokens used",
+            texts.len(),
+            json.usage.total_tokens
+        );
         Ok(embeddings)
     }
 
     /// Voyage AI embedding API.
     async fn embed_voyage(&self, texts: &[&str]) -> Result<Vec<Vec<f32>>, LlmError> {
-        let url = self.config.api_url.as_deref()
+        let url = self
+            .config
+            .api_url
+            .as_deref()
             .unwrap_or("https://api.voyageai.com/v1/embeddings");
 
         let body = serde_json::json!({
@@ -314,16 +334,11 @@ impl EmbeddingProvider {
             )));
         }
 
-        let json: VoyageEmbeddingResponse = resp
-            .json()
-            .await
-            .map_err(|e| LlmError::Parse(format!("Failed to parse Voyage embedding response: {}", e)))?;
+        let json: VoyageEmbeddingResponse = resp.json().await.map_err(|e| {
+            LlmError::Parse(format!("Failed to parse Voyage embedding response: {}", e))
+        })?;
 
-        let mut embeddings: Vec<Vec<f32>> = json
-            .data
-            .into_iter()
-            .map(|d| d.embedding)
-            .collect();
+        let mut embeddings: Vec<Vec<f32>> = json.data.into_iter().map(|d| d.embedding).collect();
 
         for emb in &mut embeddings {
             normalize_dimensions(emb, self.config.dimensions);
@@ -335,7 +350,10 @@ impl EmbeddingProvider {
 
     /// Google Gemini embedding API.
     async fn embed_gemini(&self, texts: &[&str]) -> Result<Vec<Vec<f32>>, LlmError> {
-        let base_url = self.config.api_url.as_deref()
+        let base_url = self
+            .config
+            .api_url
+            .as_deref()
             .unwrap_or("https://generativelanguage.googleapis.com/v1beta");
 
         // Gemini uses batchEmbedContents for multiple texts
@@ -375,16 +393,11 @@ impl EmbeddingProvider {
             )));
         }
 
-        let json: GeminiEmbeddingResponse = resp
-            .json()
-            .await
-            .map_err(|e| LlmError::Parse(format!("Failed to parse Gemini embedding response: {}", e)))?;
+        let json: GeminiEmbeddingResponse = resp.json().await.map_err(|e| {
+            LlmError::Parse(format!("Failed to parse Gemini embedding response: {}", e))
+        })?;
 
-        let mut embeddings: Vec<Vec<f32>> = json
-            .embeddings
-            .into_iter()
-            .map(|e| e.values)
-            .collect();
+        let mut embeddings: Vec<Vec<f32>> = json.embeddings.into_iter().map(|e| e.values).collect();
 
         for emb in &mut embeddings {
             normalize_dimensions(emb, self.config.dimensions);
@@ -528,7 +541,11 @@ mod tests {
     fn test_hash_embedding_normalized() {
         let e = hash_embedding("some meaningful text to embed", 1024);
         let norm: f32 = e.iter().map(|x| x * x).sum::<f32>().sqrt();
-        assert!((norm - 1.0).abs() < 0.01, "Expected L2 norm ~1.0, got {}", norm);
+        assert!(
+            (norm - 1.0).abs() < 0.01,
+            "Expected L2 norm ~1.0, got {}",
+            norm
+        );
     }
 
     #[test]
@@ -614,7 +631,10 @@ mod tests {
             cache_max_entries: 100,
         };
         let provider = EmbeddingProvider::new(config);
-        let emb = provider.embed("test query about Rust programming").await.unwrap();
+        let emb = provider
+            .embed("test query about Rust programming")
+            .await
+            .unwrap();
         assert_eq!(emb.len(), 1024);
     }
 
