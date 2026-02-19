@@ -134,7 +134,8 @@ mod tests {
         let s = "3.14";
         let default = 0.0f64;
         let result: f64 = s.parse().unwrap_or(default);
-        assert!((result - 3.14).abs() < f64::EPSILON);
+        let expected: f64 = s.parse().unwrap();
+        assert!((result - expected).abs() < f64::EPSILON);
     }
 
     #[test]

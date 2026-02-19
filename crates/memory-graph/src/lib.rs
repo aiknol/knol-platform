@@ -2,8 +2,8 @@
 
 use chrono::{DateTime, Utc};
 use sqlx::PgPool;
-use uuid::Uuid;
 use tracing::debug;
+use uuid::Uuid;
 
 // ── Entity Operations ──
 
@@ -16,9 +16,7 @@ pub async fn upsert_entity(
     summary: Option<&str>,
     attributes: Option<&serde_json::Value>,
 ) -> Result<Uuid, GraphError> {
-    let attrs = attributes
-        .cloned()
-        .unwrap_or_else(|| serde_json::json!({}));
+    let attrs = attributes.cloned().unwrap_or_else(|| serde_json::json!({}));
 
     let id = sqlx::query_scalar::<_, Uuid>(
         r#"
@@ -48,7 +46,7 @@ pub async fn upsert_entity(
 /// Get an entity by ID.
 pub async fn get_entity(pool: &PgPool, id: Uuid) -> Result<Option<EntityRow>, GraphError> {
     let row = sqlx::query_as::<_, EntityRow>(
-        "SELECT * FROM entities WHERE id = $1 AND status = 'active'"
+        "SELECT * FROM entities WHERE id = $1 AND status = 'active'",
     )
     .bind(id)
     .fetch_optional(pool)
@@ -108,6 +106,7 @@ pub async fn list_entities(
 // ── Edge Operations ──
 
 /// Insert or update an edge between two entities.
+#[allow(clippy::too_many_arguments)]
 pub async fn upsert_edge(
     pool: &PgPool,
     tenant_id: Uuid,
@@ -118,9 +117,7 @@ pub async fn upsert_edge(
     weight: f32,
     source_episode_id: Option<Uuid>,
 ) -> Result<Uuid, GraphError> {
-    let props = properties
-        .cloned()
-        .unwrap_or_else(|| serde_json::json!({}));
+    let props = properties.cloned().unwrap_or_else(|| serde_json::json!({}));
 
     let id = sqlx::query_scalar::<_, Uuid>(
         r#"
@@ -220,7 +217,10 @@ pub async fn expand_nhop(
         if types.is_empty() {
             String::new()
         } else {
-            let quoted: Vec<String> = types.iter().map(|t| format!("'{}'", t.replace('\'', ""))).collect();
+            let quoted: Vec<String> = types
+                .iter()
+                .map(|t| format!("'{}'", t.replace('\'', "")))
+                .collect();
             format!(" AND rel_type IN ({})", quoted.join(","))
         }
     } else {
@@ -276,7 +276,12 @@ pub async fn expand_nhop(
         .map_err(GraphError::Database)?;
 
     let result: Vec<(Uuid, u32)> = rows.into_iter().map(|(id, d)| (id, d as u32)).collect();
-    debug!("N-hop expansion (depth={}) from {}: {} entities", depth, entity_id, result.len());
+    debug!(
+        "N-hop expansion (depth={}) from {}: {} entities",
+        depth,
+        entity_id,
+        result.len()
+    );
     Ok(result)
 }
 
@@ -364,15 +369,18 @@ pub async fn get_neighbors(
     .await
     .map_err(GraphError::Database)?;
 
-    Ok(rows.into_iter().map(|r| NeighborInfo {
-        entity_id: r.neighbor_id,
-        name: r.neighbor_name,
-        entity_type: r.neighbor_type,
-        rel_type: r.rel_type,
-        weight: r.weight,
-        properties: r.properties,
-        direction: r.direction,
-    }).collect())
+    Ok(rows
+        .into_iter()
+        .map(|r| NeighborInfo {
+            entity_id: r.neighbor_id,
+            name: r.neighbor_name,
+            entity_type: r.neighbor_type,
+            rel_type: r.rel_type,
+            weight: r.weight,
+            properties: r.properties,
+            direction: r.direction,
+        })
+        .collect())
 }
 
 /// Neighbor information for graph exploration.
@@ -438,7 +446,11 @@ pub async fn expand_2hop(
     .await
     .map_err(GraphError::Database)?;
 
-    debug!("2-hop expansion from {}: {} entities", entity_id, rows.len());
+    debug!(
+        "2-hop expansion from {}: {} entities",
+        entity_id,
+        rows.len()
+    );
     Ok(rows)
 }
 

@@ -381,7 +381,7 @@ mod tests {
         let policy = create_test_policy(PolicyType::ContentFilter, rules);
 
         let result = engine.enforce_write_policies(
-            &[policy.clone()],
+            std::slice::from_ref(&policy),
             "This contains forbidden content",
             "semantic",
         );
@@ -403,7 +403,8 @@ mod tests {
         };
         let policy = create_test_policy(PolicyType::Access, rules);
 
-        let result = engine.enforce_write_policies(&[policy.clone()], "content", "semantic");
+        let result =
+            engine.enforce_write_policies(std::slice::from_ref(&policy), "content", "semantic");
         assert!(matches!(result, PolicyResult::Allow));
 
         let result = engine.enforce_write_policies(&[policy], "content", "unknown_type");
@@ -462,7 +463,8 @@ mod tests {
         };
         let policy = create_test_policy(PolicyType::Access, rules);
 
-        let result = engine.enforce_read_policies(&[policy.clone()], "Memory content", "user");
+        let result =
+            engine.enforce_read_policies(std::slice::from_ref(&policy), "Memory content", "user");
         assert!(matches!(result, PolicyResult::Allow));
 
         let result = engine.enforce_read_policies(&[policy], "Memory content", "secret");

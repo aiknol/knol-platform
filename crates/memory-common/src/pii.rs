@@ -141,10 +141,7 @@ impl PiiDetector {
         );
 
         // SSN pattern
-        regexes.insert(
-            PiiType::SSN,
-            Regex::new(r"\b\d{3}-\d{2}-\d{4}\b").unwrap(),
-        );
+        regexes.insert(PiiType::SSN, Regex::new(r"\b\d{3}-\d{2}-\d{4}\b").unwrap());
 
         // Credit Card pattern
         regexes.insert(
@@ -264,9 +261,9 @@ impl PiiDetector {
     /// Adds a custom regex pattern for a custom PII type.
     pub fn add_custom_pattern(&mut self, pattern: &str) -> Result<(), regex::Error> {
         let regex = Regex::new(pattern)?;
-        self.regexes
-            .insert(PiiType::Custom("custom"), regex);
-        self.policies.insert(PiiType::Custom("custom"), PiiPolicy::Redact);
+        self.regexes.insert(PiiType::Custom("custom"), regex);
+        self.policies
+            .insert(PiiType::Custom("custom"), PiiPolicy::Redact);
         Ok(())
     }
 
@@ -428,7 +425,7 @@ mod tests {
                 .iter()
                 .filter(|m| m.pii_type == PiiType::DateOfBirth)
                 .collect();
-            assert!(dob_matches.len() >= 1, "Failed for: {}", text);
+            assert!(!dob_matches.is_empty(), "Failed for: {}", text);
         }
     }
 
