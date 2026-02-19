@@ -2579,11 +2579,9 @@ dependencies = [
 name = "service-gateway"
 version = "0.1.0"
 dependencies = [
- "aes-gcm",
  "anyhow",
  "axum",
  "axum-extra",
- "base64 0.22.1",
  "chrono",
  "fred",
  "hex",
@@ -2593,7 +2591,6 @@ dependencies = [
  "memory-common",
  "memory-db",
  "memory-graph",
- "rand 0.8.5",
  "reqwest",
  "serde",
  "serde_json",
