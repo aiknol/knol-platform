@@ -18,18 +18,16 @@
 use async_nats::jetstream::consumer::PullConsumer;
 use axum::Router;
 use memory_common::{
-    GroundingConfig, MemoryWriteEvent, VerificationStatus,
     webhook::{
-        WebhookConfig, WebhookEvent, WebhookEventType, WebhookRegistration,
-        deliver_webhook,
+        deliver_webhook, WebhookConfig, WebhookEvent, WebhookEventType, WebhookRegistration,
     },
+    GroundingConfig, MemoryWriteEvent, VerificationStatus,
 };
 use memory_llm::{
-    ExtractionOptions, LlmCacheConfig, TriageConfig, TriageDecision,
-    triage_content, dynamic_output_tokens, prune_entity_context,
-    cache_key, get_cached, set_cached, log_token_usage,
-    ConflictConfig, ConflictAction, ExistingMemory, detect_conflicts,
-    EmbeddingProvider,
+    cache_key, detect_conflicts, dynamic_output_tokens, get_cached, log_token_usage,
+    prune_entity_context, set_cached, triage_content, ConflictAction, ConflictConfig,
+    EmbeddingProvider, ExistingMemory, ExtractionOptions, LlmCacheConfig, TriageConfig,
+    TriageDecision,
 };
 use sha2::Digest;
 use std::{net::SocketAddr, sync::Arc};
@@ -57,13 +55,14 @@ struct AppState {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
         )
         .json()
         .init();
 
     info!("Starting Memory Graph Service...");
+
+    memory_common::startup::validate_env("service-graph")?;
 
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgresql://memory:memory_dev@localhost:5432/memory".into());
@@ -72,8 +71,12 @@ async fn main() -> anyhow::Result<()> {
     let db_pool = memory_db::create_pool(&database_url, 4).await?;
 
     let port: u16 = memory_common::db_config::load_u64(
-        &db_pool, "services.graph_port", "GRAPH_SERVICE_PORT", 8083,
-    ).await as u16;
+        &db_pool,
+        "services.graph_port",
+        "GRAPH_SERVICE_PORT",
+        8083,
+    )
+    .await as u16;
     let (_nats_client, nats_js) = memory_queue::connect(&nats_url).await?;
     memory_queue::ensure_stream(&nats_js).await?;
 
@@ -94,8 +97,12 @@ async fn main() -> anyhow::Result<()> {
     // Load triage config from admin DB
     let triage = memory_llm::build_triage_config_from_db(&db_pool).await;
     let max_entity_context = memory_common::db_config::load_u64(
-        &db_pool, "llm.max_entity_context", "LLM_MAX_ENTITY_CONTEXT", 20,
-    ).await as usize;
+        &db_pool,
+        "llm.max_entity_context",
+        "LLM_MAX_ENTITY_CONTEXT",
+        20,
+    )
+    .await as usize;
     info!(
         "Triage config: enabled={}, min_words={}, light_threshold={}, max_entities={}",
         triage.enabled, triage.min_words, triage.light_threshold_words, max_entity_context
@@ -103,19 +110,35 @@ async fn main() -> anyhow::Result<()> {
 
     // ── Optimization configs ──
     let dynamic_output_tokens_enabled = memory_common::db_config::load_bool(
-        &db_pool, "llm.dynamic_output_tokens", "LLM_DYNAMIC_OUTPUT_TOKENS", true,
-    ).await;
+        &db_pool,
+        "llm.dynamic_output_tokens",
+        "LLM_DYNAMIC_OUTPUT_TOKENS",
+        true,
+    )
+    .await;
 
     let inline_verification = memory_common::db_config::load_bool(
-        &db_pool, "grounding.inline_verification", "GROUNDING_INLINE_VERIFICATION", true,
-    ).await;
+        &db_pool,
+        "grounding.inline_verification",
+        "GROUNDING_INLINE_VERIFICATION",
+        true,
+    )
+    .await;
 
     let cache_enabled = memory_common::db_config::load_bool(
-        &db_pool, "llm.cache_enabled", "LLM_CACHE_ENABLED", true,
-    ).await;
+        &db_pool,
+        "llm.cache_enabled",
+        "LLM_CACHE_ENABLED",
+        true,
+    )
+    .await;
     let cache_ttl = memory_common::db_config::load_u64(
-        &db_pool, "llm.cache_ttl_secs", "LLM_CACHE_TTL_SECS", 3600,
-    ).await;
+        &db_pool,
+        "llm.cache_ttl_secs",
+        "LLM_CACHE_TTL_SECS",
+        3600,
+    )
+    .await;
 
     let llm_cache = LlmCacheConfig {
         enabled: cache_enabled,
@@ -124,8 +147,12 @@ async fn main() -> anyhow::Result<()> {
 
     // Try to connect to Redis (optional — degrades gracefully if unavailable)
     let redis_url = memory_common::db_config::load_str(
-        &db_pool, "services.redis_url", "REDIS_URL", "redis://localhost:6379",
-    ).await;
+        &db_pool,
+        "services.redis_url",
+        "REDIS_URL",
+        "redis://localhost:6379",
+    )
+    .await;
     let redis = if cache_enabled {
         match memory_cache::create_client(&redis_url).await {
             Ok(client) => {
@@ -146,7 +173,10 @@ async fn main() -> anyhow::Result<()> {
     let embedder = EmbeddingProvider::from_db(&db_pool)
         .await
         .unwrap_or_else(|e| {
-            warn!("Failed to initialize embedding provider from DB: {}. Using local fallback.", e);
+            warn!(
+                "Failed to initialize embedding provider from DB: {}. Using local fallback.",
+                e
+            );
             EmbeddingProvider::new(memory_llm::EmbeddingConfig {
                 provider: "local".into(),
                 api_key: String::new(),
@@ -159,7 +189,8 @@ async fn main() -> anyhow::Result<()> {
         });
     info!(
         "Embedding provider: {} ({}D) — write-time generation enabled",
-        embedder.provider_name(), embedder.dimensions()
+        embedder.provider_name(),
+        embedder.dimensions()
     );
 
     // ── Conflict detection config ──
@@ -170,15 +201,23 @@ async fn main() -> anyhow::Result<()> {
     );
 
     // ── Webhook config ──
-    let webhook_enabled = memory_common::db_config::load_bool(
-        &db_pool, "webhooks.enabled", "WEBHOOKS_ENABLED", true,
-    ).await;
+    let webhook_enabled =
+        memory_common::db_config::load_bool(&db_pool, "webhooks.enabled", "WEBHOOKS_ENABLED", true)
+            .await;
     let webhook_max_retries = memory_common::db_config::load_u64(
-        &db_pool, "webhooks.max_retries", "WEBHOOKS_MAX_RETRIES", 3,
-    ).await as u32;
+        &db_pool,
+        "webhooks.max_retries",
+        "WEBHOOKS_MAX_RETRIES",
+        3,
+    )
+    .await as u32;
     let webhook_timeout = memory_common::db_config::load_u64(
-        &db_pool, "webhooks.timeout_secs", "WEBHOOKS_TIMEOUT_SECS", 10,
-    ).await;
+        &db_pool,
+        "webhooks.timeout_secs",
+        "WEBHOOKS_TIMEOUT_SECS",
+        10,
+    )
+    .await;
     let webhook_config = WebhookConfig {
         enabled: webhook_enabled,
         max_retries: webhook_max_retries,
@@ -189,7 +228,10 @@ async fn main() -> anyhow::Result<()> {
         .timeout(std::time::Duration::from_secs(webhook_timeout))
         .build()
         .unwrap_or_default();
-    info!("Webhooks: enabled={}, max_retries={}", webhook_enabled, webhook_max_retries);
+    info!(
+        "Webhooks: enabled={}, max_retries={}",
+        webhook_enabled, webhook_max_retries
+    );
 
     info!(
         "Optimizations: dynamic_tokens={}, inline_verification={}, cache={}, embeddings=write-time, conflicts={}, webhooks={}",
@@ -230,9 +272,12 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
-    let app = Router::new().route("/health", axum::routing::get(|| async {
-        axum::Json(serde_json::json!({"status": "ok", "service": "memory-graph"}))
-    }));
+    let app = Router::new().route(
+        "/health",
+        axum::routing::get(|| async {
+            axum::Json(serde_json::json!({"status": "ok", "service": "memory-graph"}))
+        }),
+    );
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("Graph service listening on {}", addr);
@@ -245,18 +290,11 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn process_messages(
-    state: Arc<AppState>,
-    consumer: PullConsumer,
-) -> anyhow::Result<()> {
+async fn process_messages(state: Arc<AppState>, consumer: PullConsumer) -> anyhow::Result<()> {
     use futures::StreamExt;
 
     loop {
-        let mut messages = consumer
-            .fetch()
-            .max_messages(10)
-            .messages()
-            .await?;
+        let mut messages = consumer.fetch().max_messages(10).messages().await?;
 
         while let Some(Ok(message)) = messages.next().await {
             let state = state.clone();
@@ -283,10 +321,7 @@ async fn process_messages(
     }
 }
 
-async fn process_single_event(
-    state: &AppState,
-    payload: &[u8],
-) -> anyhow::Result<()> {
+async fn process_single_event(state: &AppState, payload: &[u8]) -> anyhow::Result<()> {
     let event: MemoryWriteEvent = memory_queue::deserialize_message(payload)?;
     info!(
         "Processing write event: episode={} tenant={}",
@@ -297,10 +332,7 @@ async fn process_single_event(
     let triage_decision = triage_content(&event.content, &state.triage);
     match &triage_decision {
         TriageDecision::Skip { reason } => {
-            debug!(
-                "Triage: skipping episode {} ({})",
-                event.episode_id, reason
-            );
+            debug!("Triage: skipping episode {} ({})", event.episode_id, reason);
             return Ok(());
         }
         TriageDecision::Light => {
@@ -316,11 +348,8 @@ async fn process_single_event(
         .await
         .unwrap_or_default();
     let all_entity_names: Vec<String> = existing.iter().map(|e| e.name.clone()).collect();
-    let entity_names = prune_entity_context(
-        &event.content,
-        &all_entity_names,
-        state.max_entity_context,
-    );
+    let entity_names =
+        prune_entity_context(&event.content, &all_entity_names, state.max_entity_context);
     debug!(
         "Entity context: {} relevant of {} total",
         entity_names.len(),
@@ -340,10 +369,16 @@ async fn process_single_event(
                 );
                 // Log as cache hit
                 log_token_usage(
-                    &state.db_pool, event.tenant_id,
-                    state.llm.provider_name(), state.llm.model_name(),
-                    "extraction", 0, 0, true,
-                ).await;
+                    &state.db_pool,
+                    event.tenant_id,
+                    state.llm.provider_name(),
+                    state.llm.model_name(),
+                    "extraction",
+                    0,
+                    0,
+                    true,
+                )
+                .await;
                 return store_extraction(state, &event, &cached).await;
             }
         }
@@ -387,10 +422,16 @@ async fn process_single_event(
     {
         let usage = state.llm.get_token_usage().await;
         log_token_usage(
-            &state.db_pool, event.tenant_id,
-            state.llm.provider_name(), state.llm.model_name(),
-            "extraction", usage.input_tokens, usage.output_tokens, false,
-        ).await;
+            &state.db_pool,
+            event.tenant_id,
+            state.llm.provider_name(),
+            state.llm.model_name(),
+            "extraction",
+            usage.input_tokens,
+            usage.output_tokens,
+            false,
+        )
+        .await;
     }
 
     // ── 7. Cache the result for future identical requests ──
@@ -401,34 +442,43 @@ async fn process_single_event(
     }
 
     // ── 8. Separate verification pass (only if NOT using inline verification) ──
-    let verifications = if state.grounding.enable_verification
-        && !use_inline
-        && !extraction.memories.is_empty()
-    {
-        match state.llm.verify_memories(&extraction.memories, &event.content).await {
-            Ok(v) => {
-                info!("Verification complete: {} results", v.len());
-                // Log verification token usage
-                let usage = state.llm.get_token_usage().await;
-                log_token_usage(
-                    &state.db_pool, event.tenant_id,
-                    state.llm.provider_name(), state.llm.model_name(),
-                    "verification", usage.input_tokens, usage.output_tokens, false,
-                ).await;
-                v
+    let verifications =
+        if state.grounding.enable_verification && !use_inline && !extraction.memories.is_empty() {
+            match state
+                .llm
+                .verify_memories(&extraction.memories, &event.content)
+                .await
+            {
+                Ok(v) => {
+                    info!("Verification complete: {} results", v.len());
+                    // Log verification token usage
+                    let usage = state.llm.get_token_usage().await;
+                    log_token_usage(
+                        &state.db_pool,
+                        event.tenant_id,
+                        state.llm.provider_name(),
+                        state.llm.model_name(),
+                        "verification",
+                        usage.input_tokens,
+                        usage.output_tokens,
+                        false,
+                    )
+                    .await;
+                    v
+                }
+                Err(e) => {
+                    warn!("Verification failed (proceeding without): {}", e);
+                    Vec::new()
+                }
             }
-            Err(e) => {
-                warn!("Verification failed (proceeding without): {}", e);
-                Vec::new()
-            }
-        }
-    } else {
-        Vec::new()
-    };
+        } else {
+            Vec::new()
+        };
 
     // ── 9. Conflict detection against existing memories ──
     let conflicts = if state.conflict_config.enabled && !extraction.memories.is_empty() {
-        let existing_memories = load_existing_memories(&state.db_pool, event.tenant_id, event.user_id).await;
+        let existing_memories =
+            load_existing_memories(&state.db_pool, event.tenant_id, event.user_id).await;
         if existing_memories.is_empty() {
             Vec::new()
         } else {
@@ -439,7 +489,11 @@ async fn process_single_event(
                 &state.conflict_config,
             );
             if !c.is_empty() {
-                info!("Detected {} conflicts for episode {}", c.len(), event.episode_id);
+                info!(
+                    "Detected {} conflicts for episode {}",
+                    c.len(),
+                    event.episode_id
+                );
             }
             c
         }
@@ -447,7 +501,8 @@ async fn process_single_event(
         Vec::new()
     };
 
-    store_extraction_with_verifications(state, &event, &extraction, &verifications, &conflicts).await
+    store_extraction_with_verifications(state, &event, &extraction, &verifications, &conflicts)
+        .await
 }
 
 /// Load existing active memories for a tenant+user for conflict checking.
@@ -498,18 +553,24 @@ async fn load_existing_memories(
     };
 
     match rows {
-        Ok(rows) => rows.into_iter().map(|r| ExistingMemory {
-            id: r.id,
-            content: r.content,
-            kind: r.kind,
-            confidence: r.confidence,
-            importance: r.importance,
-            tags: r.tags,
-            entity_names: r.entity_names,
-            created_at: r.created_at,
-        }).collect(),
+        Ok(rows) => rows
+            .into_iter()
+            .map(|r| ExistingMemory {
+                id: r.id,
+                content: r.content,
+                kind: r.kind,
+                confidence: r.confidence,
+                importance: r.importance,
+                tags: r.tags,
+                entity_names: r.entity_names,
+                created_at: r.created_at,
+            })
+            .collect(),
         Err(e) => {
-            warn!("Failed to load existing memories for conflict detection: {}", e);
+            warn!(
+                "Failed to load existing memories for conflict detection: {}",
+                e
+            );
             Vec::new()
         }
     }
@@ -546,11 +607,16 @@ async fn store_extraction_with_verifications(
 ) -> anyhow::Result<()> {
     // Build a lookup: memory_index → (status, score)
     let verification_map: std::collections::HashMap<usize, (&VerificationStatus, f32)> =
-        verifications.iter().map(|v| (v.memory_index, (&v.status, v.score))).collect();
+        verifications
+            .iter()
+            .map(|v| (v.memory_index, (&v.status, v.score)))
+            .collect();
 
     // Build a lookup: new_content → conflict action (use first conflict per content)
-    let conflict_map: std::collections::HashMap<&str, &memory_llm::ConflictDetection> =
-        conflicts.iter().map(|c| (c.new_content.as_str(), c)).collect();
+    let conflict_map: std::collections::HashMap<&str, &memory_llm::ConflictDetection> = conflicts
+        .iter()
+        .map(|c| (c.new_content.as_str(), c))
+        .collect();
 
     // Track created resources for webhook events
     let mut created_memory_ids: Vec<Uuid> = Vec::new();
@@ -568,26 +634,36 @@ async fn store_extraction_with_verifications(
             ConflictAction::Supersede => {
                 // Mark the old memory as superseded
                 let _ = sqlx::query(
-                    "UPDATE memories SET status = 'superseded', updated_at = now() WHERE id = $1"
+                    "UPDATE memories SET status = 'superseded', updated_at = now() WHERE id = $1",
                 )
                 .bind(conflict.existing_memory_id)
                 .execute(&mut *tx)
                 .await;
                 superseded_ids.push(conflict.existing_memory_id);
-                debug!("Superseded memory {} ({})", conflict.existing_memory_id, conflict_type_str(&conflict.conflict_type));
+                debug!(
+                    "Superseded memory {} ({})",
+                    conflict.existing_memory_id,
+                    conflict_type_str(&conflict.conflict_type)
+                );
             }
             ConflictAction::SkipNew => {
                 skipped_count += 1;
-                debug!("Skipping duplicate new memory (existing={})", conflict.existing_memory_id);
+                debug!(
+                    "Skipping duplicate new memory (existing={})",
+                    conflict.existing_memory_id
+                );
             }
             ConflictAction::Review => {
-                debug!("Flagging conflict for review (existing={})", conflict.existing_memory_id);
+                debug!(
+                    "Flagging conflict for review (existing={})",
+                    conflict.existing_memory_id
+                );
                 // Still insert the new memory but mark for review via metadata
             }
             ConflictAction::Merge => {
                 // For now, treat merge as supersede (insert new version)
                 let _ = sqlx::query(
-                    "UPDATE memories SET status = 'superseded', updated_at = now() WHERE id = $1"
+                    "UPDATE memories SET status = 'superseded', updated_at = now() WHERE id = $1",
                 )
                 .bind(conflict.existing_memory_id)
                 .execute(&mut *tx)
@@ -676,7 +752,9 @@ async fn store_extraction_with_verifications(
                             None,
                             &embedding,
                             &content_hash,
-                        ).await {
+                        )
+                        .await
+                        {
                             warn!("Failed to store embedding for memory {}: {}", mid, e);
                         } else {
                             debug!("Stored {}D embedding for memory {}", embedding.len(), mid);
@@ -692,7 +770,8 @@ async fn store_extraction_with_verifications(
     }
 
     // Upsert entities
-    let mut entity_id_map: std::collections::HashMap<String, Uuid> = std::collections::HashMap::new();
+    let mut entity_id_map: std::collections::HashMap<String, Uuid> =
+        std::collections::HashMap::new();
     for ent in &extraction.entities {
         match sqlx::query_scalar::<_, Uuid>(
             r#"
@@ -771,25 +850,33 @@ async fn store_extraction_with_verifications(
         let db_pool = state.db_pool.clone();
         let wh_client = state.webhook_client.clone();
         let wh_config = state.webhook_config.clone();
-        let tenant_id = event.tenant_id;
-        let episode_id = event.episode_id;
-        let memory_ids = created_memory_ids.clone();
-        let entity_ids = created_entity_ids.clone();
-        let edge_count = created_edge_count;
-        let superseded = superseded_ids.clone();
-        let conflict_count = conflicts.len();
+        let summary = WebhookDispatchSummary {
+            tenant_id: event.tenant_id,
+            episode_id: event.episode_id,
+            memory_ids: created_memory_ids.clone(),
+            entity_ids: created_entity_ids.clone(),
+            edge_count: created_edge_count,
+            superseded_ids: superseded_ids.clone(),
+            conflict_count: conflicts.len(),
+        };
 
         tokio::spawn(async move {
-            dispatch_webhooks(
-                &db_pool, &wh_client, &wh_config,
-                tenant_id, episode_id,
-                &memory_ids, &entity_ids, edge_count,
-                &superseded, conflict_count,
-            ).await;
+            dispatch_webhooks(&db_pool, &wh_client, &wh_config, summary).await;
         });
     }
 
     Ok(())
+}
+
+/// Summary of resources created during extraction for webhook fan-out.
+struct WebhookDispatchSummary {
+    tenant_id: Uuid,
+    episode_id: Uuid,
+    memory_ids: Vec<Uuid>,
+    entity_ids: Vec<(Uuid, String)>,
+    edge_count: usize,
+    superseded_ids: Vec<Uuid>,
+    conflict_count: usize,
 }
 
 /// Dispatch webhook events for all resources created in this extraction.
@@ -797,14 +884,18 @@ async fn dispatch_webhooks(
     db_pool: &sqlx::PgPool,
     wh_client: &reqwest::Client,
     wh_config: &WebhookConfig,
-    tenant_id: Uuid,
-    episode_id: Uuid,
-    memory_ids: &[Uuid],
-    entity_ids: &[(Uuid, String)],
-    edge_count: usize,
-    superseded_ids: &[Uuid],
-    conflict_count: usize,
+    summary: WebhookDispatchSummary,
 ) {
+    let WebhookDispatchSummary {
+        tenant_id,
+        episode_id,
+        memory_ids,
+        entity_ids,
+        edge_count,
+        superseded_ids,
+        conflict_count,
+    } = summary;
+
     // Load registered webhooks for this tenant
     let webhooks = match load_tenant_webhooks(db_pool, tenant_id).await {
         Ok(w) => w,
@@ -819,7 +910,7 @@ async fn dispatch_webhooks(
     }
 
     // Fire memory.created events
-    for mid in memory_ids {
+    for mid in &memory_ids {
         let event = WebhookEvent::new(
             WebhookEventType::MemoryCreated,
             tenant_id,
@@ -832,7 +923,7 @@ async fn dispatch_webhooks(
     }
 
     // Fire entity.created events
-    for (eid, name) in entity_ids {
+    for (eid, name) in &entity_ids {
         let event = WebhookEvent::new(
             WebhookEventType::EntityCreated,
             tenant_id,
@@ -936,23 +1027,27 @@ async fn load_tenant_webhooks(
     .await;
 
     match rows {
-        Ok(rows) => Ok(rows.into_iter().map(|r| {
-            let event_types: Vec<WebhookEventType> = r.event_types
-                .iter()
-                .filter_map(|s| serde_json::from_str(&format!("\"{}\"", s)).ok())
-                .collect();
+        Ok(rows) => Ok(rows
+            .into_iter()
+            .map(|r| {
+                let event_types: Vec<WebhookEventType> = r
+                    .event_types
+                    .iter()
+                    .filter_map(|s| serde_json::from_str(&format!("\"{}\"", s)).ok())
+                    .collect();
 
-            WebhookRegistration {
-                id: r.id,
-                tenant_id: r.tenant_id,
-                url: r.url,
-                secret: r.secret,
-                event_types,
-                active: r.active,
-                description: r.description,
-                created_at: r.created_at,
-            }
-        }).collect()),
+                WebhookRegistration {
+                    id: r.id,
+                    tenant_id: r.tenant_id,
+                    url: r.url,
+                    secret: r.secret,
+                    event_types,
+                    active: r.active,
+                    description: r.description,
+                    created_at: r.created_at,
+                }
+            })
+            .collect()),
         Err(e) => {
             // Gracefully handle missing webhooks table (not yet migrated)
             debug!("Could not load webhooks (table may not exist): {}", e);
@@ -976,7 +1071,9 @@ struct WebhookRow {
 /// Wait for SIGTERM or Ctrl+C for graceful shutdown.
 async fn shutdown_signal() {
     let ctrl_c = async {
-        tokio::signal::ctrl_c().await.expect("Failed to install Ctrl+C handler");
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C handler");
     };
     #[cfg(unix)]
     let terminate = async {

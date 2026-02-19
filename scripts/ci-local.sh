@@ -18,6 +18,9 @@ echo "==> Rust clippy"
 (cd "$ROOT_DIR/knol-oss" && cargo clippy --workspace --all-targets -- -D warnings)
 (cd "$ROOT_DIR/knol-enterprise" && cargo clippy --workspace --all-targets -- -D warnings)
 
+echo "==> OSS service-graph strict clippy"
+(cd "$ROOT_DIR/knol-oss" && cargo clippy -p service-graph --all-targets -- -D warnings)
+
 echo "==> Rust tests"
 (cd "$ROOT_DIR/knol-oss" && cargo test --workspace --lib)
 (cd "$ROOT_DIR/knol-enterprise" && cargo test --workspace --lib)

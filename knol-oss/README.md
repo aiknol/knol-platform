@@ -226,7 +226,9 @@ Before publishing this repository, run:
 ./scripts/public-readiness.sh
 ```
 
-This verifies formatting, linting, tests, current-tree secret scan, and git-history high-confidence secret checks.
+This verifies formatting, linting, tests, current-tree secret scan, and git-history high-confidence secret checks, including strict service-graph linting via:
+
+- `cargo clippy -p service-graph --all-targets -- -D warnings`
 
 ## Contributing
 
