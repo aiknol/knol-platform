@@ -260,7 +260,10 @@ To block pushes when local CI fails, install the tracked git hooks:
 ./scripts/install-git-hooks.sh
 ```
 
-The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check fails.
+The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check fails, including:
+
+- `cargo fmt --all -- --check` in `knol-oss/`
+- `cargo fmt --all -- --check` in `knol-enterprise/`
 
 ## License
 

@@ -7,8 +7,8 @@ echo "==> Running local CI gates"
 echo "Root: $ROOT_DIR"
 
 echo "==> Rust fmt checks"
-cargo fmt --check --all --manifest-path "$ROOT_DIR/knol-oss/Cargo.toml"
-cargo fmt --check --all --manifest-path "$ROOT_DIR/knol-enterprise/Cargo.toml"
+(cd "$ROOT_DIR/knol-oss" && cargo fmt --all -- --check)
+(cd "$ROOT_DIR/knol-enterprise" && cargo fmt --all -- --check)
 
 echo "==> Rust checks"
 cargo check --workspace --manifest-path "$ROOT_DIR/knol-oss/Cargo.toml"
