@@ -61,7 +61,7 @@ impl PolicyType {
 }
 
 /// Rules for policy enforcement
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PolicyRules {
     /// Maximum retention period in days
     pub max_retention_days: Option<u32>,
@@ -75,19 +75,6 @@ pub struct PolicyRules {
     pub max_memory_size_bytes: Option<usize>,
     /// Allowed memory types (episodic, semantic, etc.)
     pub allowed_memory_types: Option<Vec<String>>,
-}
-
-impl Default for PolicyRules {
-    fn default() -> Self {
-        Self {
-            max_retention_days: None,
-            allowed_scopes: None,
-            blocked_keywords: None,
-            require_pii_redaction: None,
-            max_memory_size_bytes: None,
-            allowed_memory_types: None,
-        }
-    }
 }
 
 /// Represents a policy stored in the database
@@ -222,7 +209,10 @@ impl PolicyEngine {
         for policy in policies {
             if policy.policy_type == PolicyType::Access {
                 if let Some(allowed_types) = &policy.rules.allowed_memory_types {
-                    if !allowed_types.iter().any(|t| t.eq_ignore_ascii_case(memory_type)) {
+                    if !allowed_types
+                        .iter()
+                        .any(|t| t.eq_ignore_ascii_case(memory_type))
+                    {
                         return PolicyResult::Deny(format!(
                             "Memory type '{}' is not allowed by policy",
                             memory_type
@@ -234,21 +224,21 @@ impl PolicyEngine {
 
         // Check if PII redaction is required
         for policy in policies {
-            if policy.policy_type == PolicyType::Redaction {
-                if policy.rules.require_pii_redaction == Some(true) {
-                    let detector = PiiDetector::new();
-                    let redacted = detector.redact(content);
+            if policy.policy_type == PolicyType::Redaction
+                && policy.rules.require_pii_redaction == Some(true)
+            {
+                let detector = PiiDetector::new();
+                let redacted = detector.redact(content);
 
-                    if !redacted.redactions.is_empty() {
-                        return PolicyResult::Modify(PolicyModifications {
-                            content: Some(redacted.text),
-                            pii_redacted: true,
-                            reason: Some(format!(
-                                "Automatic PII redaction applied: {} items redacted",
-                                redacted.redactions.len()
-                            )),
-                        });
-                    }
+                if !redacted.redactions.is_empty() {
+                    return PolicyResult::Modify(PolicyModifications {
+                        content: Some(redacted.text),
+                        pii_redacted: true,
+                        reason: Some(format!(
+                            "Automatic PII redaction applied: {} items redacted",
+                            redacted.redactions.len()
+                        )),
+                    });
                 }
             }
         }
@@ -294,21 +284,21 @@ impl PolicyEngine {
 
         // Apply PII redaction on output if policy requires it
         for policy in policies {
-            if policy.policy_type == PolicyType::Redaction {
-                if policy.rules.require_pii_redaction == Some(true) {
-                    let detector = PiiDetector::new();
-                    let redacted = detector.redact(content);
+            if policy.policy_type == PolicyType::Redaction
+                && policy.rules.require_pii_redaction == Some(true)
+            {
+                let detector = PiiDetector::new();
+                let redacted = detector.redact(content);
 
-                    if !redacted.redactions.is_empty() {
-                        return PolicyResult::Modify(PolicyModifications {
-                            content: Some(redacted.text),
-                            pii_redacted: true,
-                            reason: Some(format!(
-                                "PII redaction applied on retrieval: {} items redacted",
-                                redacted.redactions.len()
-                            )),
-                        });
-                    }
+                if !redacted.redactions.is_empty() {
+                    return PolicyResult::Modify(PolicyModifications {
+                        content: Some(redacted.text),
+                        pii_redacted: true,
+                        reason: Some(format!(
+                            "PII redaction applied on retrieval: {} items redacted",
+                            redacted.redactions.len()
+                        )),
+                    });
                 }
             }
         }
@@ -390,7 +380,11 @@ mod tests {
         };
         let policy = create_test_policy(PolicyType::ContentFilter, rules);
 
-        let result = engine.enforce_write_policies(&[policy.clone()], "This contains forbidden content", "semantic");
+        let result = engine.enforce_write_policies(
+            &[policy.clone()],
+            "This contains forbidden content",
+            "semantic",
+        );
         match result {
             PolicyResult::Deny(reason) => assert!(reason.contains("forbidden")),
             _ => panic!("Expected Deny result for blocked keyword"),
@@ -427,7 +421,11 @@ mod tests {
             ..Default::default()
         };
         let policy = create_test_policy(PolicyType::Redaction, rules);
-        let result = engine.enforce_write_policies(&[policy], "Contact me at john@example.com for details", "semantic");
+        let result = engine.enforce_write_policies(
+            &[policy],
+            "Contact me at john@example.com for details",
+            "semantic",
+        );
         match result {
             PolicyResult::Modify(mods) => {
                 assert!(mods.pii_redacted);
@@ -447,7 +445,11 @@ mod tests {
             ..Default::default()
         };
         let policy = create_test_policy(PolicyType::Redaction, rules);
-        let result = engine.enforce_write_policies(&[policy], "This is clean content without PII", "semantic");
+        let result = engine.enforce_write_policies(
+            &[policy],
+            "This is clean content without PII",
+            "semantic",
+        );
         assert!(matches!(result, PolicyResult::Allow));
     }
 
@@ -521,14 +523,20 @@ mod tests {
     #[tokio::test]
     async fn test_multiple_policies_enforcement() {
         let engine = test_engine();
-        let size_policy = create_test_policy(PolicyType::Retention, PolicyRules {
-            max_memory_size_bytes: Some(1000),
-            ..Default::default()
-        });
-        let keyword_policy = create_test_policy(PolicyType::ContentFilter, PolicyRules {
-            blocked_keywords: Some(vec!["restricted".to_string()]),
-            ..Default::default()
-        });
+        let size_policy = create_test_policy(
+            PolicyType::Retention,
+            PolicyRules {
+                max_memory_size_bytes: Some(1000),
+                ..Default::default()
+            },
+        );
+        let keyword_policy = create_test_policy(
+            PolicyType::ContentFilter,
+            PolicyRules {
+                blocked_keywords: Some(vec!["restricted".to_string()]),
+                ..Default::default()
+            },
+        );
 
         let result = engine.enforce_write_policies(
             &[size_policy.clone(), keyword_policy.clone()],

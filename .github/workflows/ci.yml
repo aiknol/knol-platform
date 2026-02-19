@@ -80,8 +80,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - run: cargo fmt --check --manifest-path knol-oss/Cargo.toml
-      - run: cargo fmt --check --manifest-path knol-enterprise/Cargo.toml
+      - run: cargo fmt --check --all --manifest-path knol-oss/Cargo.toml
+      - run: cargo fmt --check --all --manifest-path knol-enterprise/Cargo.toml
 
   # ---------------------------------------------------------------------------
   # Website build

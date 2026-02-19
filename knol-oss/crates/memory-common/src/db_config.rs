@@ -23,12 +23,11 @@ pub async fn load_string(pool: &PgPool, db_key: &str, env_name: &str, default: &
 /// Load a string config: DB → env → default.
 pub async fn load_str(pool: &PgPool, db_key: &str, env_name: &str, default: &str) -> String {
     // 1. Try database
-    if let Ok(row) = sqlx::query_as::<_, ConfigRow>(
-        "SELECT value FROM system_config WHERE key = $1",
-    )
-    .bind(db_key)
-    .fetch_one(pool)
-    .await
+    if let Ok(row) =
+        sqlx::query_as::<_, ConfigRow>("SELECT value FROM system_config WHERE key = $1")
+            .bind(db_key)
+            .fetch_one(pool)
+            .await
     {
         if let Some(s) = row.value.as_str() {
             debug!("Config '{}' loaded from DB: {}", db_key, s);
@@ -83,24 +82,18 @@ pub async fn load_bool(pool: &PgPool, db_key: &str, env_name: &str, default: boo
 /// Expects the `value` column to be a JSON array of strings, e.g. `["a", "b"]`.
 /// Returns an empty vec if the key doesn't exist or isn't a valid array.
 pub async fn load_str_array(pool: &PgPool, db_key: &str) -> Option<Vec<String>> {
-    let row = sqlx::query_as::<_, ConfigRow>(
-        "SELECT value FROM system_config WHERE key = $1",
-    )
-    .bind(db_key)
-    .fetch_optional(pool)
-    .await
-    .ok()
-    .flatten()?;
+    let row = sqlx::query_as::<_, ConfigRow>("SELECT value FROM system_config WHERE key = $1")
+        .bind(db_key)
+        .fetch_optional(pool)
+        .await
+        .ok()
+        .flatten()?;
 
-    if let Some(arr) = row.value.as_array() {
-        Some(
-            arr.iter()
-                .filter_map(|v| v.as_str().map(|s| s.to_string()))
-                .collect(),
-        )
-    } else {
-        None
-    }
+    row.value.as_array().map(|arr| {
+        arr.iter()
+            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+            .collect()
+    })
 }
 
 #[cfg(test)]
@@ -202,7 +195,8 @@ mod tests {
     fn test_config_row_from_json_array() {
         let json: serde_json::Value = serde_json::json!(["a", "b", "c"]);
         let arr = json.as_array().unwrap();
-        let strings: Vec<String> = arr.iter()
+        let strings: Vec<String> = arr
+            .iter()
             .filter_map(|v| v.as_str().map(|s| s.to_string()))
             .collect();
         assert_eq!(strings, vec!["a", "b", "c"]);
@@ -212,7 +206,8 @@ mod tests {
     fn test_config_row_mixed_array() {
         let json: serde_json::Value = serde_json::json!(["a", 1, "b", null]);
         let arr = json.as_array().unwrap();
-        let strings: Vec<String> = arr.iter()
+        let strings: Vec<String> = arr
+            .iter()
             .filter_map(|v| v.as_str().map(|s| s.to_string()))
             .collect();
         assert_eq!(strings, vec!["a", "b"]);
