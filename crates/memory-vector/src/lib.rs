@@ -1,11 +1,12 @@
 //! Vector search operations using pgvector.
 
-use sqlx::PgPool;
-use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use sqlx::PgPool;
 use tracing::debug;
+use uuid::Uuid;
 
 /// Store an embedding vector for a memory.
+#[allow(clippy::too_many_arguments)]
 pub async fn store_vector(
     pool: &PgPool,
     memory_id: Uuid,
@@ -53,6 +54,7 @@ pub async fn store_vector(
 }
 
 /// Search for similar memories using cosine similarity.
+#[allow(clippy::too_many_arguments)]
 pub async fn search_similar(
     pool: &PgPool,
     tenant_id: Uuid,

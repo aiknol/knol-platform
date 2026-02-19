@@ -4,13 +4,13 @@
 //! so the rest of the system can call `extract_memories` without caring which model
 //! is behind it.
 
-use async_trait::async_trait;
-use memory_common::{ExtractionResult, ExtractedMemory, MemoryVerification};
 use crate::error::LlmError;
 use crate::types::TokenUsage;
+use async_trait::async_trait;
+use memory_common::{ExtractedMemory, ExtractionResult, MemoryVerification};
 
 /// Options that callers can pass to tune extraction behavior per-call.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ExtractionOptions {
     /// Override the default max_output_tokens for this call.
     /// When `None`, the provider uses its compiled default (4096).
@@ -19,15 +19,6 @@ pub struct ExtractionOptions {
     /// (`grounded`, `ground_score`) in the extraction JSON, eliminating
     /// the need for a separate verification call.
     pub inline_verification: bool,
-}
-
-impl Default for ExtractionOptions {
-    fn default() -> Self {
-        Self {
-            max_output_tokens: None,
-            inline_verification: false,
-        }
-    }
 }
 
 /// Trait that every LLM provider must implement.
@@ -58,7 +49,8 @@ pub trait LlmProvider: Send + Sync {
         existing_entities: &[String],
         _options: &ExtractionOptions,
     ) -> Result<ExtractionResult, LlmError> {
-        self.extract_memories(content, role, existing_entities).await
+        self.extract_memories(content, role, existing_entities)
+            .await
     }
 
     /// Verify extracted memories against their source content (factual grounding).

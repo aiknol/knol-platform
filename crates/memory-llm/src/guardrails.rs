@@ -117,12 +117,24 @@ impl GuardrailConfig {
 // ── Allowed Types ───────────────────────────────────────────────────────────
 
 const VALID_MEMORY_TYPES: &[&str] = &[
-    "preference", "fact", "task", "event", "relationship", "temporalchange",
-    "temporal_change", "goal",
+    "preference",
+    "fact",
+    "task",
+    "event",
+    "relationship",
+    "temporalchange",
+    "temporal_change",
+    "goal",
 ];
 
 const VALID_ENTITY_TYPES: &[&str] = &[
-    "person", "organization", "product", "concept", "location", "event", "time",
+    "person",
+    "organization",
+    "product",
+    "concept",
+    "location",
+    "event",
+    "time",
     "technology",
 ];
 
@@ -237,7 +249,7 @@ pub fn sanitize_extraction(
             while !mem.content.is_char_boundary(mem.content.len()) {
                 mem.content.pop();
             }
-            mem.content.push_str("…");
+            mem.content.push('…');
         }
 
         // Check blocked keywords
@@ -356,14 +368,22 @@ pub fn sanitize_extraction(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use memory_common::{ExtractedEntity, ExtractedMemory, ExtractedRelationship, ExtractionResult};
+    use memory_common::{
+        ExtractedEntity, ExtractedMemory, ExtractedRelationship, ExtractionResult,
+    };
 
     fn default_config() -> GuardrailConfig {
         GuardrailConfig::default()
     }
 
     /// Helper to create an ExtractedMemory with grounding fields defaulted to None.
-    fn mem(content: &str, kind: &str, confidence: f32, importance: f32, tags: Vec<String>) -> ExtractedMemory {
+    fn mem(
+        content: &str,
+        kind: &str,
+        confidence: f32,
+        importance: f32,
+        tags: Vec<String>,
+    ) -> ExtractedMemory {
         ExtractedMemory {
             content: content.to_string(),
             kind: kind.to_string(),
@@ -381,7 +401,13 @@ mod tests {
     #[test]
     fn test_pii_redaction_in_memories() {
         let result = ExtractionResult {
-            memories: vec![mem("Alex's email is alex@meridian.com", "Fact", 0.9, 0.7, vec!["contact".into()])],
+            memories: vec![mem(
+                "Alex's email is alex@meridian.com",
+                "Fact",
+                0.9,
+                0.7,
+                vec!["contact".into()],
+            )],
             entities: vec![],
             relationships: vec![],
         };
@@ -398,7 +424,13 @@ mod tests {
             ..Default::default()
         };
         let result = ExtractionResult {
-            memories: vec![mem("Email is alex@meridian.com please", "Fact", 0.9, 0.7, vec![])],
+            memories: vec![mem(
+                "Email is alex@meridian.com please",
+                "Fact",
+                0.9,
+                0.7,
+                vec![],
+            )],
             entities: vec![],
             relationships: vec![],
         };
@@ -414,7 +446,13 @@ mod tests {
             ..Default::default()
         };
         let result = ExtractionResult {
-            memories: vec![mem("Email is alex@meridian.com please", "Fact", 0.9, 0.7, vec![])],
+            memories: vec![mem(
+                "Email is alex@meridian.com please",
+                "Fact",
+                0.9,
+                0.7,
+                vec![],
+            )],
             entities: vec![],
             relationships: vec![],
         };
@@ -425,7 +463,13 @@ mod tests {
     #[test]
     fn test_no_false_positives_on_clean_text() {
         let result = ExtractionResult {
-            memories: vec![mem("Alex is a senior engineer at Meridian Health and prefers Rust over Go.", "Fact", 0.9, 0.7, vec![])],
+            memories: vec![mem(
+                "Alex is a senior engineer at Meridian Health and prefers Rust over Go.",
+                "Fact",
+                0.9,
+                0.7,
+                vec![],
+            )],
             entities: vec![],
             relationships: vec![],
         };
@@ -512,7 +556,13 @@ mod tests {
             ..Default::default()
         };
         let result = ExtractionResult {
-            memories: vec![mem("This is a very long memory content that should be truncated", "Fact", 0.9, 0.5, vec![])],
+            memories: vec![mem(
+                "This is a very long memory content that should be truncated",
+                "Fact",
+                0.9,
+                0.5,
+                vec![],
+            )],
             entities: vec![],
             relationships: vec![],
         };
@@ -639,8 +689,20 @@ mod tests {
     fn test_full_pipeline_realistic() {
         let result = ExtractionResult {
             memories: vec![
-                mem("Alex works at Meridian Health, email: alex@meridian.com", "Fact", 0.95, 0.8, vec!["work".into()]),
-                mem("Alex prefers Rust over Go", "Preference", 0.9, 0.6, vec!["tech".into()]),
+                mem(
+                    "Alex works at Meridian Health, email: alex@meridian.com",
+                    "Fact",
+                    0.95,
+                    0.8,
+                    vec!["work".into()],
+                ),
+                mem(
+                    "Alex prefers Rust over Go",
+                    "Preference",
+                    0.9,
+                    0.6,
+                    vec!["tech".into()],
+                ),
             ],
             entities: vec![
                 ExtractedEntity {

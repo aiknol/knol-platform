@@ -18,6 +18,9 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+/// Input tuple for batch decay scoring: (id, importance, created_at, last_accessed_at).
+pub type DecayInput = (uuid::Uuid, f32, DateTime<Utc>, Option<DateTime<Utc>>);
+
 /// Decay configuration — loaded from system_config table.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DecayConfig {
@@ -130,7 +133,7 @@ pub fn apply_access_boost(current_importance: f32, config: &DecayConfig) -> f32 
 /// Batch-apply decay to multiple memories for efficient retrieval scoring.
 /// Returns Vec of (memory_id, decayed_score).
 pub fn batch_decay_scores(
-    memories: &[(uuid::Uuid, f32, DateTime<Utc>, Option<DateTime<Utc>>)], // (id, importance, created_at, last_accessed)
+    memories: &[DecayInput],
     now: DateTime<Utc>,
     config: &DecayConfig,
 ) -> Vec<(uuid::Uuid, f32)> {
@@ -147,11 +150,31 @@ pub fn batch_decay_scores(
 pub async fn build_decay_config_from_db(pool: &sqlx::PgPool) -> DecayConfig {
     use memory_common::db_config;
 
-    let enabled = db_config::load_bool(pool, "memory.decay_enabled", "MEMORY_DECAY_ENABLED", true).await;
-    let function_str = db_config::load_string(pool, "memory.decay_function", "MEMORY_DECAY_FUNCTION", "exponential").await;
-    let half_life = db_config::load_f64(pool, "memory.decay_half_life_hours", "MEMORY_DECAY_HALF_LIFE", 168.0).await;
-    let min_score = db_config::load_f64(pool, "memory.decay_min_score", "MEMORY_DECAY_MIN_SCORE", 0.05).await as f32;
-    let access_boost = db_config::load_f64(pool, "memory.access_boost", "MEMORY_ACCESS_BOOST", 0.05).await as f32;
+    let enabled =
+        db_config::load_bool(pool, "memory.decay_enabled", "MEMORY_DECAY_ENABLED", true).await;
+    let function_str = db_config::load_string(
+        pool,
+        "memory.decay_function",
+        "MEMORY_DECAY_FUNCTION",
+        "exponential",
+    )
+    .await;
+    let half_life = db_config::load_f64(
+        pool,
+        "memory.decay_half_life_hours",
+        "MEMORY_DECAY_HALF_LIFE",
+        168.0,
+    )
+    .await;
+    let min_score = db_config::load_f64(
+        pool,
+        "memory.decay_min_score",
+        "MEMORY_DECAY_MIN_SCORE",
+        0.05,
+    )
+    .await as f32;
+    let access_boost =
+        db_config::load_f64(pool, "memory.access_boost", "MEMORY_ACCESS_BOOST", 0.05).await as f32;
 
     let function = match function_str.as_str() {
         "linear" => DecayFunction::Linear,
@@ -216,7 +239,12 @@ mod tests {
         let created = now - Duration::hours(10000); // very old
 
         let score = decayed_score(0.5, created, None, now, &config);
-        assert!(score >= config.min_score, "Score {} should be >= min {}", score, config.min_score);
+        assert!(
+            score >= config.min_score,
+            "Score {} should be >= min {}",
+            score,
+            config.min_score
+        );
     }
 
     #[test]
@@ -306,9 +334,9 @@ mod tests {
         let now = Utc::now();
 
         let memories = vec![
-            (Uuid::new_v4(), 0.9, now, None),                           // just created
-            (Uuid::new_v4(), 0.9, now - Duration::hours(168), None),    // 7 days old
-            (Uuid::new_v4(), 0.9, now - Duration::hours(336), None),    // 14 days old
+            (Uuid::new_v4(), 0.9, now, None), // just created
+            (Uuid::new_v4(), 0.9, now - Duration::hours(168), None), // 7 days old
+            (Uuid::new_v4(), 0.9, now - Duration::hours(336), None), // 14 days old
         ];
 
         let scores = batch_decay_scores(&memories, now, &config);
