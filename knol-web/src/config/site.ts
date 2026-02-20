@@ -6,7 +6,7 @@ export const SITE = {
   description:
     'Rust-native context engineering platform for LLM applications. One binary, one PostgreSQL database, sub-5ms latency. Hybrid retrieval, knowledge graphs, memory decay, and conflict detection. Deploy in 60 seconds.',
   url: 'https://aiknol.com',
-  appUrl: 'https://app.aiknol.com',
+  appUrl: 'https://app.aiknol.com/admin/login/',
   github: 'https://github.com/aiknol/knol',
   docsUrl: '/docs/',
   pypi: 'https://pypi.org/project/knol/',
@@ -49,7 +49,7 @@ export const FOOTER_SECTIONS = [
       { label: 'Features', href: '/#features' },
       { label: 'Pricing', href: '/pricing/' },
       { label: 'Comparison', href: '/comparison' },
-      { label: 'Roadmap', href: `${SITE.github}/blob/main/ROADMAP.md`, external: true },
+      { label: 'Roadmap', href: `${SITE.github}/issues`, external: true },
     ],
   },
   {
