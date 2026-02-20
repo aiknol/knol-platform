@@ -35,6 +35,7 @@ export const NAV_LINKS: NavItem[] = [
   { href: '/comparison', label: 'Compare' },
   { href: '/pricing/', label: 'Pricing' },
   { href: '/blog/', label: 'Blog' },
+  { href: `mailto:${SITE.contactEmail}`, label: 'Contact' },
   { href: SITE.github, label: 'GitHub', external: true },
 ];
 
