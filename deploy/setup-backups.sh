@@ -32,7 +32,14 @@ if ! command -v pg_dump >/dev/null 2>&1; then
     apt-get install -y -qq postgresql-client
 fi
 if ! command -v aws >/dev/null 2>&1; then
-    apt-get install -y -qq awscli
+    if ! apt-get install -y -qq awscli; then
+        apt-get install -y -qq python3-pip
+        pip3 install --break-system-packages --no-cache-dir awscli
+    fi
+fi
+if ! command -v aws >/dev/null 2>&1; then
+    echo "ERROR: aws cli installation failed" >&2
+    exit 1
 fi
 
 # Create directories
@@ -162,7 +169,7 @@ chown "$CRON_USER":"$CRON_USER" "$BACKUP_SCRIPT"
 
 # Install cron job — daily at 3:00 AM UTC
 CRON_LINE="0 3 * * * $BACKUP_SCRIPT"
-(crontab -u "$CRON_USER" -l 2>/dev/null | grep -v "$BACKUP_SCRIPT"; echo "$CRON_LINE") | crontab -u "$CRON_USER" -
+(crontab -u "$CRON_USER" -l 2>/dev/null | grep -v "$BACKUP_SCRIPT" || true; echo "$CRON_LINE") | crontab -u "$CRON_USER" -
 
 echo ""
 echo "Backup setup complete:"
