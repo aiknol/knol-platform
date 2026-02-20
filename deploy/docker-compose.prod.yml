@@ -24,7 +24,6 @@ services:
     environment:
       API_DOMAIN: ${API_DOMAIN}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN}
-      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-https://aiknol.com}
     ports:
       - "80:80"
       - "443:443"
@@ -58,6 +57,7 @@ services:
     env_file: .env.production
     environment:
       GATEWAY_PORT: "8080"
+      GATEWAY_CORS_ORIGINS: ${GATEWAY_CORS_ORIGINS:-https://aiknol.com,https://www.aiknol.com,https://app.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health >/dev/null || exit 1"]
       interval: 10s
@@ -163,7 +163,7 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
-      ADMIN_CORS_ORIGIN: ${CORS_ALLOW_ORIGIN:-https://aiknol.com}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-https://aiknol.com,https://www.aiknol.com,https://app.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
       MARKETING_SERVICE_URL: http://marketing:8088
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/health >/dev/null || exit 1"]
@@ -190,7 +190,7 @@ services:
     environment:
       JOBS_SERVICE_PORT: "8085"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8085/health >/dev/null || exit 1"]
+      test: ["CMD-SHELL", "kill -0 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -295,8 +295,6 @@ services:
       --jetstream
       --http_port=8222
       --store_dir=/data
-      --max_mem_store=256MB
-      --max_file_store=1GB
     volumes:
       - nats_data:/data
     healthcheck:

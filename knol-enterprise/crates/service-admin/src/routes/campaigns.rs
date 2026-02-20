@@ -16,15 +16,34 @@ pub async fn list_campaigns(
     State(state): State<Arc<AdminAppState>>,
     _claims: AdminClaims,
 ) -> Result<Json<Vec<serde_json::Value>>, AdminError> {
-    let rows = sqlx::query_as::<_, CampaignRow>(
-        "SELECT id, name, cron, channels, enabled, phase, description, created_at, updated_at FROM marketing_campaigns ORDER BY phase, name",
-    )
-    .fetch_all(&state.db_pool)
-    .await
-    .map_err(|e| {
-        tracing::error!("Database error: {}", e);
-        AdminError::Internal("Database error".into())
-    })?;
+    let has_phase = has_column(&state.db_pool, "marketing_campaigns", "phase").await?;
+    let has_description = has_column(&state.db_pool, "marketing_campaigns", "description").await?;
+
+    // Compatibility: local/dev databases created from older consolidated migrations
+    // may not have `phase`/`description` yet. Project those fields with defaults.
+    let phase_expr = if has_phase {
+        "phase"
+    } else {
+        "'content_engine'::text AS phase"
+    };
+    let description_expr = if has_description {
+        "description"
+    } else {
+        "''::text AS description"
+    };
+    let order_clause = if has_phase { "phase, name" } else { "name" };
+    let sql = format!(
+        "SELECT id, name, cron, channels, enabled, {}, {}, created_at, updated_at FROM marketing_campaigns ORDER BY {}",
+        phase_expr, description_expr, order_clause
+    );
+
+    let rows = sqlx::query_as::<_, CampaignRow>(&sql)
+        .fetch_all(&state.db_pool)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error: {}", e);
+            AdminError::Internal("Database error".into())
+        })?;
 
     let mut campaigns = Vec::new();
     for r in &rows {
@@ -131,18 +150,33 @@ pub async fn update_campaign(
         }
     }
 
-    // Get old values for audit
-    let old = sqlx::query_as::<_, CampaignRow>(
-        "SELECT id, name, cron, channels, enabled, phase, description, created_at, updated_at FROM marketing_campaigns WHERE name = $1",
-    )
-    .bind(&name)
-    .fetch_optional(&state.db_pool)
-    .await
-    .map_err(|e| {
-        tracing::error!("Database error: {}", e);
-        AdminError::Internal("Database error".into())
-    })?
-    .ok_or_else(|| AdminError::NotFound(format!("Campaign '{}' not found", name)))?;
+    let has_phase = has_column(&state.db_pool, "marketing_campaigns", "phase").await?;
+    let has_description = has_column(&state.db_pool, "marketing_campaigns", "description").await?;
+
+    // Get old values for audit, compatible across schema versions.
+    let phase_expr = if has_phase {
+        "phase"
+    } else {
+        "'content_engine'::text AS phase"
+    };
+    let description_expr = if has_description {
+        "description"
+    } else {
+        "''::text AS description"
+    };
+    let old_sql = format!(
+        "SELECT id, name, cron, channels, enabled, {}, {}, created_at, updated_at FROM marketing_campaigns WHERE name = $1",
+        phase_expr, description_expr
+    );
+    let old = sqlx::query_as::<_, CampaignRow>(&old_sql)
+        .bind(&name)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error: {}", e);
+            AdminError::Internal("Database error".into())
+        })?
+        .ok_or_else(|| AdminError::NotFound(format!("Campaign '{}' not found", name)))?;
 
     if let Some(enabled) = body.enabled {
         sqlx::query(
@@ -184,32 +218,42 @@ pub async fn update_campaign(
         })?;
     }
 
+    let mut skipped_fields = Vec::new();
+
     if let Some(phase) = &body.phase {
-        sqlx::query(
-            "UPDATE marketing_campaigns SET phase = $1, updated_at = NOW() WHERE name = $2",
-        )
-        .bind(phase)
-        .bind(&name)
-        .execute(&state.db_pool)
-        .await
-        .map_err(|e| {
-            tracing::error!("Database error: {}", e);
-            AdminError::Internal("Database error".into())
-        })?;
+        if has_phase {
+            sqlx::query(
+                "UPDATE marketing_campaigns SET phase = $1, updated_at = NOW() WHERE name = $2",
+            )
+            .bind(phase)
+            .bind(&name)
+            .execute(&state.db_pool)
+            .await
+            .map_err(|e| {
+                tracing::error!("Database error: {}", e);
+                AdminError::Internal("Database error".into())
+            })?;
+        } else {
+            tracing::warn!("Skipping phase update for campaign '{}' because marketing_campaigns.phase does not exist", name);
+            skipped_fields.push("phase");
+        }
     }
 
     if let Some(description) = &body.description {
-        sqlx::query(
-            "UPDATE marketing_campaigns SET description = $1, updated_at = NOW() WHERE name = $2",
-        )
-        .bind(description)
-        .bind(&name)
-        .execute(&state.db_pool)
-        .await
-        .map_err(|e| {
-            tracing::error!("Database error: {}", e);
-            AdminError::Internal("Database error".into())
-        })?;
+        if has_description {
+            sqlx::query("UPDATE marketing_campaigns SET description = $1, updated_at = NOW() WHERE name = $2")
+                .bind(description)
+                .bind(&name)
+                .execute(&state.db_pool)
+                .await
+                .map_err(|e| {
+                    tracing::error!("Database error: {}", e);
+                    AdminError::Internal("Database error".into())
+                })?;
+        } else {
+            tracing::warn!("Skipping description update for campaign '{}' because marketing_campaigns.description does not exist", name);
+            skipped_fields.push("description");
+        }
     }
 
     // Audit
@@ -224,7 +268,11 @@ pub async fn update_campaign(
     .execute(&state.db_pool)
     .await;
 
-    Ok(Json(serde_json::json!({"name": name, "updated": true})))
+    Ok(Json(serde_json::json!({
+        "name": name,
+        "updated": true,
+        "skipped_fields": skipped_fields,
+    })))
 }
 
 #[derive(Deserialize)]
@@ -342,17 +390,21 @@ pub async fn trigger_campaign(
     validate_campaign_name(&name)?;
 
     // Verify campaign exists in DB (also prevents triggering arbitrary endpoints)
-    let _campaign = sqlx::query_as::<_, CampaignRow>(
-        "SELECT id, name, cron, channels, enabled, phase, description, created_at, updated_at FROM marketing_campaigns WHERE name = $1",
-    )
-    .bind(&name)
-    .fetch_optional(&state.db_pool)
-    .await
-    .map_err(|e| {
-        tracing::error!("Database error fetching campaign: {}", e);
-        AdminError::Internal("Database error".into())
-    })?
-    .ok_or_else(|| AdminError::NotFound(format!("Campaign '{}' not found", name)))?;
+    let exists = sqlx::query_scalar::<_, i64>("SELECT 1 FROM marketing_campaigns WHERE name = $1")
+        .bind(&name)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error fetching campaign: {}", e);
+            AdminError::Internal("Database error".into())
+        })?
+        .is_some();
+    if !exists {
+        return Err(AdminError::NotFound(format!(
+            "Campaign '{}' not found",
+            name
+        )));
+    }
 
     let marketing_url = std::env::var("MARKETING_SERVICE_URL").map_err(|_| {
         tracing::error!("MARKETING_SERVICE_URL env var is not set");
@@ -407,6 +459,8 @@ pub async fn marketing_stats(
     Query(params): Query<StatsParams>,
 ) -> Result<Json<serde_json::Value>, AdminError> {
     let days = params.days.unwrap_or(30);
+    let has_phase = has_column(&state.db_pool, "marketing_campaigns", "phase").await?;
+    let has_marketing_stats_table = has_table(&state.db_pool, "marketing_stats").await?;
 
     // Channel breakdown
     let channel_stats = sqlx::query_as::<_, ChannelStatsRow>(
@@ -421,19 +475,26 @@ pub async fn marketing_stats(
     })?;
 
     // Phase breakdown
-    let phase_stats = sqlx::query_as::<_, PhaseStatsRow>(
-        r#"SELECT mc.phase, COUNT(mpl.*) as total, COALESCE(SUM(CASE WHEN mpl.success THEN 1 ELSE 0 END), 0) as successes
-           FROM marketing_campaigns mc
-           LEFT JOIN marketing_publish_log mpl ON mpl.campaign = mc.name AND mpl.published_at > NOW() - make_interval(days => $1)
-           GROUP BY mc.phase ORDER BY mc.phase"#,
-    )
-    .bind(days as i32)
-    .fetch_all(&state.db_pool)
-    .await
-    .map_err(|e| {
-        tracing::error!("Database error: {}", e);
-        AdminError::Internal("Database error".into())
-    })?;
+    let phase_expr = if has_phase {
+        "mc.phase"
+    } else {
+        "'content_engine'::text"
+    };
+    let phase_sql = format!(
+        "SELECT {} as phase, COUNT(mpl.*) as total, COALESCE(SUM(CASE WHEN mpl.success THEN 1 ELSE 0 END), 0) as successes
+         FROM marketing_campaigns mc
+         LEFT JOIN marketing_publish_log mpl ON mpl.campaign = mc.name AND mpl.published_at > NOW() - make_interval(days => $1)
+         GROUP BY 1 ORDER BY 1",
+        phase_expr
+    );
+    let phase_stats = sqlx::query_as::<_, PhaseStatsRow>(&phase_sql)
+        .bind(days as i32)
+        .fetch_all(&state.db_pool)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error: {}", e);
+            AdminError::Internal("Database error".into())
+        })?;
 
     // Daily publish counts (last N days)
     let daily_counts = sqlx::query_as::<_, DailyCountRow>(
@@ -448,15 +509,19 @@ pub async fn marketing_stats(
     })?;
 
     // Custom marketing metrics (from marketing_stats table)
-    let metrics = sqlx::query_as::<_, MetricRow>(
-        "SELECT DISTINCT ON (metric_name) metric_name, metric_value, recorded_at, metadata FROM marketing_stats ORDER BY metric_name, recorded_at DESC",
-    )
-    .fetch_all(&state.db_pool)
-    .await
-    .map_err(|e| {
-        tracing::error!("Database error: {}", e);
-        AdminError::Internal("Database error".into())
-    })?;
+    let metrics = if has_marketing_stats_table {
+        sqlx::query_as::<_, MetricRow>(
+            "SELECT DISTINCT ON (metric_name) metric_name, metric_value, recorded_at, metadata FROM marketing_stats ORDER BY metric_name, recorded_at DESC",
+        )
+        .fetch_all(&state.db_pool)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error: {}", e);
+            AdminError::Internal("Database error".into())
+        })?
+    } else {
+        Vec::new()
+    };
 
     // Total summary
     let total_row = sqlx::query_as::<_, CampaignStatsRow>(
@@ -538,6 +603,44 @@ pub async fn record_metric(
     Ok(Json(
         serde_json::json!({"recorded": true, "metric": body.metric_name}),
     ))
+}
+
+async fn has_column(pool: &sqlx::PgPool, table: &str, column: &str) -> Result<bool, AdminError> {
+    let exists = sqlx::query_scalar::<_, i64>(
+        r#"SELECT 1
+           FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND table_name = $1
+             AND column_name = $2
+           LIMIT 1"#,
+    )
+    .bind(table)
+    .bind(column)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| {
+        tracing::error!("Database error checking column {}.{}: {}", table, column, e);
+        AdminError::Internal("Database error".into())
+    })?;
+    Ok(exists.is_some())
+}
+
+async fn has_table(pool: &sqlx::PgPool, table: &str) -> Result<bool, AdminError> {
+    let exists = sqlx::query_scalar::<_, i64>(
+        r#"SELECT 1
+           FROM information_schema.tables
+           WHERE table_schema = 'public'
+             AND table_name = $1
+           LIMIT 1"#,
+    )
+    .bind(table)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| {
+        tracing::error!("Database error checking table {}: {}", table, e);
+        AdminError::Internal("Database error".into())
+    })?;
+    Ok(exists.is_some())
 }
 
 // ── Row types ────────────────────────────────────────────────────

@@ -31,6 +31,7 @@ export interface NavItem {
 export const NAV_LINKS: NavItem[] = [
   { href: '/demo/', label: 'Demo' },
   { href: '/docs/', label: 'Docs' },
+  { href: '/mcp/', label: 'MCP' },
   { href: '/comparison', label: 'Compare' },
   { href: '/pricing/', label: 'Pricing' },
   { href: '/blog/', label: 'Blog' },
@@ -55,6 +56,7 @@ export const FOOTER_SECTIONS = [
     links: [
       { label: 'Documentation', href: '/docs/' },
       { label: 'API Reference', href: '/docs/' },
+      { label: 'MCP Server', href: '/mcp/' },
       { label: 'GitHub', href: SITE.github, external: true },
       { label: 'PyPI', href: SITE.pypi, external: true },
       { label: 'npm', href: SITE.npm, external: true },

@@ -31,20 +31,15 @@
 		level INFO
 	}
 
-	# CORS for browser clients
-	@cors_preflight method OPTIONS
-	handle @cors_preflight {
-		header Access-Control-Allow-Origin "{$CORS_ALLOW_ORIGIN:https://aiknol.com}"
-		header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-		header Access-Control-Allow-Headers "Authorization, Content-Type, X-API-Key"
-		header Access-Control-Max-Age "86400"
-		respond "" 204
-	}
-	header Access-Control-Allow-Origin "{$CORS_ALLOW_ORIGIN:https://aiknol.com}"
+	# CORS is handled in the gateway service so per-origin logic stays centralized.
 }
 
 # Admin dashboard — admin.aiknol.com (enterprise)
 {$ADMIN_DOMAIN:admin.aiknol.com} {
+	# Human-friendly landing for the admin subdomain.
+	@root path /
+	redir @root https://app.aiknol.com/admin/ 308
+
 	reverse_proxy admin:8084 {
 		health_uri /health
 		health_interval 15s

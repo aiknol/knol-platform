@@ -61,6 +61,30 @@ async fn main() -> anyhow::Result<()> {
         .map_err(|e| anyhow::anyhow!("Encryption key error: {}", e))?;
 
     let db_pool = memory_db::create_pool(&database_url, 6).await?;
+    let skip_runtime_migrations = std::env::var("SKIP_RUNTIME_MIGRATIONS")
+        .ok()
+        .map(|v| {
+            let v = v.trim().to_ascii_lowercase();
+            v == "1" || v == "true" || v == "yes"
+        })
+        .unwrap_or(false);
+    if skip_runtime_migrations {
+        info!("SKIP_RUNTIME_MIGRATIONS=true; skipping enterprise runtime migrations");
+    } else {
+        let runtime_migrations = std::path::Path::new("/app/migrations").to_path_buf();
+        let local_migrations =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../migrations");
+        let migration_path = if runtime_migrations.exists() {
+            runtime_migrations
+        } else {
+            local_migrations
+        };
+        let mut migrator = sqlx::migrate::Migrator::new(migration_path.as_path()).await?;
+        // Shared DB: ignore migration versions owned by OSS migration set.
+        migrator.set_ignore_missing(true);
+        migrator.run(&db_pool).await?;
+        info!("Enterprise migrations applied/verified");
+    }
 
     let port: u16 = memory_common::db_config::load_u64(
         &db_pool,

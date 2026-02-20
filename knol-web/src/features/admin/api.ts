@@ -1,8 +1,17 @@
-const API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3001';
+function resolveDefaultAdminApiUrl(): string {
+  if (typeof window === 'undefined') {
+    return 'https://admin.aiknol.com';
+  }
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1';
+  return isLocal ? 'http://localhost:3001' : 'https://admin.aiknol.com';
+}
+
+const API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL || resolveDefaultAdminApiUrl();
 
 if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_ADMIN_API_URL) {
   console.warn(
-    '[Admin API] NEXT_PUBLIC_ADMIN_API_URL is not set. Falling back to http://localhost:3001. ' +
+    `[Admin API] NEXT_PUBLIC_ADMIN_API_URL is not set. Falling back to ${API_URL}. ` +
     'Set this env var at build time for production deployments.'
   );
 }

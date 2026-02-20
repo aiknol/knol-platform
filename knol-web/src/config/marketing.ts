@@ -509,6 +509,249 @@ Typical migration timeline:
 
 The process is straightforward, and our team can assist at any stage.`,
   },
+  {
+    title: 'Give Claude Persistent Memory with Knol MCP Server',
+    slug: 'claude-persistent-memory-mcp',
+    date: 'March 22, 2026',
+    tag: 'Tutorial',
+    description:
+      'Step-by-step guide to setting up Knol as an MCP server for Claude Desktop. Your AI assistant will remember users, preferences, and context across every session.',
+    href: '/blog/claude-persistent-memory-mcp',
+    body: `## Why Claude Needs Persistent Memory
+
+Every time you start a new Claude conversation, you start from scratch. Claude doesn't remember your name, your projects, your coding preferences, or the debugging session you had yesterday. You have to re-explain context every single time.
+
+Knol's MCP server fixes this. Once connected, Claude can store and retrieve memories across sessions — facts, preferences, project context, and relationships. It's like giving Claude a brain that persists.
+
+## Setting Up Knol (60 Seconds)
+
+First, get Knol running locally:
+
+\`\`\`bash
+git clone https://github.com/aiknol/knol.git
+cd knol
+docker compose up -d
+\`\`\`
+
+That's it. Knol is now running on localhost:3000 with PostgreSQL, vector search, knowledge graphs, and the full context engineering stack.
+
+## Connecting to Claude Desktop
+
+Open your Claude Desktop MCP configuration:
+
+\`\`\`bash
+# macOS
+code ~/Library/Application\\ Support/Claude/claude_desktop_config.json
+
+# Windows
+code %APPDATA%/Claude/claude_desktop_config.json
+\`\`\`
+
+Add the Knol MCP server:
+
+\`\`\`json
+{
+  "mcpServers": {
+    "knol-memory": {
+      "command": "npx",
+      "args": ["@aiknol/knol-mcp-server"],
+      "env": {
+        "KNOL_API_URL": "http://localhost:3000",
+        "KNOL_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+\`\`\`
+
+Restart Claude Desktop. You should see the MCP tools icon appear, indicating Knol is connected.
+
+## What Claude Can Do Now
+
+With Knol connected, Claude has access to six memory tools:
+
+**knol_store_memory** — Claude can save important facts from your conversation. "User prefers TypeScript over JavaScript" or "Working on a React dashboard for project Atlas."
+
+**knol_search_memory** — Before answering, Claude can search past memories. "What do I know about this user's tech stack?" returns relevant context from previous sessions.
+
+**knol_get_user_context** — Pull a complete summary of everything known about the current user. Preferences, projects, recent interactions, and relationships.
+
+**knol_graph_query** — Traverse the knowledge graph. "What projects is this user connected to?" or "Who else works on project Atlas?"
+
+## Real Example
+
+Session 1 (Monday):
+
+\`\`\`
+You: I'm building a dashboard with Next.js and Tailwind. The backend is Rust with Axum.
+Claude: [stores: user tech stack = Next.js, Tailwind, Rust, Axum]
+\`\`\`
+
+Session 2 (Wednesday):
+
+\`\`\`
+You: Can you help me add a new API endpoint?
+Claude: [searches memory, finds Rust/Axum preference]
+Claude: Sure! Since you are using Axum, here is the endpoint...
+\`\`\`
+
+No re-explanation needed. Claude already knows your stack.
+
+## Beyond Claude Desktop
+
+The same MCP server works with Cursor, Windsurf, and any MCP-compatible tool. Your memory is shared across all of them — context from a Claude conversation is available when you are coding in Cursor.
+
+## Privacy and Self-Hosting
+
+All memory stays on your machine. Knol runs locally, your data never leaves your infrastructure. For teams, deploy Knol on your own servers with multi-tenant isolation, encryption at rest, and full audit logging.
+
+The MCP server is open-source. Star us on GitHub to follow development.`,
+  },
+  {
+    title: 'Knol vs Mem0: A Technical Comparison for AI Memory',
+    slug: 'knol-vs-mem0-comparison',
+    date: 'March 29, 2026',
+    tag: 'Comparison',
+    description:
+      'An honest technical comparison between Knol and Mem0 covering architecture, performance, features, and total cost of ownership for production AI memory.',
+    href: '/blog/knol-vs-mem0-comparison',
+    body: `## Two Different Approaches to AI Memory
+
+Mem0 and Knol both solve the same problem: giving AI applications persistent memory. But they take fundamentally different architectural approaches, and those differences matter at scale.
+
+This is an honest comparison. Both tools have strengths. The right choice depends on your requirements.
+
+## Architecture
+
+**Mem0** is a Python SDK that coordinates multiple backend services. In a typical production deployment, you need: Qdrant or Pinecone for vector search, Neo4j for knowledge graphs, Redis for caching, and a primary database for metadata. That is 4+ services to deploy, monitor, and maintain.
+
+**Knol** is a single Rust binary backed by PostgreSQL with pgvector. Vector search, knowledge graphs, full-text search, and caching all run on one database. One service to deploy, one backup strategy, one set of credentials.
+
+\`\`\`
+Mem0 Production Stack:
+  Python App -> Qdrant + Neo4j + Redis + PostgreSQL
+  4 services, 3 languages, 2GB+ RAM minimum
+
+Knol Production Stack:
+  Rust Binary -> PostgreSQL (with pgvector)
+  1 service, 50MB binary, 256MB RAM
+\`\`\`
+
+## Performance
+
+Knol's Rust implementation delivers sub-5ms P95 latency on memory retrieval. Mem0's Python coordination layer adds overhead from cross-service communication, typically resulting in 50-200ms retrieval times depending on deployment.
+
+For real-time applications like chatbots, that difference is noticeable to users. For batch processing, it means higher throughput per dollar.
+
+## Feature Comparison
+
+Both platforms support core memory operations: store, search, and retrieve. The differences are in advanced features.
+
+Knol has memory decay (realistic forgetting), conflict detection (contradictory facts), bi-temporal modeling (valid time vs transaction time), and hybrid retrieval (vector + BM25 + graph fusion in a single query). These are built into the core engine.
+
+Mem0 has a simpler model focused on vector-based memory with graph relationships. It is easier to get started with but has fewer knobs to tune for production workloads.
+
+## Cost
+
+The total cost of ownership differs significantly. Mem0's multi-service architecture means paying for Qdrant Cloud (or self-hosting), Neo4j Aura (or self-hosting), Redis, and your primary database. Each service has its own scaling curve.
+
+Knol runs on PostgreSQL, which you probably already have. If you use Neon, Supabase, or AWS RDS, you are adding memory capability to an existing service rather than standing up new infrastructure.
+
+## When to Choose Each
+
+Choose Mem0 if you are already invested in the Qdrant/Neo4j ecosystem, your team is Python-first, or you need Mem0's managed cloud offering.
+
+Choose Knol if you want minimal infrastructure (PostgreSQL only), sub-10ms latency, multi-tenant isolation, advanced features like memory decay and conflict detection, or you prefer self-hosting with open-source software.`,
+  },
+  {
+    title: 'Deploy AI Memory on PostgreSQL in 60 Seconds',
+    slug: 'ai-memory-postgresql-deploy',
+    date: 'April 5, 2026',
+    tag: 'Tutorial',
+    description:
+      'The fastest way to add persistent memory to your AI application. Three commands, one PostgreSQL database, sub-5ms latency. No Qdrant, no Neo4j, no complexity.',
+    href: '/blog/ai-memory-postgresql-deploy',
+    body: `## The 3-Command Deploy
+
+Stop reading blog posts about complex AI memory architectures. Here is a working memory system in 60 seconds:
+
+\`\`\`bash
+git clone https://github.com/aiknol/knol.git
+cd knol
+docker compose up -d
+\`\`\`
+
+That is it. You now have a running memory system with vector search, knowledge graphs, full-text search, and 4 types of memory. Let us use it.
+
+## Store Your First Memory
+
+\`\`\`bash
+curl -X POST http://localhost:3000/v1/memory \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer your-api-key" \\
+  -d '{
+    "content": "User prefers dark mode and uses VS Code",
+    "user_id": "user_123"
+  }'
+\`\`\`
+
+Knol automatically extracts structured facts from the content, generates vector embeddings, and updates the knowledge graph. All in one API call.
+
+## Search Memories
+
+\`\`\`bash
+curl http://localhost:3000/v1/memory/search \\
+  -H "Authorization: Bearer your-api-key" \\
+  -d '{
+    "query": "What editor does this user prefer?",
+    "user_id": "user_123",
+    "limit": 5
+  }'
+\`\`\`
+
+The search uses hybrid retrieval — vector similarity, BM25 keyword matching, and knowledge graph traversal — fused together for the best results. Response time: under 5ms.
+
+## Connect Your AI Application
+
+\`\`\`python
+from knol import KnolClient
+
+client = KnolClient(
+    api_url="http://localhost:3000",
+    api_key="your-api-key"
+)
+
+# Store memory from a conversation
+client.episodic.add(
+    content="User asked about deploying to AWS ECS",
+    user_id="user_123"
+)
+
+# Retrieve context for the next response
+context = client.retrieve(
+    query="What cloud platform does this user use?",
+    user_id="user_123"
+)
+\`\`\`
+
+## Why PostgreSQL Only?
+
+Most AI memory systems require you to deploy 3-4 separate databases: one for vectors (Qdrant, Pinecone), one for graphs (Neo4j), one for search (Elasticsearch), and one for metadata (PostgreSQL). That is a lot of infrastructure for storing user preferences.
+
+Knol uses PostgreSQL with the pgvector extension. Vectors, graphs, full-text search, and relational data all live in one database. One backup strategy, one set of credentials, one connection pool.
+
+## What You Get Out of the Box
+
+The Docker Compose includes everything: Gateway service for API routing, Write service for memory ingestion, Retrieve service for hybrid search, Graph service for entity extraction, PostgreSQL with pgvector for all data, Redis for caching, and NATS for async processing.
+
+Total memory footprint: under 512MB. Compare that to running Qdrant + Neo4j + Redis + PostgreSQL separately.
+
+## Next Steps
+
+Once you have memories flowing, explore LangChain integration, the MCP server for Claude Desktop, knowledge graph queries, memory decay for automatic relevance scoring, and the admin dashboard for monitoring.
+
+All documentation is at aiknol.com/docs. The project is open-source on GitHub.`,
+  },
 ];
 
 

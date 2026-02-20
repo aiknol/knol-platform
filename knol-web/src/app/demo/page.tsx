@@ -11,7 +11,7 @@ export default function DemoPage() {
   return (
     <div className="fixed inset-0 bg-[#09090b]">
       <iframe
-        src="/demo/index.html"
+        src="/live-demo/"
         className="w-full h-full border-0"
         title="Knol Interactive Demo"
         allow="clipboard-write"
