@@ -9,7 +9,11 @@ function resolveDefaultAdminApiUrl(): string {
 
 const API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL || resolveDefaultAdminApiUrl();
 
-if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_ADMIN_API_URL) {
+if (
+  typeof window !== 'undefined' &&
+  process.env.NODE_ENV !== 'production' &&
+  !process.env.NEXT_PUBLIC_ADMIN_API_URL
+) {
   console.warn(
     `[Admin API] NEXT_PUBLIC_ADMIN_API_URL is not set. Falling back to ${API_URL}. ` +
     'Set this env var at build time for production deployments.'
