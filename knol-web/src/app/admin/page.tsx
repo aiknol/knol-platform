@@ -106,6 +106,42 @@ export default function DashboardPage() {
         </AdminCard>
       )}
 
+      {/* Marketing Strategy Overview */}
+      <AdminCard>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-dark-50">Zero-Cost Marketing</h2>
+          <a href="/admin/marketing" className="text-xs text-brand-400 hover:text-brand-300 transition-colors">
+            View Analytics
+          </a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
+            <div className="text-xs font-bold text-red-400 mb-1">Launch</div>
+            <div className="text-sm text-dark-300">HN, PH, Twitter Blitz, Reddit, Blog</div>
+          </div>
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 text-center">
+            <div className="text-xs font-bold text-blue-400 mb-1">Content Engine</div>
+            <div className="text-sm text-dark-300">DOW Tweets, Weekly Blog Cross-posts</div>
+          </div>
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4 text-center">
+            <div className="text-xs font-bold text-purple-400 mb-1">Community</div>
+            <div className="text-sm text-dark-300">Reddit rotation across 4 subs</div>
+          </div>
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-center">
+            <div className="text-xs font-bold text-amber-400 mb-1">Conversion</div>
+            <div className="text-sm text-dark-300">LinkedIn, Email Digest, GitHub</div>
+          </div>
+        </div>
+        <div className="mt-3 flex gap-3">
+          <a href="/admin/campaigns" className="text-xs text-brand-400 hover:text-brand-300 transition-colors">
+            Manage Campaigns →
+          </a>
+          <a href="/admin/credentials?search=marketing" className="text-xs text-dark-400 hover:text-dark-200 transition-colors">
+            Channel Credentials →
+          </a>
+        </div>
+      </AdminCard>
+
       {/* Pipeline Status */}
       <AdminCard>
         <h2 className="text-xl font-semibold text-dark-50 mb-4">Write Pipeline</h2>

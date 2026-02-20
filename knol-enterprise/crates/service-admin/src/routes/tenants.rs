@@ -22,7 +22,10 @@ pub async fn list_tenants(
     )
     .fetch_all(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let json: Vec<serde_json::Value> = rows
         .iter()
@@ -57,7 +60,10 @@ pub async fn get_tenant(
     .bind(id)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?
     .ok_or_else(|| AdminError::NotFound(format!("Tenant {} not found", id)))?;
 
     Ok(Json(serde_json::json!({
@@ -97,7 +103,10 @@ pub async fn update_tenant(
     .bind(id)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?
     .ok_or_else(|| AdminError::NotFound(format!("Tenant {} not found", id)))?;
 
     if let Some(plan) = &body.plan {
@@ -106,7 +115,10 @@ pub async fn update_tenant(
             .bind(id)
             .execute(&state.db_pool)
             .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::error!("Internal error: {}", e);
+                AdminError::Internal("Internal server error".into())
+            })?;
     }
 
     if let Some(config) = &body.config {
@@ -115,7 +127,10 @@ pub async fn update_tenant(
             .bind(id)
             .execute(&state.db_pool)
             .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::error!("Internal error: {}", e);
+                AdminError::Internal("Internal server error".into())
+            })?;
     }
 
     if let Some(limit) = body.usage_limit {
@@ -124,7 +139,10 @@ pub async fn update_tenant(
             .bind(id)
             .execute(&state.db_pool)
             .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::error!("Internal error: {}", e);
+                AdminError::Internal("Internal server error".into())
+            })?;
     }
 
     if let Some(name) = &body.name {
@@ -133,7 +151,10 @@ pub async fn update_tenant(
             .bind(id)
             .execute(&state.db_pool)
             .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::error!("Internal error: {}", e);
+                AdminError::Internal("Internal server error".into())
+            })?;
     }
 
     // Audit

@@ -1,14 +1,25 @@
 # Knol — Docker build context exclusions
-target/
 .git/
 .github/
-brand/
-memorylayer-web/node_modules/
-memorylayer-web/out/
-memorylayer-web/.next/
-memorylayer-demo/
-*.md
-LICENSE*
+**/.git/
+**/target/
+**/node_modules/
+**/.next/
+**/out/
+**/.turbo/
+**/dist/
+**/coverage/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Local env/secrets (allow examples)
 .env*
 !.env.example
-deploy/
+**/.env*
+!**/.env.example
+
+# Local docs/assets that are not required for runtime images
+brand/
+*.md
+LICENSE*

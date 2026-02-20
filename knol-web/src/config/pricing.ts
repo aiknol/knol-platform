@@ -87,6 +87,6 @@ export const PRICING_TIERS: PricingTier[] = [
       'On-prem deployment option',
     ],
     cta: 'Contact Sales',
-    ctaLink: 'mailto:sales@aiknol.com',
+    ctaLink: `mailto:${SITE.contactEmail}`,
   },
 ];

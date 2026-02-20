@@ -47,7 +47,10 @@ pub async fn list_audit(
     .bind(limit)
     .fetch_all(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let json: Vec<serde_json::Value> = rows
         .iter()

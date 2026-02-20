@@ -1,3 +1,8 @@
+# -----------------------------------------------------------------------------
+# DEVELOPMENT/DEMO STACK ONLY
+# Do NOT use this file for production deployment.
+# For Hetzner production use: deploy/docker-compose.prod.yml
+# -----------------------------------------------------------------------------
 name: knol
 
 services:
@@ -115,7 +120,7 @@ services:
       GATEWAY_PORT: "8080"
       WRITE_SERVICE_URL: http://write-service:8081
       RETRIEVE_SERVICE_URL: http://retrieve-service:8082
-      ADMIN_SERVICE_URL: http://admin-service:3001
+      ADMIN_SERVICE_URL: http://admin-service:8084
       RUST_LOG: info
     command: ["gateway"]
     ports:
@@ -217,15 +222,41 @@ services:
       DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
       DB_MAX_CONNECTIONS: "6"
       DB_MIN_CONNECTIONS: "1"
-      ADMIN_SERVICE_PORT: "3001"
+      ADMIN_SERVICE_PORT: "8084"
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?set ADMIN_JWT_SECRET in .env (>=32 chars)}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
-      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3006}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3006,http://localhost:3005,http://localhost:8080}
+      ADMIN_SECURE_COOKIES: "false"
+      MARKETING_SERVICE_URL: http://marketing-service:8088
       RUST_LOG: info
     command: ["admin-service"]
     ports:
       - "3001:8084"
     mem_limit: 320m
+    profiles: ["enterprise"]
+
+  marketing-service:
+    image: knol-enterprise-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.enterprise
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      DB_MAX_CONNECTIONS: "4"
+      DB_MIN_CONNECTIONS: "1"
+      MARKETING_SERVICE_PORT: "8088"
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
+      RUST_LOG: info
+    command: ["marketing-service"]
+    ports:
+      - "8088:8088"
+    mem_limit: 256m
     profiles: ["enterprise"]
 
   jobs-service:
@@ -264,11 +295,11 @@ services:
       DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
       DB_MAX_CONNECTIONS: "4"
       DB_MIN_CONNECTIONS: "1"
-      BILLING_SERVICE_PORT: "3003"
+      BILLING_SERVICE_PORT: "8086"
       RUST_LOG: info
     command: ["billing-service"]
     ports:
-      - "3003:3003"
+      - "3003:8086"
     mem_limit: 256m
     profiles: ["enterprise"]
 
@@ -290,11 +321,11 @@ services:
       NATS_URL: nats://nats:4222
       DB_MAX_CONNECTIONS: "4"
       DB_MIN_CONNECTIONS: "1"
-      INGEST_SERVICE_PORT: "3004"
+      INGEST_SERVICE_PORT: "8087"
       RUST_LOG: info
     command: ["ingest-service"]
     ports:
-      - "3004:3004"
+      - "3004:8087"
     mem_limit: 256m
     profiles: ["enterprise"]
 
@@ -307,7 +338,7 @@ services:
     volumes:
       - .:/workspace
       - web-node-modules:/workspace/knol-web/node_modules
-    command: sh -lc "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3005"
+    command: sh -lc "if [ ! -d node_modules/next ]; then npm ci; fi && npm run dev -- --hostname 0.0.0.0 --port 3005"
     ports:
       - "3005:3005"
     mem_limit: 512m
@@ -321,13 +352,13 @@ services:
     working_dir: /workspace/knol-web
     environment:
       NEXT_TELEMETRY_DISABLED: "1"
-      NODE_OPTIONS: "--max-old-space-size=256"
+      NODE_OPTIONS: "--max-old-space-size=384"
       NEXT_PUBLIC_ADMIN_API_URL: "http://localhost:3001"
       ADMIN_WEBSITE_MODE: "true"
     volumes:
       - .:/workspace
       - admin-web-node-modules:/workspace/knol-web/node_modules
-    command: sh -lc "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3006"
+    command: sh -lc "if [ ! -d node_modules/next ]; then npm ci; fi && npm run dev -- --hostname 0.0.0.0 --port 3006"
     ports:
       - "3006:3006"
     mem_limit: 512m

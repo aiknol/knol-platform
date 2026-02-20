@@ -4,7 +4,7 @@ import { BLOG_POSTS, BlogPost } from '@/config';
 import { pageTitle } from '@/config/site';
 
 type PageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 // Generate static params for all blog post slugs
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 
 // Generate metadata for each post
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = props.params;
+  const params = await props.params;
   const post = BLOG_POSTS.find((p) => p.slug === params.slug);
 
   if (!post) {
@@ -74,7 +74,7 @@ function renderBody(body: string) {
 }
 
 export default async function BlogPostPage(props: PageProps) {
-  const params = props.params;
+  const params = await props.params;
   const post = BLOG_POSTS.find((p) => p.slug === params.slug);
 
   if (!post) {

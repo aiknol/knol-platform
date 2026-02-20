@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { pageTitle } from '@/config/site';
+import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Terms of Service'),
@@ -241,8 +241,9 @@ export default function TermsPage() {
           </p>
           <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 text-dark-300">
             <p className="font-semibold text-dark-100 mb-2">Knol</p>
-            <p className="mb-1">Email: <a href="mailto:hello@aiknol.com" className="text-brand-400 hover:text-brand-300">hello@aiknol.com</a></p>
-            <p>GitHub: <a href="https://github.com/aiknol/knol" className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
+            <p className="mb-1">Email: <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a></p>
+            <p className="mb-1">Phone: <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a></p>
+            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
           </div>
         </section>
       </div>

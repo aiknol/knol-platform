@@ -13,13 +13,15 @@ export default function Footer() {
               <ul className="space-y-2">
                 {section.links.map((link) => {
                   const isExternal = 'external' in link && link.external;
+                  const href = String(link.href);
+                  const isProtocol = href.startsWith('mailto:') || href.startsWith('tel:');
                   const className = "text-dark-300 hover:text-brand-500 text-sm";
                   return (
-                    <li key={link.label}>
-                      {isExternal ? (
-                        <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>{link.label}</a>
+                    <li key={String(link.label)}>
+                      {isExternal || isProtocol ? (
+                        <a href={href} {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})} className={className}>{link.label}</a>
                       ) : (
-                        <Link href={link.href} className={className}>{link.label}</Link>
+                        <Link href={href} className={className}>{link.label}</Link>
                       )}
                     </li>
                   );

@@ -45,10 +45,13 @@ pub fn generate(channel: &str, category: &str) -> Result<PublishContent, Marketi
         "reddit" => {
             // First line is the title, rest is body
             let (title, body) = split_title_body(template);
-            let subreddit = if category.contains("rust") {
-                "rust"
-            } else {
-                "MachineLearning"
+            let subreddit = match category {
+                "reddit_rust" => "rust",
+                "reddit_ml" => "MachineLearning",
+                "reddit_local_llama" => "LocalLLaMA",
+                "reddit_selfhosted" => "selfhosted",
+                _ if category.contains("rust") => "rust",
+                _ => "MachineLearning",
             };
             PublishContent {
                 text: title.to_string(),
@@ -120,6 +123,39 @@ pub fn generate(channel: &str, category: &str) -> Result<PublishContent, Marketi
             subreddit: None,
             subject: None,
         },
+        // Cross-posting channels (Phase 3): same format as Dev.to
+        "hashnode" | "medium" => {
+            let (title, body) = split_title_body(template);
+            PublishContent {
+                text: title.to_string(),
+                title: Some(title.to_string()),
+                body: Some(body.to_string()),
+                tags: vec![
+                    "rust".into(),
+                    "ai".into(),
+                    "machinelearning".into(),
+                    "opensource".into(),
+                ],
+                subreddit: None,
+                subject: None,
+            }
+        }
+        // Product Hunt (Phase 2): tagline + description
+        "producthunt" => {
+            let (tagline, description) = split_title_body(template);
+            PublishContent {
+                text: tagline.to_string(),
+                title: Some(tagline.to_string()),
+                body: Some(description.to_string()),
+                tags: vec![
+                    "developer-tools".into(),
+                    "artificial-intelligence".into(),
+                    "open-source".into(),
+                ],
+                subreddit: None,
+                subject: None,
+            }
+        }
         _ => PublishContent {
             text: template.to_string(),
             title: None,

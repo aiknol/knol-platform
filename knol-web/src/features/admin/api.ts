@@ -1,5 +1,12 @@
 const API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:3001';
 
+if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_ADMIN_API_URL) {
+  console.warn(
+    '[Admin API] NEXT_PUBLIC_ADMIN_API_URL is not set. Falling back to http://localhost:3001. ' +
+    'Set this env var at build time for production deployments.'
+  );
+}
+
 type FetchOptions = RequestInit & {
   skipAuth?: boolean;
 };
@@ -54,6 +61,9 @@ async function apiFetch(endpoint: string, options: FetchOptions = {}) {
   const response = await fetch(url, {
     ...fetchOptions,
     headers,
+    // SECURITY: Include cookies so the HttpOnly JWT cookie is sent automatically.
+    // This works alongside the Bearer token for backward compatibility.
+    credentials: 'include',
   });
 
   if (response.status === 401) {
@@ -163,29 +173,100 @@ export const credentialsAPI = {
 // ── Campaigns ────────────────────────────────────────────────────
 
 export interface Campaign {
+  id: string;
   name: string;
   enabled: boolean;
   cron?: string;
   channels?: string[];
-  last_publish_at?: string;
+  phase?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  last_publish?: {
+    channel: string;
+    success: boolean;
+    published_at: string;
+  } | null;
+  stats?: {
+    total_publishes: number;
+    successful: number;
+    success_rate: number;
+  } | null;
 }
 
 export interface CampaignLog {
-  timestamp: string;
   campaign: string;
-  status: string;
-  message?: string;
+  channel: string;
+  success: boolean;
+  message_id?: string;
+  url?: string;
+  error?: string;
+  published_at: string;
+}
+
+export interface MarketingStats {
+  period_days: number;
+  strategy: string;
+  summary: {
+    total_publishes: number;
+    successful: number;
+    success_rate: number;
+  };
+  by_channel: Array<{
+    channel: string;
+    total: number;
+    successful: number;
+    success_rate: number;
+  }>;
+  by_phase: Array<{
+    phase: string;
+    total: number;
+    successful: number;
+  }>;
+  daily: Array<{
+    date: string;
+    total: number;
+    successful: number;
+  }>;
+  metrics: Array<{
+    name: string;
+    value: number;
+    recorded_at: string;
+    metadata?: Record<string, unknown>;
+  }>;
 }
 
 export const campaignsAPI = {
   list: async (): Promise<Campaign[]> => apiFetch('/admin/campaigns'),
-  update: async (name: string, enabled?: boolean, cron?: string, channels?: string[]) =>
+  update: async (
+    name: string,
+    enabled?: boolean,
+    cron?: string,
+    channels?: string[],
+    phase?: string,
+    description?: string,
+  ) =>
     apiFetch(`/admin/campaigns/${name}`, {
       method: 'PUT',
-      body: JSON.stringify({ ...(enabled !== undefined && { enabled }), ...(cron && { cron }), ...(channels && { channels }) }),
+      body: JSON.stringify({
+        ...(enabled !== undefined && { enabled }),
+        ...(cron && { cron }),
+        ...(channels && { channels }),
+        ...(phase && { phase }),
+        ...(description && { description }),
+      }),
     }),
   getLogs: async (campaignName: string, limit: number = 50): Promise<CampaignLog[]> =>
     apiFetch(`/admin/campaigns/${campaignName}/logs?limit=${limit}`),
+  trigger: async (campaignName: string, force: boolean = false) =>
+    apiFetch(`/admin/campaigns/${campaignName}/trigger?force=${force}`, { method: 'POST' }),
+  getStats: async (days: number = 30): Promise<MarketingStats> =>
+    apiFetch(`/admin/marketing/stats?days=${days}`),
+  recordMetric: async (metricName: string, metricValue: number, metadata?: Record<string, unknown>) =>
+    apiFetch('/admin/marketing/metrics', {
+      method: 'POST',
+      body: JSON.stringify({ metric_name: metricName, metric_value: metricValue, metadata }),
+    }),
 };
 
 // ── Tenants ──────────────────────────────────────────────────────

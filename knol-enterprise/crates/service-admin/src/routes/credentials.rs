@@ -21,7 +21,10 @@ pub async fn list_credentials(
     )
     .fetch_all(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let json: Vec<serde_json::Value> = rows
         .iter()
@@ -65,8 +68,10 @@ pub async fn upsert_credential(
     }
 
     // Encrypt the value
-    let encrypted = crypto::encrypt(body.value.as_bytes(), &state.encryption_key)
-        .map_err(|e| AdminError::Internal(format!("Encryption failed: {}", e)))?;
+    let encrypted = crypto::encrypt(body.value.as_bytes(), &state.encryption_key).map_err(|e| {
+        tracing::error!("Encryption failed: {}", e);
+        AdminError::Internal("Encryption error".into())
+    })?;
 
     // Check if exists (for audit)
     let exists = sqlx::query_scalar::<_, bool>(
@@ -75,7 +80,10 @@ pub async fn upsert_credential(
     .bind(&name)
     .fetch_one(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     sqlx::query(
         r#"
@@ -95,7 +103,10 @@ pub async fn upsert_credential(
     .bind(&body.description)
     .execute(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     // Audit (don't log actual credential value)
     let _ = sqlx::query(
@@ -128,7 +139,10 @@ pub async fn delete_credential(
         .bind(&name)
         .execute(&state.db_pool)
         .await
-        .map_err(|e| AdminError::Internal(e.to_string()))?;
+        .map_err(|e| {
+            tracing::error!("Internal error: {}", e);
+            AdminError::Internal("Internal server error".into())
+        })?;
 
     let _ = sqlx::query(
         "INSERT INTO admin_audit_log (admin_id, admin_email, action, resource_type, resource_key) VALUES ($1, $2, 'delete', 'credential', $3)",
@@ -155,11 +169,16 @@ pub async fn test_credential(
     .bind(&name)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?
     .ok_or_else(|| AdminError::NotFound(format!("Credential '{}' not found", name)))?;
 
-    let decrypted = crypto::decrypt(&row.encrypted_value, &state.encryption_key)
-        .map_err(|e| AdminError::Internal(format!("Decryption failed: {}", e)))?;
+    let decrypted = crypto::decrypt(&row.encrypted_value, &state.encryption_key).map_err(|e| {
+        tracing::error!("Decryption failed: {}", e);
+        AdminError::Internal("Decryption error".into())
+    })?;
     let value = String::from_utf8(decrypted)
         .map_err(|_| AdminError::Internal("Invalid UTF-8 in credential".into()))?;
 
@@ -285,6 +304,10 @@ async fn test_openai_key(state: &AdminAppState, key: &str) -> (bool, String) {
 }
 
 async fn test_gemini_key(state: &AdminAppState, key: &str) -> (bool, String) {
+    // SECURITY: Google's Gemini API requires the key as a query parameter.
+    // This means the key appears in server access logs and network traces.
+    // We use a minimal list-models call that doesn't transmit sensitive data.
+    // In production, consider using OAuth2 service accounts instead of API keys.
     let url = format!(
         "https://generativelanguage.googleapis.com/v1beta/models?key={}",
         key

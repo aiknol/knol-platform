@@ -31,15 +31,17 @@ RUN cargo build --release \
     --bin jobs-service \
     --bin billing-service \
     --bin ingest-service \
+    --bin marketing-service \
     && strip /app/knol-enterprise/target/release/admin-service \
     && strip /app/knol-enterprise/target/release/jobs-service \
     && strip /app/knol-enterprise/target/release/billing-service \
-    && strip /app/knol-enterprise/target/release/ingest-service
+    && strip /app/knol-enterprise/target/release/ingest-service \
+    && strip /app/knol-enterprise/target/release/marketing-service
 
 # Stage 4: Minimal runtime
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates libssl3 \
+    && apt-get install -y --no-install-recommends ca-certificates libssl3 curl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -r knol && useradd -r -g knol -s /sbin/nologin knol
@@ -48,6 +50,7 @@ COPY --from=builder /app/knol-enterprise/target/release/admin-service   /usr/loc
 COPY --from=builder /app/knol-enterprise/target/release/jobs-service    /usr/local/bin/
 COPY --from=builder /app/knol-enterprise/target/release/billing-service /usr/local/bin/
 COPY --from=builder /app/knol-enterprise/target/release/ingest-service    /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/marketing-service /usr/local/bin/
 
 # Copy enterprise migrations if present
 COPY knol-enterprise/migrations/ /app/migrations/

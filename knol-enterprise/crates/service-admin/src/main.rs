@@ -8,9 +8,13 @@ mod auth;
 mod crypto;
 mod routes;
 
+use axum::extract::DefaultBodyLimit;
 use axum::{
     extract::{Json, Path, Query, State},
-    http::{HeaderMap, HeaderValue},
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, COOKIE},
+        HeaderMap, HeaderValue, Method,
+    },
     middleware,
     routing::{delete, get, post, put},
     Router,
@@ -18,7 +22,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::{net::SocketAddr, sync::Arc};
 use tower_http::cors::{Any, CorsLayer};
-use tracing::info;
+use tracing::{info, warn};
 use uuid::Uuid;
 
 /// Shared state for the admin service.
@@ -27,6 +31,9 @@ pub struct AdminAppState {
     pub jwt_secret: String,
     pub encryption_key: [u8; 32],
     pub http_client: reqwest::Client,
+    /// Per-IP login rate limiter: tracks (attempt_count, first_attempt_time).
+    pub login_rate_limiter:
+        std::sync::Mutex<std::collections::HashMap<String, (u32, std::time::Instant)>>,
 }
 
 #[tokio::main]
@@ -40,8 +47,8 @@ async fn main() -> anyhow::Result<()> {
 
     info!("Starting Memory Admin Service...");
 
-    let database_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://memory:memory_dev@localhost:5432/memory".into());
+    let database_url =
+        std::env::var("DATABASE_URL").map_err(|_| anyhow::anyhow!("DATABASE_URL must be set"))?;
 
     let jwt_secret = std::env::var("ADMIN_JWT_SECRET")
         .map_err(|_| anyhow::anyhow!("ADMIN_JWT_SECRET must be set"))?;
@@ -50,7 +57,8 @@ async fn main() -> anyhow::Result<()> {
             "ADMIN_JWT_SECRET must be at least 32 characters"
         ));
     }
-    let encryption_key = crypto::load_encryption_key();
+    let encryption_key = crypto::load_encryption_key()
+        .map_err(|e| anyhow::anyhow!("Encryption key error: {}", e))?;
 
     let db_pool = memory_db::create_pool(&database_url, 6).await?;
 
@@ -72,28 +80,63 @@ async fn main() -> anyhow::Result<()> {
         http_client: reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(10))
             .build()?,
+        login_rate_limiter: std::sync::Mutex::new(std::collections::HashMap::new()),
     });
 
-    // CORS for admin dashboard: DB → env → default.
+    // CORS for admin/dashboard + local demos: DB → env → default.
     let allowed_origin = memory_common::db_config::load_str(
         &state.db_pool,
         "services.admin_cors_origin",
         "ADMIN_CORS_ORIGIN",
-        "http://localhost:3006",
+        "http://localhost:3006,http://localhost:3005,http://localhost:8080",
     )
     .await;
+    let allowed_origin = allowed_origin.trim();
+    let allowed_methods = [
+        Method::GET,
+        Method::POST,
+        Method::PUT,
+        Method::DELETE,
+        Method::OPTIONS,
+    ];
+    let allowed_headers = [AUTHORIZATION, CONTENT_TYPE, ACCEPT, COOKIE];
+    // SECURITY: When using HttpOnly cookies (`credentials: 'include`), CORS
+    // cannot use a wildcard origin. We always require explicit origins.
     let cors = if allowed_origin == "*" {
+        let is_dev = std::env::var("ADMIN_SECURE_COOKIES")
+            .map(|v| v == "false")
+            .unwrap_or(false);
+        if !is_dev {
+            return Err(anyhow::anyhow!(
+                "ADMIN_CORS_ORIGIN='*' is not allowed in production (credential cookies require explicit origins). \
+                 Set ADMIN_CORS_ORIGIN to your frontend URL, or set ADMIN_SECURE_COOKIES=false for local dev."
+            ));
+        }
+        warn!("ADMIN_CORS_ORIGIN='*' with ADMIN_SECURE_COOKIES=false — dev mode only.");
         CorsLayer::new()
             .allow_origin(Any)
-            .allow_methods(Any)
-            .allow_headers(Any)
+            .allow_methods(allowed_methods)
+            .allow_headers(allowed_headers)
     } else {
-        let origin = HeaderValue::from_str(&allowed_origin)
-            .map_err(|_| anyhow::anyhow!("Invalid ADMIN_CORS_ORIGIN value"))?;
+        let mut origins = Vec::new();
+        for raw in allowed_origin.split(',') {
+            let item = raw.trim();
+            if item.is_empty() {
+                continue;
+            }
+            origins.push(
+                HeaderValue::from_str(item)
+                    .map_err(|_| anyhow::anyhow!("Invalid ADMIN_CORS_ORIGIN value"))?,
+            );
+        }
+        if origins.is_empty() {
+            return Err(anyhow::anyhow!("ADMIN_CORS_ORIGIN must not be empty"));
+        }
         CorsLayer::new()
-            .allow_origin(origin)
-            .allow_methods(Any)
-            .allow_headers(Any)
+            .allow_origin(origins)
+            .allow_methods(allowed_methods)
+            .allow_headers(allowed_headers)
+            .allow_credentials(true)
     };
 
     // ── Admin panel routes (JWT-protected) ───────────────────────
@@ -126,6 +169,13 @@ async fn main() -> anyhow::Result<()> {
             "/campaigns/:name/logs",
             get(routes::campaigns::campaign_logs),
         )
+        .route(
+            "/campaigns/:name/trigger",
+            post(routes::campaigns::trigger_campaign),
+        )
+        // Marketing stats & metrics
+        .route("/marketing/stats", get(routes::campaigns::marketing_stats))
+        .route("/marketing/metrics", post(routes::campaigns::record_metric))
         // Tenants
         .route("/tenants", get(routes::tenants::list_tenants))
         .route("/tenants/:id", get(routes::tenants::get_tenant))
@@ -144,10 +194,11 @@ async fn main() -> anyhow::Result<()> {
             auth::admin_auth_middleware,
         ));
 
-    // Admin routes: login + demo config are public, everything else is protected
+    // Admin routes: login + demo endpoints are public, everything else is protected
     let admin_routes = Router::new()
         .route("/auth/login", post(auth::login))
         .route("/demo/config", get(routes::demo::demo_config))
+        .route("/demo/extract", post(routes::demo::demo_extract))
         .merge(admin_protected);
 
     // Build full app
@@ -170,6 +221,8 @@ async fn main() -> anyhow::Result<()> {
             }),
         )
         .layer(cors)
+        // SECURITY: Limit request body size to 1MB to prevent DoS via large payloads.
+        .layer(DefaultBodyLimit::max(1024 * 1024))
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -342,8 +395,9 @@ async fn list_audit(
 
     let json: Vec<serde_json::Value> = rows
         .iter()
-        .map(|r| serde_json::to_value(r).unwrap())
-        .collect();
+        .map(serde_json::to_value)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| memory_common::MemoryError::Internal(format!("Serialization error: {}", e)))?;
     Ok(Json(json))
 }
 
@@ -363,8 +417,9 @@ async fn list_policies(
 
     let json: Vec<serde_json::Value> = rows
         .iter()
-        .map(|r| serde_json::to_value(r).unwrap())
-        .collect();
+        .map(serde_json::to_value)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| memory_common::MemoryError::Internal(format!("Serialization error: {}", e)))?;
     Ok(Json(json))
 }
 
@@ -402,8 +457,9 @@ async fn simulate_replay(
 
     let json: Vec<serde_json::Value> = rows
         .iter()
-        .map(|r| serde_json::to_value(r).unwrap())
-        .collect();
+        .map(serde_json::to_value)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| memory_common::MemoryError::Internal(format!("Serialization error: {}", e)))?;
     Ok(Json(serde_json::json!({
         "point_in_time": body.point_in_time,
         "memory_count": json.len(),

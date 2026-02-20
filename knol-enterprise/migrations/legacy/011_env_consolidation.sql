@@ -23,8 +23,8 @@ VALUES
    'Ingest service listen port',                           'INGEST_SERVICE_PORT'),
 
   -- CORS
-  ('services.admin_cors_origin',  '"http://localhost:3006"', 'string', 'services',
-   'Allowed CORS origin for admin panel',                  'ADMIN_CORS_ORIGIN'),
+  ('services.admin_cors_origin',  '"http://localhost:3006,http://localhost:3005,http://localhost:8080"', 'string', 'services',
+   'Allowed CORS origins for admin panel and local demo UI', 'ADMIN_CORS_ORIGIN'),
 
   -- MinIO / S3
   ('storage.minio_endpoint',      '"http://localhost:9000"', 'string', 'storage',

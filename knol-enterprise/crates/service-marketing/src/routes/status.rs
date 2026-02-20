@@ -28,7 +28,7 @@ pub async fn status(State(state): State<Arc<AppState>>) -> Json<serde_json::Valu
         })
         .collect();
 
-    // Campaign definitions
+    // Campaign definitions with zero-cost plan phase info
     let campaign_list: Vec<serde_json::Value> = campaigns::all_campaigns()
         .iter()
         .map(|c| {
@@ -36,13 +36,21 @@ pub async fn status(State(state): State<Arc<AppState>>) -> Json<serde_json::Valu
                 "name": c.name,
                 "cron": c.cron,
                 "enabled": c.enabled,
-                "channels": c.channels.iter().map(|t| &t.channel).collect::<Vec<_>>(),
+                "phase": c.phase,
+                "description": c.description,
+                "channels": c.channels.iter().map(|t| {
+                    serde_json::json!({
+                        "channel": t.channel,
+                        "template_category": t.template_category,
+                    })
+                }).collect::<Vec<_>>(),
             })
         })
         .collect();
 
     Json(serde_json::json!({
         "service": "marketing",
+        "strategy": "zero-cost",
         "campaigns": campaign_list,
         "rate_limits": rate_limits,
     }))

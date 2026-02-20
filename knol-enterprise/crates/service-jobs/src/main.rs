@@ -2,6 +2,7 @@
 //!
 //! Background cron jobs: importance decay, dedup scan, retention enforcement,
 //! stale edge cleanup, memory consolidation, and conflict detection.
+#![allow(dead_code)]
 
 use std::sync::Arc;
 use tracing::{error, info};
@@ -15,7 +16,7 @@ struct AppState {
 }
 
 type JobFuture = std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<u64>> + Send>>;
-type JobFn = fn(Arc<AppState>) -> JobFuture;
+type PeriodicJob = fn(Arc<AppState>) -> JobFuture;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -74,7 +75,7 @@ async fn run_periodic(
     state: Arc<AppState>,
     name: &'static str,
     interval: std::time::Duration,
-    job: JobFn,
+    job: PeriodicJob,
 ) {
     info!("Job '{}' scheduled every {:?}", name, interval);
     loop {

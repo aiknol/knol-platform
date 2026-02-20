@@ -216,7 +216,8 @@ export default function AboutPage() {
             Have questions or want to learn more? We'd love to hear from you.
           </p>
           <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 text-dark-300">
-            <p className="mb-2">Email: <a href="mailto:hello@aiknol.com" className="text-brand-400 hover:text-brand-300">hello@aiknol.com</a></p>
+            <p className="mb-2">Email: <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a></p>
+            <p className="mb-2">Phone: <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a></p>
             <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
           </div>
         </section>

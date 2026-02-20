@@ -273,9 +273,10 @@ INSERT INTO system_config (key, value, value_type, category, description, env_ov
     ('demo.enabled',          'true',                         'boolean', 'demo', 'Enable the public interactive demo',                    NULL),
     ('demo.llm_provider',     '"gemini"',                     'string',  'demo', 'LLM provider for the demo (gemini, openai, anthropic)', 'DEMO_LLM_PROVIDER'),
     ('demo.llm_model',        '""',                           'string',  'demo', 'Model override for demo (empty = use provider default)', 'DEMO_LLM_MODEL'),
+    ('demo.expose_public_llm_key', 'false',                   'boolean', 'demo', 'Deprecated: no longer used. Demo endpoints never return provider API keys.', NULL),
     ('demo.admin_api_url',    '"http://localhost:8084"',      'string',  'demo', 'Admin API URL the demo fetches config from',             'DEMO_ADMIN_API_URL'),
-    ('demo.github_url',       '"https://github.com/pankajb64/memorylayer"', 'string', 'demo', 'CTA link URL in the demo',                NULL),
-    ('demo.tagline',          '"Give your AI persistent memory"', 'string', 'demo', 'Headline on demo welcome screen',                    NULL),
+    ('demo.github_url',       '"https://github.com/aiknol/knol"', 'string', 'demo', 'CTA link URL in the demo',                          NULL),
+    ('demo.tagline',          '"Context engineering for AI applications"', 'string', 'demo', 'Headline on demo welcome screen',          NULL),
     -- Guardrails
     ('guardrails.redact_pii',                'true',    'boolean',      'guardrails', 'Enable PII detection and redaction in extracted memories',     NULL),
     ('guardrails.pii_mode',                  '"redact"','string',       'guardrails', 'PII handling mode: redact, mask, hash, or allow',              NULL),
@@ -375,8 +376,8 @@ VALUES
    'Ingest service listen port',                           'INGEST_SERVICE_PORT'),
 
   -- CORS
-  ('services.admin_cors_origin',  '"http://localhost:3006"', 'string', 'services',
-   'Allowed CORS origin for admin panel',                  'ADMIN_CORS_ORIGIN'),
+  ('services.admin_cors_origin',  '"http://localhost:3006,http://localhost:3005,http://localhost:8080"', 'string', 'services',
+   'Allowed CORS origins for admin panel and local demo UI', 'ADMIN_CORS_ORIGIN'),
 
   -- MinIO / S3
   ('storage.minio_endpoint',      '"http://localhost:9000"', 'string', 'storage',
@@ -559,4 +560,3 @@ WHERE key IN (
 );
 
 -- <<< END 014_remove_plaintext_sensitive_config.sql
-

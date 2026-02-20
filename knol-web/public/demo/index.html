@@ -658,7 +658,7 @@
     <p class="welcome-sub">
         Open-core memory for AI teams. Keep core memory OSS, then scale with managed security, reliability, and compliance.
     </p>
-    <button class="start-btn" id="startBtn" onclick="demo.start()">
+    <button class="start-btn" id="startBtn">
         ▶ &nbsp;Watch the Live Demo
     </button>
     <div class="welcome-features">
@@ -780,24 +780,31 @@ const CONFIG = {
     // Defaults (overridden by admin API)
     llmProvider: 'gemini',
     llmModel: 'gemini-2.0-flash',
-    llmApiKey: '',
     llmApiUrl: '',
+    llmReady: false,
     githubUrl: 'https://github.com/aiknol/knol',
-    tagline: 'Give your AI persistent memory',
+    tagline: 'Context engineering for AI applications',
     loaded: false,
 };
 
 // Try to load config from admin API at startup
 (async function loadConfig() {
     try {
-        const res = await fetch(`${CONFIG.adminApiUrl}/admin/demo/config`, { signal: AbortSignal.timeout(3000) });
+        const timeoutSignal =
+            typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
+                ? AbortSignal.timeout(3000)
+                : undefined;
+        const res = await fetch(
+            `${CONFIG.adminApiUrl}/admin/demo/config`,
+            timeoutSignal ? { signal: timeoutSignal } : {}
+        );
         if (res.ok) {
             const data = await res.json();
             if (data.enabled === false) return;
             if (data.llm_provider) CONFIG.llmProvider = data.llm_provider;
             if (data.llm_model) CONFIG.llmModel = data.llm_model;
-            if (data.llm_api_key) CONFIG.llmApiKey = data.llm_api_key;
             if (data.llm_api_url) CONFIG.llmApiUrl = data.llm_api_url;
+            CONFIG.llmReady = Boolean(data.llm_ready);
             if (data.github_url) CONFIG.githubUrl = data.github_url;
             if (data.tagline) CONFIG.tagline = data.tagline;
             CONFIG.loaded = true;
@@ -811,22 +818,6 @@ const CONFIG = {
         console.log('[Knol Demo] Admin API unavailable, using defaults');
     }
 })();
-
-function getLlmUrl() {
-    const provider = CONFIG.llmProvider;
-    const key = CONFIG.llmApiKey;
-    const model = CONFIG.llmModel;
-    if (provider === 'gemini' || provider === 'google') {
-        const base = CONFIG.llmApiUrl || 'https://generativelanguage.googleapis.com/v1beta';
-        return { url: `${base}/models/${model}:generateContent?key=${key}`, type: 'gemini' };
-    }
-    if (provider === 'openai' || provider === 'open_ai') {
-        const base = CONFIG.llmApiUrl || 'https://api.openai.com/v1';
-        return { url: `${base}/chat/completions`, type: 'openai', key };
-    }
-    // Anthropic — browser CORS won't work, but include for completeness
-    return { url: 'https://api.anthropic.com/v1/messages', type: 'anthropic', key };
-}
 
 // ── Memory Store ──
 class MemoryStore {
@@ -1039,53 +1030,23 @@ RULES:
     }
 
     async extract(userMessage, memoryContext) {
-        if (!CONFIG.llmApiKey) return this.fallback(userMessage, memoryContext);
-
-        const { url, type, key } = getLlmUrl();
-        const systemPrompt = this.buildSystemPrompt(memoryContext);
+        if (!CONFIG.llmReady) return this.fallback(userMessage, memoryContext);
 
         try {
-            let res, text;
-
-            if (type === 'gemini') {
-                res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-                        generationConfig: { temperature: 0.7, maxOutputTokens: 1024, responseMimeType: 'application/json' }
-                    })
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-            } else if (type === 'openai') {
-                res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-                    body: JSON.stringify({
-                        model: CONFIG.llmModel,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userMessage }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 1024,
-                        response_format: { type: 'json_object' }
-                    })
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                text = data.choices?.[0]?.message?.content || '';
-
-            } else {
-                // Anthropic — CORS blocks browser calls, fall back
-                return this.fallback(userMessage, memoryContext);
+            const res = await fetch(`${CONFIG.adminApiUrl}/admin/demo/extract`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_message: userMessage,
+                    memory_context: memoryContext
+                })
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data || typeof data.response !== 'string') {
+                throw new Error('Invalid payload from admin demo extract endpoint');
             }
-
-            return JSON.parse(text);
+            return data;
         } catch (err) {
             console.error('LLM error:', err);
             return this.fallback(userMessage, memoryContext);
@@ -1134,7 +1095,7 @@ RULES:
                 temporal_change: "Tracked that change!",
                 goal: "I'll keep that goal in mind."
             };
-            response = `${ack[type] || "Stored!"} I've extracted **${entities.length} ${entities.length === 1 ? 'entity' : 'entities'}** from this message. Everything is being added to your knowledge graph.\n\n_Note: Running in offline mode. Connect a valid Gemini API key for full AI responses._`;
+            response = `${ack[type] || "Stored!"} I've extracted **${entities.length} ${entities.length === 1 ? 'entity' : 'entities'}** from this message. Everything is being added to your knowledge graph.\n\n_Note: Running in offline mode. Add a valid provider key in Admin > Credentials and verify /admin/demo/config reports llm_ready: true._`;
         }
 
         return { response, new_memories: memories, referenced_memory_indices: refs };
@@ -1142,7 +1103,7 @@ RULES:
 }
 
 // ── Main Demo App ──
-const demo = {
+const demo = window.demo = {
     store: new MemoryStore(),
     llm: new LlmClient(),
     graph: null,
@@ -1155,8 +1116,8 @@ const demo = {
         const badge = document.getElementById('providerBadge');
         const p = CONFIG.llmProvider;
         const icon = p === 'gemini' ? '✦' : p === 'openai' ? '◉' : '◈';
-        badge.textContent = `${icon} ${CONFIG.llmModel}`;
-        badge.title = `Provider: ${p} | Model: ${CONFIG.llmModel} | Config: ${CONFIG.loaded ? 'Admin API' : 'defaults'}`;
+        badge.textContent = `${icon} ${CONFIG.llmModel}${CONFIG.llmReady ? '' : ' (offline)'}`;
+        badge.title = `Provider: ${p} | Model: ${CONFIG.llmModel} | LLM ready: ${CONFIG.llmReady ? 'yes' : 'no'} | Config: ${CONFIG.loaded ? 'Admin API' : 'defaults'}`;
         this.runGuidedDemo();
     },
 
@@ -1496,6 +1457,12 @@ const demo = {
         return new Promise(r => setTimeout(r, ms));
     }
 };
+
+// Bind start action via JS (more reliable than inline onclick across environments)
+const startBtn = document.getElementById('startBtn');
+if (startBtn) {
+    startBtn.addEventListener('click', () => demo.start());
+}
 </script>
 </body>
 </html>

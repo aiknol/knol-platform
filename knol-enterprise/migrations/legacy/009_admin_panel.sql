@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     admin_id      UUID REFERENCES admin_users(id),
     admin_email   TEXT,
-    action        TEXT NOT NULL CHECK (action IN ('create','update','delete','login','logout','test')),
+    action        TEXT NOT NULL CHECK (action IN ('create','update','delete','login','logout','test','trigger')),
     resource_type TEXT NOT NULL,        -- 'config', 'credential', 'campaign', 'tenant', 'user'
     resource_key  TEXT,
     old_value     JSONB,
@@ -118,9 +118,10 @@ INSERT INTO system_config (key, value, value_type, category, description, env_ov
     ('demo.enabled',          'true',                         'boolean', 'demo', 'Enable the public interactive demo',                    NULL),
     ('demo.llm_provider',     '"gemini"',                     'string',  'demo', 'LLM provider for the demo (gemini, openai, anthropic)', 'DEMO_LLM_PROVIDER'),
     ('demo.llm_model',        '""',                           'string',  'demo', 'Model override for demo (empty = use provider default)', 'DEMO_LLM_MODEL'),
+    ('demo.expose_public_llm_key', 'false',                   'boolean', 'demo', 'Deprecated: no longer used. Demo endpoints never return provider API keys.', NULL),
     ('demo.admin_api_url',    '"http://localhost:8084"',      'string',  'demo', 'Admin API URL the demo fetches config from',             'DEMO_ADMIN_API_URL'),
-    ('demo.github_url',       '"https://github.com/pankajb64/memorylayer"', 'string', 'demo', 'CTA link URL in the demo',                NULL),
-    ('demo.tagline',          '"Give your AI persistent memory"', 'string', 'demo', 'Headline on demo welcome screen',                    NULL),
+    ('demo.github_url',       '"https://github.com/aiknol/knol"', 'string', 'demo', 'CTA link URL in the demo',                          NULL),
+    ('demo.tagline',          '"Context engineering for AI applications"', 'string', 'demo', 'Headline on demo welcome screen',          NULL),
     -- Guardrails
     ('guardrails.redact_pii',                'true',    'boolean',      'guardrails', 'Enable PII detection and redaction in extracted memories',     NULL),
     ('guardrails.pii_mode',                  '"redact"','string',       'guardrails', 'PII handling mode: redact, mask, hash, or allow',              NULL),

@@ -1,9 +1,24 @@
-//! Campaign definitions and execution logic.
+//! Campaign definitions aligned with the Zero-Cost Marketing Plan.
 //!
-//! Three campaigns run on cron schedules:
-//! - **Daily** (2pm UTC): 1 tweet, rotating category
-//! - **Weekly** (Tue 3pm UTC): Blog + Dev.to + LinkedIn + Reddit
-//! - **Monthly** (1st 4pm UTC): Newsletter + GitHub metadata + tweet thread
+//! Campaigns are organized by plan phases:
+//!
+//! **Phase 3 (Content Engine):**
+//! - **daily_twitter** (2pm UTC): Day-of-week rotation (Mon=tip, Tue=benchmark,
+//!   Wed=showcase, Thu=architecture, Fri=community)
+//! - **weekly_content** (Tue 3pm UTC): Blog + cross-post to Dev.to, Hashnode, Medium +
+//!   LinkedIn + Reddit (rotating subs)
+//!
+//! **Phase 2 (Launch Week) — one-time campaigns:**
+//! - **launch_hn**: Hacker News Show HN post
+//! - **launch_reddit**: Reddit blitz across 4 subreddits
+//! - **launch_devto**: Dev.to technical article
+//! - **launch_twitter**: Twitter thread
+//! - **launch_producthunt**: Product Hunt listing
+//!
+//! **Phase 4 & 5 (Community & Conversion):**
+//! - **monthly_newsletter**: Email + GitHub metadata + community tweet
+//! - **mcp_content**: MCP ecosystem content (bi-weekly)
+//! - **seo_content**: SEO-targeted blog posts (weekly)
 
 use chrono::Datelike;
 use std::sync::Arc;
@@ -22,6 +37,10 @@ pub struct Campaign {
     pub cron: String,
     pub channels: Vec<ChannelTask>,
     pub enabled: bool,
+    /// Which phase of the zero-cost marketing plan this campaign belongs to.
+    pub phase: MarketingPhase,
+    /// Human-readable description of the campaign's purpose.
+    pub description: String,
 }
 
 /// A single publish task within a campaign.
@@ -31,20 +50,47 @@ pub struct ChannelTask {
     pub template_category: String,
 }
 
-/// Get all campaign definitions.
+/// Marketing plan phase for campaign categorization.
+#[derive(Debug, Clone, serde::Serialize)]
+pub enum MarketingPhase {
+    /// Phase 2: Launch Week (one-time campaigns)
+    Launch,
+    /// Phase 3: Content Engine (recurring)
+    ContentEngine,
+    /// Phase 4: Community & Ecosystem
+    Community,
+    /// Phase 5: Conversion & Growth
+    Conversion,
+}
+
+impl std::fmt::Display for MarketingPhase {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MarketingPhase::Launch => write!(f, "launch"),
+            MarketingPhase::ContentEngine => write!(f, "content_engine"),
+            MarketingPhase::Community => write!(f, "community"),
+            MarketingPhase::Conversion => write!(f, "conversion"),
+        }
+    }
+}
+
+/// Get all campaign definitions aligned with the Zero-Cost Marketing Plan.
 pub fn all_campaigns() -> Vec<Campaign> {
     vec![
+        // ── Phase 3: Content Engine (recurring) ──────────────────
         Campaign {
-            name: "daily".to_string(),
+            name: "daily_twitter".to_string(),
             cron: "0 0 14 * * *".to_string(), // 2pm UTC daily
             channels: vec![ChannelTask {
                 channel: "twitter".to_string(),
-                template_category: "tweet_launch".to_string(), // rotates at runtime
+                template_category: "tweet_tip".to_string(), // rotated by day-of-week at runtime
             }],
             enabled: true,
+            phase: MarketingPhase::ContentEngine,
+            description: "Daily tweet with day-of-week rotation: Mon=tip, Tue=benchmark, Wed=showcase, Thu=architecture, Fri=community".to_string(),
         },
         Campaign {
-            name: "weekly".to_string(),
+            name: "weekly_content".to_string(),
             cron: "0 0 15 * * TUE".to_string(), // Tue 3pm UTC
             channels: vec![
                 ChannelTask {
@@ -56,18 +102,126 @@ pub fn all_campaigns() -> Vec<Campaign> {
                     template_category: "devto_tutorial".to_string(),
                 },
                 ChannelTask {
+                    channel: "hashnode".to_string(),
+                    template_category: "devto_tutorial".to_string(), // cross-post
+                },
+                ChannelTask {
+                    channel: "medium".to_string(),
+                    template_category: "devto_tutorial".to_string(), // cross-post
+                },
+                ChannelTask {
                     channel: "linkedin".to_string(),
                     template_category: "linkedin_technical".to_string(),
                 },
                 ChannelTask {
                     channel: "reddit".to_string(),
-                    template_category: "reddit_rust".to_string(),
+                    template_category: "reddit_rust".to_string(), // rotated at runtime
                 },
             ],
             enabled: true,
+            phase: MarketingPhase::ContentEngine,
+            description: "Weekly blog + cross-post to Dev.to/Hashnode/Medium + LinkedIn + Reddit".to_string(),
+        },
+
+        // ── Phase 2: Launch Week (one-time, disabled by default) ─
+        Campaign {
+            name: "launch_hn".to_string(),
+            cron: "0 0 13 * * *".to_string(), // 8am ET = 1pm UTC (peak HN)
+            channels: vec![ChannelTask {
+                channel: "hackernews".to_string(),
+                template_category: "hn_show".to_string(),
+            }],
+            enabled: false, // Enable manually for launch day
+            phase: MarketingPhase::Launch,
+            description: "Launch Day 1: Show HN post (8am ET Tuesday/Wednesday)".to_string(),
         },
         Campaign {
-            name: "monthly".to_string(),
+            name: "launch_reddit".to_string(),
+            cron: "0 0 15 * * *".to_string(),
+            channels: vec![
+                ChannelTask {
+                    channel: "reddit".to_string(),
+                    template_category: "reddit_rust".to_string(),
+                },
+                ChannelTask {
+                    channel: "reddit".to_string(),
+                    template_category: "reddit_local_llama".to_string(),
+                },
+                ChannelTask {
+                    channel: "reddit".to_string(),
+                    template_category: "reddit_ml".to_string(),
+                },
+                ChannelTask {
+                    channel: "reddit".to_string(),
+                    template_category: "reddit_selfhosted".to_string(),
+                },
+            ],
+            enabled: false,
+            phase: MarketingPhase::Launch,
+            description: "Launch Day 2: Reddit blitz — r/rust, r/LocalLLaMA, r/MachineLearning, r/selfhosted".to_string(),
+        },
+        Campaign {
+            name: "launch_devto".to_string(),
+            cron: "0 0 14 * * *".to_string(),
+            channels: vec![
+                ChannelTask {
+                    channel: "devto".to_string(),
+                    template_category: "devto_rust_rewrite".to_string(),
+                },
+                ChannelTask {
+                    channel: "hashnode".to_string(),
+                    template_category: "devto_rust_rewrite".to_string(),
+                },
+            ],
+            enabled: false,
+            phase: MarketingPhase::Launch,
+            description: "Launch Day 3: Dev.to + Hashnode article — 'Why We Rewrote in Rust'".to_string(),
+        },
+        Campaign {
+            name: "launch_twitter".to_string(),
+            cron: "0 0 14 * * *".to_string(),
+            channels: vec![ChannelTask {
+                channel: "twitter".to_string(),
+                template_category: "tweet_thread_launch".to_string(),
+            }],
+            enabled: false,
+            phase: MarketingPhase::Launch,
+            description: "Launch Day 4: Twitter/X launch thread".to_string(),
+        },
+        Campaign {
+            name: "launch_producthunt".to_string(),
+            cron: "0 0 12 * * *".to_string(), // Midnight PT = noon UTC
+            channels: vec![ChannelTask {
+                channel: "producthunt".to_string(),
+                template_category: "producthunt_launch".to_string(),
+            }],
+            enabled: false,
+            phase: MarketingPhase::Launch,
+            description: "Launch Day 5: Product Hunt listing (Category: Developer Tools > AI)".to_string(),
+        },
+
+        // ── Phase 4: Community & Ecosystem ───────────────────────
+        Campaign {
+            name: "mcp_content".to_string(),
+            cron: "0 0 15 * * WED".to_string(), // Every Wed
+            channels: vec![
+                ChannelTask {
+                    channel: "devto".to_string(),
+                    template_category: "devto_mcp".to_string(),
+                },
+                ChannelTask {
+                    channel: "blog".to_string(),
+                    template_category: "blog_integration".to_string(),
+                },
+            ],
+            enabled: true,
+            phase: MarketingPhase::Community,
+            description: "MCP ecosystem content: tutorials, integration guides".to_string(),
+        },
+
+        // ── Phase 5: Conversion & Growth ─────────────────────────
+        Campaign {
+            name: "monthly_newsletter".to_string(),
             cron: "0 0 16 1 * *".to_string(), // 1st of month, 4pm UTC
             channels: vec![
                 ChannelTask {
@@ -84,17 +238,100 @@ pub fn all_campaigns() -> Vec<Campaign> {
                 },
             ],
             enabled: true,
+            phase: MarketingPhase::Conversion,
+            description: "Monthly newsletter + GitHub metadata update + summary tweet".to_string(),
+        },
+        Campaign {
+            name: "seo_content".to_string(),
+            cron: "0 0 14 * * THU".to_string(), // Every Thursday
+            channels: vec![
+                ChannelTask {
+                    channel: "blog".to_string(),
+                    template_category: "blog_seo".to_string(),
+                },
+            ],
+            enabled: true,
+            phase: MarketingPhase::Conversion,
+            description: "SEO-targeted blog posts: 'AI memory layer', 'Mem0 alternative', 'context engineering'".to_string(),
+        },
+        Campaign {
+            name: "weekly_digest".to_string(),
+            cron: "0 0 10 * * FRI".to_string(), // Fri 10am UTC
+            channels: vec![
+                ChannelTask {
+                    channel: "email".to_string(),
+                    template_category: "email_digest".to_string(),
+                },
+            ],
+            enabled: true,
+            phase: MarketingPhase::Conversion,
+            description: "Weekly usage digest email for self-hosted users (opt-in)".to_string(),
         },
     ]
 }
 
-/// Rotate tweet category based on day of year.
-fn rotate_tweet_category() -> &'static str {
-    let day = chrono::Utc::now().ordinal0();
-    match day % 3 {
-        0 => "tweet_launch",
-        1 => "tweet_technical",
-        _ => "tweet_comparison",
+/// Backward-compatible alias: returns all enabled campaigns.
+pub fn enabled_campaigns() -> Vec<Campaign> {
+    all_campaigns().into_iter().filter(|c| c.enabled).collect()
+}
+
+/// Day-of-week tweet category rotation per the zero-cost plan:
+/// Monday=tip, Tuesday=benchmark, Wednesday=showcase, Thursday=architecture, Friday=community.
+/// Weekends fall back to engagement tweets.
+fn day_of_week_tweet_category() -> &'static str {
+    let weekday = chrono::Utc::now().weekday();
+    match weekday {
+        chrono::Weekday::Mon => "tweet_tip",
+        chrono::Weekday::Tue => "tweet_benchmark",
+        chrono::Weekday::Wed => "tweet_showcase",
+        chrono::Weekday::Thu => "tweet_architecture",
+        chrono::Weekday::Fri => "tweet_community",
+        chrono::Weekday::Sat | chrono::Weekday::Sun => "tweet_engagement",
+    }
+}
+
+/// Rotate Reddit subreddit for weekly content campaign.
+/// Cycles through: rust → local_llama → ml → selfhosted.
+fn rotate_reddit_category() -> &'static str {
+    let week = chrono::Utc::now().iso_week().week0();
+    match week % 4 {
+        0 => "reddit_rust",
+        1 => "reddit_local_llama",
+        2 => "reddit_ml",
+        _ => "reddit_selfhosted",
+    }
+}
+
+/// Rotate blog template for weekly content: technical → SEO → integration.
+fn rotate_blog_category() -> &'static str {
+    let week = chrono::Utc::now().iso_week().week0();
+    match week % 3 {
+        0 => "blog_technical",
+        1 => "blog_seo",
+        _ => "blog_integration",
+    }
+}
+
+/// Rotate Dev.to template: tutorial → MCP → rust_rewrite.
+fn rotate_devto_category() -> &'static str {
+    let week = chrono::Utc::now().iso_week().week0();
+    match week % 3 {
+        0 => "devto_tutorial",
+        1 => "devto_mcp",
+        _ => "devto_rust_rewrite",
+    }
+}
+
+/// Resolve the actual template category for a task, applying rotation logic.
+fn resolve_category(campaign_name: &str, task: &ChannelTask) -> String {
+    match (campaign_name, task.channel.as_str()) {
+        ("daily_twitter", "twitter") => day_of_week_tweet_category().to_string(),
+        ("weekly_content", "reddit") => rotate_reddit_category().to_string(),
+        ("weekly_content", "blog") => rotate_blog_category().to_string(),
+        ("weekly_content", "devto")
+        | ("weekly_content", "hashnode")
+        | ("weekly_content", "medium") => rotate_devto_category().to_string(),
+        _ => task.template_category.clone(),
     }
 }
 
@@ -115,19 +352,15 @@ pub async fn execute_campaign(
     }
 
     info!(
-        "Campaign '{}': starting (dry_run={})",
-        campaign_name, dry_run
+        "Campaign '{}' (phase={}): starting (dry_run={})",
+        campaign_name, campaign.phase, dry_run
     );
 
     let mut results = Vec::new();
 
     for task in &campaign.channels {
-        // Rotate tweet category for daily campaign
-        let category = if task.channel == "twitter" && campaign_name == "daily" {
-            rotate_tweet_category().to_string()
-        } else {
-            task.template_category.clone()
-        };
+        // Resolve category with rotation logic
+        let category = resolve_category(campaign_name, task);
 
         // 1. Check rate limit BEFORE generating content
         let statuses = state.rate_limiter.check_status(&task.channel).await;
@@ -168,9 +401,10 @@ pub async fn execute_campaign(
 
         if dry_run {
             info!(
-                "Campaign '{}': [DRY RUN] would publish to {} — '{}'",
+                "Campaign '{}': [DRY RUN] would publish to {} ({}) — '{}'",
                 campaign_name,
                 task.channel,
+                category,
                 &content.text[..content.text.len().min(80)]
             );
             results.push(CampaignResult {
@@ -293,4 +527,89 @@ async fn log_publish(
     .await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn all_campaigns_have_unique_names() {
+        let campaigns = all_campaigns();
+        let mut names: Vec<&str> = campaigns.iter().map(|c| c.name.as_str()).collect();
+        names.sort();
+        names.dedup();
+        assert_eq!(
+            names.len(),
+            campaigns.len(),
+            "Duplicate campaign names found"
+        );
+    }
+
+    #[test]
+    fn enabled_campaigns_are_content_engine_or_later() {
+        // Launch campaigns should be disabled by default
+        let campaigns = all_campaigns();
+        for c in &campaigns {
+            if matches!(c.phase, MarketingPhase::Launch) {
+                assert!(
+                    !c.enabled,
+                    "Launch campaign '{}' should be disabled by default",
+                    c.name
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn daily_twitter_uses_dow_rotation() {
+        let task = ChannelTask {
+            channel: "twitter".to_string(),
+            template_category: "tweet_tip".to_string(),
+        };
+        let category = resolve_category("daily_twitter", &task);
+        let valid = [
+            "tweet_tip",
+            "tweet_benchmark",
+            "tweet_showcase",
+            "tweet_architecture",
+            "tweet_community",
+            "tweet_engagement",
+        ];
+        assert!(
+            valid.contains(&category.as_str()),
+            "Unexpected category: {}",
+            category
+        );
+    }
+
+    #[test]
+    fn weekly_reddit_rotates_subs() {
+        let task = ChannelTask {
+            channel: "reddit".to_string(),
+            template_category: "reddit_rust".to_string(),
+        };
+        let category = resolve_category("weekly_content", &task);
+        let valid = [
+            "reddit_rust",
+            "reddit_local_llama",
+            "reddit_ml",
+            "reddit_selfhosted",
+        ];
+        assert!(
+            valid.contains(&category.as_str()),
+            "Unexpected Reddit category: {}",
+            category
+        );
+    }
+
+    #[test]
+    fn non_rotating_campaign_keeps_original_category() {
+        let task = ChannelTask {
+            channel: "email".to_string(),
+            template_category: "email_weekly".to_string(),
+        };
+        let category = resolve_category("monthly_newsletter", &task);
+        assert_eq!(category, "email_weekly");
+    }
 }

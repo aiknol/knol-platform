@@ -83,7 +83,10 @@ pub async fn list_configs(
         .fetch_all(&state.db_pool)
         .await
     }
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let json: Vec<serde_json::Value> = rows
         .iter()
@@ -115,7 +118,10 @@ pub async fn get_config(
     .bind(&key)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?
     .ok_or_else(|| AdminError::NotFound(format!("Config key '{}' not found", key)))?;
 
     Ok(Json(serde_json::json!({
@@ -235,7 +241,10 @@ pub async fn upsert_config(
     .bind(&key)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     // Upsert
     sqlx::query(
@@ -259,7 +268,10 @@ pub async fn upsert_config(
     .bind(&body.env_override)
     .execute(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     // Audit log
     let old_audit = old
@@ -296,7 +308,10 @@ pub async fn delete_config(
     .bind(&key)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?
     .flatten();
 
     let old = sqlx::query_scalar::<_, serde_json::Value>(
@@ -305,13 +320,19 @@ pub async fn delete_config(
     .bind(&key)
     .fetch_optional(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     sqlx::query("DELETE FROM system_config WHERE key = $1")
         .bind(&key)
         .execute(&state.db_pool)
         .await
-        .map_err(|e| AdminError::Internal(e.to_string()))?;
+        .map_err(|e| {
+            tracing::error!("Internal error: {}", e);
+            AdminError::Internal("Internal server error".into())
+        })?;
 
     let old_audit = old
         .as_ref()

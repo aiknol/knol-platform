@@ -47,27 +47,54 @@ pub fn decrypt(data: &[u8], key: &[u8; 32]) -> Result<Vec<u8>, String> {
 }
 
 /// Load encryption key from ADMIN_ENCRYPTION_KEY env var (base64-encoded).
-/// Fails closed if the key is missing or invalid.
-pub fn load_encryption_key() -> [u8; 32] {
+/// Returns an error if the key is missing, invalid base64, or not 32 bytes.
+pub fn load_encryption_key() -> Result<[u8; 32], String> {
     let b64 = std::env::var("ADMIN_ENCRYPTION_KEY")
-        .expect("ADMIN_ENCRYPTION_KEY must be set (base64-encoded 32-byte key)");
+        .map_err(|_| "ADMIN_ENCRYPTION_KEY must be set (base64-encoded 32-byte key). Generate with: openssl rand -base64 32".to_string())?;
     let bytes = B64
         .decode(&b64)
-        .expect("ADMIN_ENCRYPTION_KEY must be valid base64");
+        .map_err(|e| format!("ADMIN_ENCRYPTION_KEY must be valid base64: {}", e))?;
     if bytes.len() != 32 {
-        panic!(
+        return Err(format!(
             "ADMIN_ENCRYPTION_KEY must be 32 bytes (got {}). Generate with: openssl rand -base64 32",
             bytes.len()
-        );
+        ));
     }
     let mut key = [0u8; 32];
     key.copy_from_slice(&bytes);
-    key
+    Ok(key)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn load_encryption_key_requires_env() {
+        std::env::remove_var("ADMIN_ENCRYPTION_KEY");
+        let result = load_encryption_key();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be set"));
+    }
+
+    #[test]
+    fn load_encryption_key_rejects_invalid_base64() {
+        std::env::set_var("ADMIN_ENCRYPTION_KEY", "not-valid-base64!!!");
+        let result = load_encryption_key();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("valid base64"));
+        std::env::remove_var("ADMIN_ENCRYPTION_KEY");
+    }
+
+    #[test]
+    fn load_encryption_key_rejects_wrong_length() {
+        // 16 bytes instead of 32
+        std::env::set_var("ADMIN_ENCRYPTION_KEY", B64.encode([0u8; 16]));
+        let result = load_encryption_key();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("32 bytes"));
+        std::env::remove_var("ADMIN_ENCRYPTION_KEY");
+    }
 
     #[test]
     fn encrypt_decrypt_roundtrip() {

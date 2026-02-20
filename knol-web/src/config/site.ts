@@ -11,6 +11,9 @@ export const SITE = {
   docsUrl: '/docs/',
   pypi: 'https://pypi.org/project/knol/',
   npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
+  contactEmail: 'aiknolcontact@gmail.com',
+  contactPhone: '+14155055990',
+  contactPhoneDisplay: '(415) 505-5990',
 } as const;
 
 export function pageTitle(title?: string): string {
@@ -62,7 +65,8 @@ export const FOOTER_SECTIONS = [
     links: [
       { label: 'Blog', href: '/blog/' },
       { label: 'About', href: '/about/' },
-      { label: 'Contact', href: 'mailto:hello@aiknol.com' },
+      { label: 'Contact', href: `mailto:${SITE.contactEmail}` },
+      { label: SITE.contactPhoneDisplay, href: `tel:${SITE.contactPhone}` },
     ],
   },
   {

@@ -143,11 +143,12 @@ async def call_openai(client: httpx.AsyncClient, api_key: str, model: str,
 
 class DemoTester:
     def __init__(self, provider: str, api_key: str, model: str,
-                 admin_url: Optional[str] = None):
+                 admin_url: Optional[str] = None, use_admin_proxy: bool = False):
         self.provider = provider
         self.api_key = api_key
         self.model = model
         self.admin_url = admin_url
+        self.use_admin_proxy = use_admin_proxy
         self.memories: list[dict] = []
         self.passed = 0
         self.failed = 0
@@ -164,6 +165,17 @@ class DemoTester:
         last_err = None
         for attempt in range(3):
             try:
+                if self.use_admin_proxy:
+                    if not self.admin_url:
+                        raise ValueError("Admin proxy mode enabled but admin_url is missing")
+                    resp = await client.post(
+                        f"{self.admin_url}/admin/demo/extract",
+                        json={"user_message": msg, "memory_context": ctx},
+                        timeout=30,
+                    )
+                    resp.raise_for_status()
+                    return resp.json()
+
                 if self.provider == "gemini":
                     return await call_gemini(client, self.api_key, self.model, msg, ctx)
                 elif self.provider == "openai":
@@ -196,7 +208,10 @@ class DemoTester:
         header("Knol Demo — End-to-End Verification")
         info(f"Provider: {self.provider}")
         info(f"Model: {self.model}")
-        info(f"API key: {self.api_key[:8]}...{self.api_key[-4:]}" if len(self.api_key) > 12 else f"API key: {self.api_key[:8]}...")
+        if self.use_admin_proxy:
+            info("LLM auth: server-side credential via admin proxy")
+        else:
+            info(f"API key: {self.api_key[:8]}...{self.api_key[-4:]}" if len(self.api_key) > 12 else f"API key: {self.api_key[:8]}...")
 
         async with httpx.AsyncClient() as client:
             # ── Test 1: Admin config endpoint ──
@@ -238,14 +253,14 @@ class DemoTester:
             if resp.status_code == 200:
                 data = resp.json()
                 self.check("llm_provider" in data, f"Provider returned: {data.get('llm_provider', '?')}", "Missing llm_provider field")
-                self.check("llm_api_key" in data, "API key field present", "Missing llm_api_key field")
+                self.check("llm_ready" in data, "llm_ready field present", "Missing llm_ready field")
                 self.check(data.get("enabled") is True, "Demo is enabled", "Demo is disabled!")
 
-                has_key = bool(data.get("llm_api_key"))
-                if has_key:
-                    ok(f"API key loaded from credentials ({data['llm_api_key'][:8]}...)")
+                llm_ready = bool(data.get("llm_ready"))
+                if llm_ready:
+                    ok("LLM credential is configured server-side")
                 else:
-                    warn("No API key in admin credentials — demo will use fallback mode")
+                    warn("LLM credential is not configured — demo will use fallback mode")
 
         except httpx.ConnectError:
             warn(f"Admin API not running at {self.admin_url} (skipping)")
@@ -395,26 +410,26 @@ Examples:
     api_key = args.api_key
     model = args.model
     admin_url = args.admin_url or os.environ.get("DEMO_ADMIN_API_URL", "http://localhost:8084")
+    use_admin_proxy = False
 
-    # Try to load config from admin API if no explicit provider/key given
-    if not provider or not api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.get(f"{admin_url}/admin/demo/config", timeout=3)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    if not provider:
-                        provider = data.get("llm_provider", "gemini")
-                    if not api_key and data.get("llm_api_key"):
-                        api_key = data["llm_api_key"]
-                    if not model and data.get("llm_model"):
-                        model = data["llm_model"]
-                    info(f"Loaded config from admin API at {admin_url}")
-        except Exception:
-            pass  # Admin not running, fall back to env vars
+    # Try to load config from admin API first.
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"{admin_url}/admin/demo/config", timeout=3)
+            if resp.status_code == 200:
+                data = resp.json()
+                if not provider:
+                    provider = data.get("llm_provider", "gemini")
+                if not model and data.get("llm_model"):
+                    model = data["llm_model"]
+                if not api_key and data.get("llm_ready") is True:
+                    use_admin_proxy = True
+                info(f"Loaded config from admin API at {admin_url}")
+    except Exception:
+        pass  # Admin not running, fall back to direct key mode
 
     # Fall back to environment variables
-    if not api_key:
+    if not use_admin_proxy and not api_key:
         if provider == "openai":
             api_key = os.environ.get("OPENAI_API_KEY", "")
         else:
@@ -431,19 +446,20 @@ Examples:
     if not model:
         model = "gemini-2.0-flash" if provider == "gemini" else "gpt-4o-mini"
 
-    if not api_key:
+    if not use_admin_proxy and not api_key:
         print(f"\n{C.RED}{C.BOLD}Error: No API key found.{C.RESET}\n")
         print("Provide an API key via:")
         print(f"  {C.DIM}--api-key AIzaSy...{C.RESET}")
         print(f"  {C.DIM}GEMINI_API_KEY=... python test_demo.py{C.RESET}")
-        print(f"  {C.DIM}Store it in admin panel → Credentials → gemini_api_key{C.RESET}")
+        print(f"  {C.DIM}Or store it in admin panel and ensure /admin/demo/config returns llm_ready=true{C.RESET}")
         sys.exit(1)
 
     tester = DemoTester(
         provider=provider,
-        api_key=api_key,
+        api_key=api_key or "",
         model=model,
         admin_url=admin_url,
+        use_admin_proxy=use_admin_proxy,
     )
 
     success = await tester.run()

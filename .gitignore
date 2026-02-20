@@ -5,6 +5,7 @@ target/
 # Node.js
 node_modules/
 .next/
+.next-admin/
 out/
 
 # Environment
@@ -33,3 +34,4 @@ deploy/*.key
 # Build artifacts
 *.wasm
 dist/
+__pycache__/

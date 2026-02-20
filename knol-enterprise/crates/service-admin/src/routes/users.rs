@@ -20,11 +20,14 @@ pub async fn list_users(
     }
 
     let rows = sqlx::query_as::<_, UserRow>(
-        "SELECT id, email, role, enabled, last_login_at, created_at FROM admin_users ORDER BY created_at",
+        "SELECT id, email, role, enabled, last_login_at, created_at, updated_at FROM admin_users ORDER BY created_at",
     )
     .fetch_all(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let json: Vec<serde_json::Value> = rows
         .iter()
@@ -36,6 +39,7 @@ pub async fn list_users(
                 "enabled": r.enabled,
                 "last_login_at": r.last_login_at.map(|t| t.to_rfc3339()),
                 "created_at": r.created_at.to_rfc3339(),
+                "updated_at": r.updated_at.to_rfc3339(),
             })
         })
         .collect();
@@ -83,8 +87,10 @@ pub async fn create_user(
         )));
     }
 
-    let hash = bcrypt::hash(&body.password, 12)
-        .map_err(|e| AdminError::Internal(format!("bcrypt: {}", e)))?;
+    let hash = bcrypt::hash(&body.password, 12).map_err(|e| {
+        tracing::error!("bcrypt error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let id = sqlx::query_scalar::<_, Uuid>(
         "INSERT INTO admin_users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id",
@@ -94,7 +100,10 @@ pub async fn create_user(
     .bind(&body.role)
     .fetch_one(&state.db_pool)
     .await
-    .map_err(|e| AdminError::Internal(e.to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Internal error: {}", e);
+        AdminError::Internal("Internal server error".into())
+    })?;
 
     let _ = sqlx::query(
         "INSERT INTO admin_audit_log (admin_id, admin_email, action, resource_type, resource_key, new_value) VALUES ($1, $2, 'create', 'user', $3, $4)",
@@ -140,7 +149,10 @@ pub async fn update_user(
             .bind(id)
             .execute(&state.db_pool)
             .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::error!("Internal error: {}", e);
+                AdminError::Internal("Internal server error".into())
+            })?;
     }
 
     if let Some(enabled) = body.enabled {
@@ -149,7 +161,10 @@ pub async fn update_user(
             .bind(id)
             .execute(&state.db_pool)
             .await
-            .map_err(|e| AdminError::Internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::error!("Internal error: {}", e);
+                AdminError::Internal("Internal server error".into())
+            })?;
     }
 
     let _ = sqlx::query(
@@ -185,14 +200,20 @@ pub async fn delete_user(
         .bind(id)
         .execute(&state.db_pool)
         .await
-        .map_err(|e| AdminError::Internal(e.to_string()))?;
+        .map_err(|e| {
+            tracing::error!("Internal error: {}", e);
+            AdminError::Internal("Internal server error".into())
+        })?;
 
     // Invalidate sessions
     sqlx::query("DELETE FROM admin_sessions WHERE admin_id = $1")
         .bind(id)
         .execute(&state.db_pool)
         .await
-        .map_err(|e| AdminError::Internal(e.to_string()))?;
+        .map_err(|e| {
+            tracing::error!("Internal error: {}", e);
+            AdminError::Internal("Internal server error".into())
+        })?;
 
     let _ = sqlx::query(
         "INSERT INTO admin_audit_log (admin_id, admin_email, action, resource_type, resource_key) VALUES ($1, $2, 'delete', 'user', $3)",
@@ -214,4 +235,5 @@ struct UserRow {
     enabled: bool,
     last_login_at: Option<chrono::DateTime<chrono::Utc>>,
     created_at: chrono::DateTime<chrono::Utc>,
+    updated_at: chrono::DateTime<chrono::Utc>,
 }

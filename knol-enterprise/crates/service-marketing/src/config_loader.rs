@@ -14,21 +14,22 @@ use tracing::{info, warn};
 use crate::config::{ChannelCredentials, TwitterCredentials};
 
 /// Load the AES-256 encryption key (same logic as service-admin).
-fn load_encryption_key() -> [u8; 32] {
+/// Returns an error if the key is missing, invalid base64, or not 32 bytes.
+fn load_encryption_key() -> Result<[u8; 32], String> {
     let b64 = std::env::var("ADMIN_ENCRYPTION_KEY")
-        .expect("ADMIN_ENCRYPTION_KEY is required and must be set");
+        .map_err(|_| "ADMIN_ENCRYPTION_KEY is required and must be set. Generate with: openssl rand -base64 32".to_string())?;
     let bytes = B64
         .decode(&b64)
-        .expect("ADMIN_ENCRYPTION_KEY must be valid base64");
+        .map_err(|e| format!("ADMIN_ENCRYPTION_KEY must be valid base64: {}", e))?;
     if bytes.len() != 32 {
-        panic!(
+        return Err(format!(
             "ADMIN_ENCRYPTION_KEY must be 32 bytes (got {})",
             bytes.len()
-        );
+        ));
     }
     let mut key = [0u8; 32];
     key.copy_from_slice(&bytes);
-    key
+    Ok(key)
 }
 
 /// Decrypt a value from system_credentials.
@@ -47,12 +48,14 @@ fn decrypt(data: &[u8], key: &[u8; 32]) -> Result<String, String> {
 /// Row from system_credentials table.
 #[derive(sqlx::FromRow)]
 struct CredRow {
+    name: String,
     encrypted_value: Vec<u8>,
 }
 
 /// Row from system_config table.
 #[derive(sqlx::FromRow)]
 struct ConfigRow {
+    key: String,
     value: serde_json::Value,
 }
 
@@ -65,7 +68,7 @@ async fn load_credential(
 ) -> Option<String> {
     // Try DB first
     if let Ok(row) = sqlx::query_as::<_, CredRow>(
-        "SELECT encrypted_value FROM system_credentials WHERE name = $1",
+        "SELECT name, encrypted_value FROM system_credentials WHERE name = $1",
     )
     .bind(db_name)
     .fetch_one(pool)
@@ -91,7 +94,7 @@ async fn load_config_value(
 ) -> String {
     // Try DB first
     if let Ok(row) =
-        sqlx::query_as::<_, ConfigRow>("SELECT value FROM system_config WHERE key = $1")
+        sqlx::query_as::<_, ConfigRow>("SELECT key, value FROM system_config WHERE key = $1")
             .bind(db_key)
             .fetch_one(pool)
             .await
@@ -121,7 +124,17 @@ async fn load_config_value(
 
 /// Load all channel credentials with DB → env fallback.
 pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
-    let key = load_encryption_key();
+    let key = match load_encryption_key() {
+        Ok(k) => k,
+        Err(e) => {
+            tracing::error!(
+                "Failed to load encryption key: {}. Falling back to env-only credentials.",
+                e
+            );
+            // Fall back to loading credentials purely from env vars
+            return ChannelCredentials::from_env();
+        }
+    };
 
     // Load all credentials in parallel-ish fashion
     let twitter_key = load_credential(pool, &key, "twitter.api_key", "TWITTER_API_KEY").await;
@@ -168,6 +181,20 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
     let reddit_password = load_credential(pool, &key, "reddit.password", "REDDIT_PASSWORD").await;
 
     let devto_api_key = load_credential(pool, &key, "devto.api_key", "DEVTO_API_KEY").await;
+    let hashnode_api_key =
+        load_credential(pool, &key, "hashnode.api_key", "HASHNODE_API_KEY").await;
+    let hashnode_publication_id = load_credential(
+        pool,
+        &key,
+        "hashnode.publication_id",
+        "HASHNODE_PUBLICATION_ID",
+    )
+    .await;
+    let medium_token = load_credential(pool, &key, "medium.token", "MEDIUM_TOKEN").await;
+    let medium_author_id =
+        load_credential(pool, &key, "medium.author_id", "MEDIUM_AUTHOR_ID").await;
+    let producthunt_api_token =
+        load_credential(pool, &key, "producthunt.api_token", "PRODUCTHUNT_API_TOKEN").await;
     let github_token = load_credential(pool, &key, "github.token", "GITHUB_TOKEN").await;
 
     let smtp_host = load_credential(pool, &key, "smtp.host", "SMTP_HOST").await;
@@ -187,6 +214,9 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
         linkedin_token.is_some(),
         reddit_client_id.is_some(),
         devto_api_key.is_some(),
+        hashnode_api_key.is_some(),
+        medium_token.is_some(),
+        producthunt_api_token.is_some(),
         github_token.is_some(),
         smtp_host.is_some(),
         anthropic_api_key.is_some(),
@@ -196,7 +226,7 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
     .count();
 
     info!(
-        "Credentials loaded: {}/7 channels configured",
+        "Credentials loaded: {}/10 channels configured",
         loaded_from_db
     );
 
@@ -209,6 +239,11 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
         reddit_username,
         reddit_password,
         devto_api_key,
+        hashnode_api_key,
+        hashnode_publication_id,
+        medium_token,
+        medium_author_id,
+        producthunt_api_token,
         github_token,
         smtp_host,
         smtp_port,
@@ -219,11 +254,10 @@ pub async fn load_credentials(pool: &sqlx::PgPool) -> ChannelCredentials {
 }
 
 /// Load channel-specific rate limit overrides from system_config.
-#[allow(dead_code)]
 pub async fn load_rate_limit_override(pool: &sqlx::PgPool, channel: &str) -> Option<u64> {
     let key = format!("marketing.rate_limit.{}.daily", channel);
     if let Ok(row) =
-        sqlx::query_as::<_, ConfigRow>("SELECT value FROM system_config WHERE key = $1")
+        sqlx::query_as::<_, ConfigRow>("SELECT key, value FROM system_config WHERE key = $1")
             .bind(&key)
             .fetch_one(pool)
             .await
@@ -241,8 +275,9 @@ mod tests {
     #[test]
     fn test_load_encryption_key_requires_env() {
         std::env::remove_var("ADMIN_ENCRYPTION_KEY");
-        let result = std::panic::catch_unwind(load_encryption_key);
+        let result = load_encryption_key();
         assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be set"));
     }
 
     #[test]

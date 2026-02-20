@@ -72,6 +72,16 @@ docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d
 | Demo UI           | `http://localhost:8080`      |
 | Admin API Health  | `http://localhost:3001/health`|
 
+## Production (Hetzner)
+
+Use the production deployment stack:
+
+```bash
+docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production up -d
+```
+
+Do not use `docker-compose.stack.yml` for production. It is a development/demo stack.
+
 ## Why Knol
 
 Most memory solutions offer vector search and call it a day. Knol goes further:

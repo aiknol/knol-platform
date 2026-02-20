@@ -5,6 +5,9 @@
 # Usage:
 #   cp .env.production.example .env.production
 #   docker compose -f deploy/docker-compose.prod.yml --env-file .env.production up -d
+# Note:
+#   This file sets both `mem_limit/cpus` (plain docker compose on Hetzner)
+#   and `deploy.resources` (swarm compatibility).
 # =============================================================================
 
 services:
@@ -16,6 +19,8 @@ services:
     image: caddy:2-alpine
     container_name: knol-caddy
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
     environment:
       API_DOMAIN: ${API_DOMAIN}
       ADMIN_DOMAIN: ${ADMIN_DOMAIN}
@@ -31,6 +36,11 @@ services:
     depends_on:
       gateway:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     networks:
       - knol
 
@@ -38,15 +48,18 @@ services:
   # OSS Services
   # ---------------------------------------------------------------------------
   gateway:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-gateway
     restart: unless-stopped
+    stop_grace_period: 30s
+    mem_limit: 128m
+    cpus: "1.0"
     command: ["gateway"]
     env_file: .env.production
     environment:
       GATEWAY_PORT: "8080"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -54,20 +67,23 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '1.0'
           memory: 128M
     networks:
       - knol
 
   write:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-write
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
     command: ["write-service"]
     env_file: .env.production
     environment:
       WRITE_SERVICE_PORT: "8081"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8081/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -75,6 +91,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 128M
     depends_on:
       nats:
@@ -83,15 +100,17 @@ services:
       - knol
 
   retrieve:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-retrieve
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
     command: ["retrieve-service"]
     env_file: .env.production
     environment:
       RETRIEVE_SERVICE_PORT: "8082"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8082/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8082/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -99,20 +118,23 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 128M
     networks:
       - knol
 
   graph:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-graph
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "1.0"
     command: ["graph-service"]
     env_file: .env.production
     environment:
       GRAPH_SERVICE_PORT: "8083"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8083/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8083/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -120,6 +142,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '1.0'
           memory: 128M
     networks:
       - knol
@@ -128,9 +151,11 @@ services:
   # Enterprise Services
   # ---------------------------------------------------------------------------
   admin:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-admin
     restart: unless-stopped
+    mem_limit: 96m
+    cpus: "0.5"
     command: ["admin-service"]
     env_file: .env.production
     environment:
@@ -138,8 +163,10 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
+      ADMIN_CORS_ORIGIN: ${CORS_ALLOW_ORIGIN:-https://aiknol.com}
+      MARKETING_SERVICE_URL: http://marketing:8088
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8084/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -147,20 +174,23 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 96M
     networks:
       - knol
 
   jobs:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-jobs
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
     command: ["jobs-service"]
     env_file: .env.production
     environment:
       JOBS_SERVICE_PORT: "8085"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8085/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8085/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -168,6 +198,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 128M
     depends_on:
       nats:
@@ -176,15 +207,17 @@ services:
       - knol
 
   billing:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-billing
     restart: unless-stopped
+    mem_limit: 96m
+    cpus: "0.5"
     command: ["billing-service"]
     env_file: .env.production
     environment:
       BILLING_SERVICE_PORT: "8086"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8086/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8086/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -192,20 +225,23 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 96M
     networks:
       - knol
 
   ingest:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-enterprise-ingest
     restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
     command: ["ingest-service"]
     env_file: .env.production
     environment:
       INGEST_SERVICE_PORT: "8087"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8087/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8087/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -213,6 +249,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 128M
     depends_on:
       nats:
@@ -221,16 +258,18 @@ services:
       - knol
 
   marketing:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:-latest}
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-marketing
     restart: unless-stopped
+    mem_limit: 96m
+    cpus: "0.5"
     command: ["marketing-service"]
     env_file: .env.production
     environment:
       MARKETING_SERVICE_PORT: "8088"
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8088/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8088/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -238,6 +277,7 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 96M
     networks:
       - knol
@@ -249,6 +289,8 @@ services:
     image: nats:2.10-alpine
     container_name: knol-nats
     restart: unless-stopped
+    mem_limit: 384m
+    cpus: "1.0"
     command: >
       --jetstream
       --http_port=8222
@@ -265,14 +307,17 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '1.0'
           memory: 384M
     networks:
       - knol
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-02-07T23-21-09Z
     container_name: knol-minio
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: "0.5"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
@@ -280,13 +325,14 @@ services:
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/live >/dev/null || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
     deploy:
       resources:
         limits:
+          cpus: '0.5'
           memory: 256M
     networks:
       - knol

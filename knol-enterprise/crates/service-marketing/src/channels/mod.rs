@@ -1,10 +1,18 @@
 //! Channel adapters for publishing content to various platforms.
+//!
+//! Channels organized by the Zero-Cost Marketing Plan:
+//! - Core: Twitter, LinkedIn, Reddit, Dev.to, GitHub, Email, Blog, HackerNews
+//! - Cross-post (Phase 3): Hashnode, Medium
+//! - Launch (Phase 2): Product Hunt
 
 pub mod blog;
 pub mod devto;
 pub mod email;
 pub mod github;
+pub mod hashnode;
 pub mod linkedin;
+pub mod medium;
+pub mod producthunt;
 pub mod reddit;
 pub mod twitter;
 
@@ -90,6 +98,9 @@ pub async fn publish_to_channel(
         "github" => github::publish(content, http_client, credentials).await,
         "email" => email::publish(content, credentials).await,
         "blog" => blog::publish(content).await,
+        "hashnode" => hashnode::publish(content, http_client, credentials).await,
+        "medium" => medium::publish(content, http_client, credentials).await,
+        "producthunt" => producthunt::publish(content, http_client, credentials).await,
         "hackernews" => Ok(PublishResult::manual(
             "hackernews",
             "HN requires manual submission",

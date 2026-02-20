@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { pageTitle } from '@/config/site';
+import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Privacy Policy'),
@@ -148,7 +148,7 @@ export default function PrivacyPage() {
             <li>Right to withdraw consent: Withdraw consent for processing at any time</li>
           </ul>
           <p className="text-dark-300 mt-4">
-            To exercise these rights, contact us at hello@aiknol.com with details of your request.
+            To exercise these rights, contact us at <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a> or call <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a> with details of your request.
           </p>
         </section>
 
@@ -201,8 +201,9 @@ export default function PrivacyPage() {
           </p>
           <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 text-dark-300">
             <p className="font-semibold text-dark-100 mb-2">Knol</p>
-            <p className="mb-1">Email: <a href="mailto:hello@aiknol.com" className="text-brand-400 hover:text-brand-300">hello@aiknol.com</a></p>
-            <p>GitHub: <a href="https://github.com/aiknol/knol" className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
+            <p className="mb-1">Email: <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a></p>
+            <p className="mb-1">Phone: <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a></p>
+            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
           </div>
         </section>
       </div>

@@ -10,25 +10,43 @@ pub async fn system_status(
     State(state): State<Arc<AdminAppState>>,
     _claims: AdminClaims,
 ) -> Result<Json<serde_json::Value>, AdminError> {
+    // Service health check URLs: resolve from env vars, falling back to
+    // Docker Compose service names (which resolve via DNS in the compose network).
+    let gateway_url =
+        std::env::var("GATEWAY_HEALTH_URL").unwrap_or_else(|_| "http://gateway:8080/health".into());
+    let write_url = std::env::var("WRITE_HEALTH_URL")
+        .unwrap_or_else(|_| "http://write-service:8081/health".into());
+    let retrieve_url = std::env::var("RETRIEVE_HEALTH_URL")
+        .unwrap_or_else(|_| "http://retrieve-service:8082/health".into());
+    let graph_url = std::env::var("GRAPH_HEALTH_URL")
+        .unwrap_or_else(|_| "http://graph-service:8083/health".into());
+    let jobs_url = std::env::var("JOBS_HEALTH_URL")
+        .unwrap_or_else(|_| "http://jobs-service:8085/health".into());
+    let billing_url = std::env::var("BILLING_HEALTH_URL")
+        .unwrap_or_else(|_| "http://billing-service:8086/health".into());
+    let ingest_url = std::env::var("INGEST_HEALTH_URL")
+        .unwrap_or_else(|_| "http://ingest-service:8087/health".into());
+    let marketing_url = std::env::var("MARKETING_SERVICE_URL")
+        .map(|u| format!("{}/health", u))
+        .unwrap_or_else(|_| "http://marketing-service:8088/health".into());
+
     let services = vec![
-        ("gateway", "http://localhost:8080/health"),
-        ("write", "http://localhost:8081/health"),
-        ("retrieve", "http://localhost:8082/health"),
-        ("graph", "http://localhost:8083/health"),
-        ("admin", "http://localhost:8084/health"),
-        ("jobs", "http://localhost:8085/health"),
-        ("billing", "http://localhost:8086/health"),
-        ("ingest", "http://localhost:8087/health"),
-        ("marketing", "http://localhost:8088/health"),
+        ("gateway", gateway_url),
+        ("write", write_url),
+        ("retrieve", retrieve_url),
+        ("graph", graph_url),
+        ("jobs", jobs_url),
+        ("billing", billing_url),
+        ("ingest", ingest_url),
+        ("marketing", marketing_url),
     ];
 
     let mut statuses = Vec::new();
 
     for (name, url) in &services {
-        let health = check_service_health(&state.http_client, url).await;
+        let health = check_service_health(&state.http_client, url.as_str()).await;
         statuses.push(serde_json::json!({
             "name": name,
-            "url": url,
             "status": health.0,
             "latency_ms": health.1,
             "error": health.2,
@@ -117,9 +135,9 @@ async fn check_db(pool: &sqlx::PgPool) -> serde_json::Value {
                 "latency_ms": start.elapsed().as_millis(),
             })
         }
-        Err(e) => serde_json::json!({
+        Err(_) => serde_json::json!({
             "status": "error",
-            "error": e.to_string(),
+            "error": "Database connection failed",
             "latency_ms": start.elapsed().as_millis(),
         }),
     }

@@ -1,0 +1,38 @@
+# =============================================================================
+# Knol Web — Multi-stage Static Build Dockerfile
+# Builds Next.js static export and serves via nginx (~25MB image)
+# =============================================================================
+
+# Stage 1: Install dependencies
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY knol-web/package.json knol-web/package-lock.json ./
+RUN npm ci --ignore-scripts
+
+# Stage 2: Build static export
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY knol-web/ .
+
+# Build args for environment-specific values
+ARG NEXT_PUBLIC_API_URL=https://api.aiknol.com
+ARG NEXT_PUBLIC_ADMIN_API_URL=https://admin.aiknol.com
+
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_ADMIN_API_URL=${NEXT_PUBLIC_ADMIN_API_URL}
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN npm run build
+# Static export outputs to /app/out/
+
+# Stage 3: Serve with nginx
+FROM nginx:alpine AS runtime
+
+# Copy static files
+COPY --from=builder /app/out /usr/share/nginx/html
+
+# Custom nginx config for SPA routing
+COPY deploy/nginx-web.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80

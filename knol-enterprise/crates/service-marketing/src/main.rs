@@ -2,6 +2,7 @@
 //!
 //! Port: 8088
 //! Pattern: Axum HTTP routes + tokio-cron-scheduler for campaigns.
+#![allow(dead_code)]
 
 mod channels;
 mod config;
@@ -36,7 +37,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .init();
 
-    info!("Starting marketing-service");
+    info!("Starting marketing-service (zero-cost strategy)");
 
     // Build application state
     let state = AppState::from_env().await?;

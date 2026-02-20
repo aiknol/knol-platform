@@ -238,6 +238,10 @@ export default function CredentialsPage() {
                     <option value="github">GitHub</option>
                     <option value="devto">Dev.to</option>
                     <option value="reddit">Reddit</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="hashnode">Hashnode</option>
+                    <option value="medium">Medium</option>
+                    <option value="producthunt">Product Hunt</option>
                     <option value="email">Email</option>
                     <option value="other">Other</option>
                   </select>

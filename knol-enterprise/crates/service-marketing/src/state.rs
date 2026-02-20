@@ -32,11 +32,14 @@ impl AppState {
         // Load credentials from DB (encrypted) → env var → None fallback chain
         let credentials = crate::config_loader::load_credentials(&db_pool).await;
         info!(
-            "Marketing channels configured: twitter={} linkedin={} reddit={} devto={} github={} email={} anthropic={}",
+            "Marketing channels configured: twitter={} linkedin={} reddit={} devto={} hashnode={} medium={} producthunt={} github={} email={} anthropic={}",
             credentials.has_twitter(),
             credentials.has_linkedin(),
             credentials.has_reddit(),
             credentials.has_devto(),
+            credentials.has_hashnode(),
+            credentials.has_medium(),
+            credentials.has_producthunt(),
             credentials.has_github(),
             credentials.has_email(),
             credentials.has_anthropic(),

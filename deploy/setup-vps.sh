@@ -25,10 +25,10 @@ apt-get install -y -qq \
 # ---------- Create deploy user ----------
 echo "[2/7] Creating deploy user..."
 if ! id "knol" &>/dev/null; then
-    useradd -m -s /bin/bash -G sudo knol
-    echo "knol ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/knol
+    useradd -m -s /bin/bash knol
     echo "  → User 'knol' created. Add your SSH key:"
     echo "    ssh-copy-id knol@$(hostname -I | awk '{print $1}')"
+    echo "  → Least-privilege deploy user created (no blanket sudo)."
 fi
 
 # ---------- Install Docker ----------
@@ -112,9 +112,11 @@ echo "========================================"
 echo ""
 echo " Next steps:"
 echo "  1. Add your SSH key:  ssh-copy-id knol@$(hostname -I | awk '{print $1}')"
-echo "  2. Disable root SSH:  edit /etc/ssh/sshd_config → PermitRootLogin no"
-echo "  3. Copy deploy files: scp deploy/* knol@VPS:/opt/knol/"
-echo "  4. Create .env:       cp .env.production.example .env.production"
-echo "  5. Point DNS:         api.aiknol.com → $(hostname -I | awk '{print $1}')"
-echo "  6. Deploy:            docker compose -f docker-compose.prod.yml --env-file .env.production up -d"
+echo "  2. Create a separate ops/admin user for privileged maintenance (recommended)"
+echo "  3. Disable root SSH:  edit /etc/ssh/sshd_config → PermitRootLogin no"
+echo "  4. Copy deploy files: scp deploy/* knol@VPS:/opt/knol/"
+echo "  5. Create .env:       cp .env.production.example .env.production"
+echo "  6. Configure backups: sudo /opt/knol/setup-backups.sh"
+echo "  7. Point DNS:         api.aiknol.com → $(hostname -I | awk '{print $1}')"
+echo "  8. Deploy:            docker compose -f docker-compose.prod.yml --env-file .env.production up -d"
 echo ""

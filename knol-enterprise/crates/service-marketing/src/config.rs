@@ -27,7 +27,6 @@ impl std::fmt::Display for WindowType {
 
 impl WindowType {
     /// Duration of the window in seconds.
-    #[cfg(test)]
     pub fn duration_secs(&self) -> i64 {
         match self {
             WindowType::Minute => 60,
@@ -176,6 +175,47 @@ pub fn default_channel_configs() -> HashMap<String, ChannelConfig> {
         },
     );
 
+    // ── Zero-Cost Marketing Plan: Cross-posting channels ─────
+    configs.insert(
+        "hashnode".into(),
+        ChannelConfig {
+            name: "hashnode".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 9,
+                }, // actual: ~10
+            ],
+            cooldown_between_posts_secs: 5,
+        },
+    );
+
+    configs.insert(
+        "medium".into(),
+        ChannelConfig {
+            name: "medium".into(),
+            enabled: true,
+            rate_limits: vec![
+                RateWindow {
+                    window: WindowType::Daily,
+                    limit: 5,
+                }, // conservative — Medium discourages high-volume posting
+            ],
+            cooldown_between_posts_secs: 10,
+        },
+    );
+
+    configs.insert(
+        "producthunt".into(),
+        ChannelConfig {
+            name: "producthunt".into(),
+            enabled: true,
+            rate_limits: vec![], // Manual submission — no API rate limit
+            cooldown_between_posts_secs: 0,
+        },
+    );
+
     configs
 }
 
@@ -199,15 +239,87 @@ pub struct ChannelCredentials {
     pub reddit_username: Option<String>,
     pub reddit_password: Option<String>,
     pub devto_api_key: Option<String>,
+    pub hashnode_api_key: Option<String>,
+    pub hashnode_publication_id: Option<String>,
+    pub medium_token: Option<String>,
+    pub medium_author_id: Option<String>,
     pub github_token: Option<String>,
     pub smtp_host: Option<String>,
     pub smtp_port: u16,
     pub smtp_user: Option<String>,
     pub smtp_pass: Option<String>,
     pub anthropic_api_key: Option<String>,
+    pub producthunt_api_token: Option<String>,
 }
 
 impl ChannelCredentials {
+    /// Load credentials from environment variables.
+    pub fn from_env() -> Self {
+        let twitter = match (
+            std::env::var("TWITTER_API_KEY").ok(),
+            std::env::var("TWITTER_API_SECRET").ok(),
+            std::env::var("TWITTER_ACCESS_TOKEN").ok(),
+            std::env::var("TWITTER_ACCESS_TOKEN_SECRET").ok(),
+        ) {
+            (Some(k), Some(s), Some(t), Some(ts)) if !k.is_empty() => Some(TwitterCredentials {
+                api_key: k,
+                api_secret: s,
+                access_token: t,
+                access_token_secret: ts,
+            }),
+            _ => None,
+        };
+
+        Self {
+            twitter,
+            linkedin_token: std::env::var("LINKEDIN_ACCESS_TOKEN")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            linkedin_person_urn: std::env::var("LINKEDIN_PERSON_URN")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            reddit_client_id: std::env::var("REDDIT_CLIENT_ID")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            reddit_client_secret: std::env::var("REDDIT_CLIENT_SECRET")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            reddit_username: std::env::var("REDDIT_USERNAME")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            reddit_password: std::env::var("REDDIT_PASSWORD")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            devto_api_key: std::env::var("DEVTO_API_KEY")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            hashnode_api_key: std::env::var("HASHNODE_API_KEY")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            hashnode_publication_id: std::env::var("HASHNODE_PUBLICATION_ID")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            medium_token: std::env::var("MEDIUM_TOKEN").ok().filter(|s| !s.is_empty()),
+            medium_author_id: std::env::var("MEDIUM_AUTHOR_ID")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            github_token: std::env::var("GITHUB_TOKEN").ok().filter(|s| !s.is_empty()),
+            smtp_host: std::env::var("SMTP_HOST").ok().filter(|s| !s.is_empty()),
+            smtp_port: std::env::var("SMTP_PORT")
+                .ok()
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(587),
+            smtp_user: std::env::var("SMTP_USER").ok().filter(|s| !s.is_empty()),
+            smtp_pass: std::env::var("SMTP_PASS").ok().filter(|s| !s.is_empty()),
+            anthropic_api_key: std::env::var("ANTHROPIC_API_KEY")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            producthunt_api_token: std::env::var("PRODUCTHUNT_API_TOKEN")
+                .ok()
+                .filter(|s| !s.is_empty()),
+        }
+    }
+
     pub fn has_twitter(&self) -> bool {
         self.twitter.is_some()
     }
@@ -220,15 +332,23 @@ impl ChannelCredentials {
     pub fn has_devto(&self) -> bool {
         self.devto_api_key.is_some()
     }
+    pub fn has_hashnode(&self) -> bool {
+        self.hashnode_api_key.is_some() && self.hashnode_publication_id.is_some()
+    }
+    pub fn has_medium(&self) -> bool {
+        self.medium_token.is_some() && self.medium_author_id.is_some()
+    }
     pub fn has_github(&self) -> bool {
         self.github_token.is_some()
     }
     pub fn has_email(&self) -> bool {
         self.smtp_host.is_some() && self.smtp_user.is_some()
     }
-
     pub fn has_anthropic(&self) -> bool {
         self.anthropic_api_key.is_some()
+    }
+    pub fn has_producthunt(&self) -> bool {
+        self.producthunt_api_token.is_some()
     }
 }
 
@@ -280,6 +400,9 @@ mod tests {
             "linkedin",
             "reddit",
             "devto",
+            "hashnode",
+            "medium",
+            "producthunt",
             "github",
             "email",
             "blog",
@@ -375,12 +498,17 @@ mod tests {
             reddit_username: None,
             reddit_password: None,
             devto_api_key: None,
+            hashnode_api_key: None,
+            hashnode_publication_id: None,
+            medium_token: None,
+            medium_author_id: None,
             github_token: None,
             smtp_host: None,
             smtp_port: 587,
             smtp_user: None,
             smtp_pass: None,
             anthropic_api_key: None,
+            producthunt_api_token: None,
         }
     }
 
@@ -391,8 +519,12 @@ mod tests {
         assert!(!c.has_linkedin());
         assert!(!c.has_reddit());
         assert!(!c.has_devto());
+        assert!(!c.has_hashnode());
+        assert!(!c.has_medium());
         assert!(!c.has_github());
         assert!(!c.has_email());
+        assert!(!c.has_anthropic());
+        assert!(!c.has_producthunt());
     }
 
     #[test]
@@ -411,19 +543,28 @@ mod tests {
             reddit_username: Some("user".into()),
             reddit_password: Some("pass".into()),
             devto_api_key: Some("key".into()),
+            hashnode_api_key: Some("hn-key".into()),
+            hashnode_publication_id: Some("hn-pub".into()),
+            medium_token: Some("md-token".into()),
+            medium_author_id: Some("md-author".into()),
             github_token: Some("gh-tok".into()),
             smtp_host: Some("smtp.example.com".into()),
             smtp_port: 587,
             smtp_user: Some("user@example.com".into()),
             smtp_pass: Some("pass".into()),
             anthropic_api_key: Some("sk-ant-xxx".into()),
+            producthunt_api_token: Some("ph-tok".into()),
         };
         assert!(c.has_twitter());
         assert!(c.has_linkedin());
         assert!(c.has_reddit());
         assert!(c.has_devto());
+        assert!(c.has_hashnode());
+        assert!(c.has_medium());
         assert!(c.has_github());
         assert!(c.has_email());
+        assert!(c.has_anthropic());
+        assert!(c.has_producthunt());
     }
 
     #[test]
