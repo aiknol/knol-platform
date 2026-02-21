@@ -114,8 +114,7 @@ struct TenantAuditRow {
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 fn validate_password(password: &str) -> Result<(), AppError> {
-    enterprise_common::password::validate_password(password)
-        .map_err(|msg| AppError::BadRequest(msg))
+    enterprise_common::password::validate_password(password).map_err(AppError::BadRequest)
 }
 
 fn slugify_company(name: &str) -> String {

@@ -17,11 +17,7 @@ pub fn new_rate_limiter() -> RateLimiter {
 }
 
 /// Check whether the given key is rate-limited. Returns `Err(retry_after_secs)` if blocked.
-pub fn enforce_rate_limit(
-    limiter: &RateLimiter,
-    key: &str,
-    prefix: &str,
-) -> Result<(), u64> {
+pub fn enforce_rate_limit(limiter: &RateLimiter, key: &str, prefix: &str) -> Result<(), u64> {
     let mut map = limiter.lock().unwrap_or_else(|e| e.into_inner());
     let now = Instant::now();
     map.retain(|k, (_, first)| {

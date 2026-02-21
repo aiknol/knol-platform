@@ -195,7 +195,7 @@ pub async fn change_password(
     }
 
     enterprise_common::password::validate_password(&body.new_password)
-        .map_err(|msg| AppError::BadRequest(msg))?;
+        .map_err(AppError::BadRequest)?;
 
     let new_hash =
         bcrypt::hash(&body.new_password, 12).map_err(|e| AppError::Internal(e.to_string()))?;

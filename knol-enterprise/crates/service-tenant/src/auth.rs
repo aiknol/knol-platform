@@ -250,6 +250,7 @@ pub fn cookie_secure_suffix() -> &'static str {
 }
 
 /// Convenience wrapper: insert tenant audit using AppClaims for actor info.
+#[allow(clippy::too_many_arguments)]
 pub async fn audit(
     state: &TenantAppState,
     tenant_id: Uuid,

@@ -230,23 +230,14 @@ async fn main() -> anyhow::Result<()> {
     let app_routes = Router::new()
         .route("/auth/signup", post(routes::app::signup))
         .route("/auth/login", post(routes::app::login))
-        .route(
-            "/auth/accept-invite",
-            post(routes::invites::accept_invite),
-        )
-        .route(
-            "/webhooks/stripe",
-            post(routes::billing::stripe_webhook),
-        )
+        .route("/auth/accept-invite", post(routes::invites::accept_invite))
+        .route("/webhooks/stripe", post(routes::billing::stripe_webhook))
         .merge(app_protected);
 
     // ── Build full app with Swagger UI ───────────────────────────────
     let app = Router::new()
         .nest("/app", app_routes)
-        .merge(
-            SwaggerUi::new("/docs")
-                .url("/api-docs/openapi.json", openapi::ApiDoc::openapi()),
-        )
+        .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi::ApiDoc::openapi()))
         .route(
             "/health",
             get(|| async {

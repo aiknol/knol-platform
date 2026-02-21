@@ -19,10 +19,7 @@ pub fn extract_client_ip(headers: &HeaderMap) -> String {
         return real_ip;
     }
     // 2. X-Forwarded-For — take the LAST entry (added by the trusted proxy)
-    if let Some(xff) = headers
-        .get("x-forwarded-for")
-        .and_then(|v| v.to_str().ok())
-    {
+    if let Some(xff) = headers.get("x-forwarded-for").and_then(|v| v.to_str().ok()) {
         if let Some(last) = xff.rsplit(',').next().map(|s| s.trim().to_string()) {
             if !last.is_empty() {
                 return last;

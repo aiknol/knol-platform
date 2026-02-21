@@ -294,8 +294,7 @@ pub async fn accept_invite(
     if full_name.len() < 2 {
         return Err(AppError::BadRequest("Full name is required".into()));
     }
-    enterprise_common::password::validate_password(&body.password)
-        .map_err(|msg| AppError::BadRequest(msg))?;
+    enterprise_common::password::validate_password(&body.password).map_err(AppError::BadRequest)?;
 
     let token_hash = hash_token(&body.token);
 
