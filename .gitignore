@@ -6,7 +6,11 @@ target/
 node_modules/
 .next/
 .next-admin/
+.next-app/
+.next-main/
 out/
+.wrangler/
+*.tsbuildinfo
 
 # Environment
 .env

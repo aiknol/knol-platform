@@ -225,7 +225,7 @@ services:
       ADMIN_SERVICE_PORT: "8084"
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?set ADMIN_JWT_SECRET in .env (>=32 chars)}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
-      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3006,http://localhost:3005,http://localhost:8080}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008}
       ADMIN_SECURE_COOKIES: "false"
       SKIP_RUNTIME_MIGRATIONS: "true"
       MARKETING_SERVICE_URL: http://marketing-service:8088
@@ -330,46 +330,7 @@ services:
     mem_limit: 256m
     profiles: ["enterprise"]
 
-  website:
-    image: node:20-alpine
-    working_dir: /workspace/knol-web
-    environment:
-      NEXT_TELEMETRY_DISABLED: "1"
-      NODE_OPTIONS: "--max-old-space-size=512"
-    volumes:
-      - .:/workspace
-      - web-node-modules:/workspace/knol-web/node_modules
-    command: sh -lc "if [ ! -d node_modules/next ]; then npm ci; fi && npm run build && npx serve@14.2.4 out -l 3005"
-    ports:
-      - "3005:3005"
-    mem_limit: 512m
-    profiles: ["web"]
-
-  admin-website:
-    image: nginx:alpine
-    depends_on:
-      website:
-        condition: service_started
-    volumes:
-      - ./deploy/nginx-admin-local.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "3006:80"
-    mem_limit: 128m
-    profiles: ["enterprise", "web"]
-
-  demo-ui:
-    image: nginx:alpine
-    volumes:
-      - ./knol-demo/index.html:/usr/share/nginx/html/index.html:ro
-      - ./knol-demo/favicon.svg:/usr/share/nginx/html/favicon.svg:ro
-    ports:
-      - "8080:80"
-    mem_limit: 128m
-    profiles: ["web"]
-
 volumes:
   pgdata:
   natsdata:
   miniodata:
-  web-node-modules:
-  admin-web-node-modules:

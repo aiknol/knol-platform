@@ -1,6 +1,6 @@
 # =============================================================================
-# Knol — Cloudflare Pages Configuration
-# Static site deployment for aiknol.com
+# Knol Main Website — Cloudflare Pages Configuration
+# Static site deployment for aiknol.com (web)
 # =============================================================================
 # This is only needed if deploying via Wrangler CLI directly.
 # The GitHub Action uses `wrangler pages deploy` instead.
@@ -10,7 +10,7 @@ name = "knol-web"
 compatibility_date = "2024-09-25"
 
 # Pages project settings
-pages_build_output_dir = "../knol-web/out"
+pages_build_output_dir = "../frontend/web/out"
 
 # Custom headers for all pages
 # [site.headers]

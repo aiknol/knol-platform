@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knol — Deployment Strategy for Cost Effectiveness</title>
+<style>
+  :root {
+    --ink: #0A0A0B;
+    --violet: #6E56CF;
+    --violet-light: #8B73E6;
+    --snow: #FAFAFA;
+    --charcoal: #1A1A1D;
+    --steel: #52525B;
+    --silver: #71717A;
+    --cloud: #E4E4E7;
+    --green: #22C55E;
+    --amber: #F59E0B;
+    --red: #EF4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--snow);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+  /* Header */
+  header {
+    background: var(--ink);
+    color: var(--snow);
+    padding: 64px 0 48px;
+  }
+  header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  header .subtitle {
+    color: var(--silver);
+    font-size: 18px;
+    font-weight: 400;
+  }
+  header .tag {
+    display: inline-block;
+    background: var(--violet);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Sections */
+  section { padding: 48px 0; border-bottom: 1px solid var(--cloud); }
+  section:last-child { border-bottom: none; }
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    color: var(--charcoal);
+  }
+  p { margin-bottom: 16px; color: var(--steel); }
+  strong { color: var(--ink); }
+
+  /* Summary box */
+  .summary-box {
+    background: linear-gradient(135deg, #f0ecfb 0%, #ede8fc 100%);
+    border-left: 4px solid var(--violet);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+  .summary-box p { color: var(--charcoal); margin-bottom: 8px; }
+  .summary-box p:last-child { margin-bottom: 0; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--ink);
+    color: var(--snow);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--cloud);
+    color: var(--steel);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8f8fa; }
+  .price { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .free { color: var(--green); font-weight: 600; }
+  .cheap { color: var(--violet); font-weight: 600; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-rec { background: #dcfce7; color: #166534; }
+  .badge-alt { background: #fef3c7; color: #92400e; }
+  .badge-scale { background: #ede8fc; color: #5b3fad; }
+
+  /* Tier cards */
+  .tier-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin: 24px 0;
+  }
+  .tier-card {
+    border: 2px solid var(--cloud);
+    border-radius: 12px;
+    padding: 24px;
+    background: white;
+  }
+  .tier-card.recommended {
+    border-color: var(--violet);
+    box-shadow: 0 0 0 1px var(--violet);
+  }
+  .tier-card h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .tier-card .tier-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--violet);
+    margin: 12px 0;
+  }
+  .tier-card .tier-price span { font-size: 14px; color: var(--silver); font-weight: 400; }
+  .tier-card ul {
+    list-style: none;
+    margin-top: 16px;
+  }
+  .tier-card li {
+    font-size: 13px;
+    color: var(--steel);
+    padding: 4px 0;
+    padding-left: 20px;
+    position: relative;
+  }
+  .tier-card li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* Architecture diagram */
+  .arch-box {
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 32px;
+    color: var(--snow);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin: 20px 0;
+  }
+  .arch-box .comment { color: var(--silver); }
+  .arch-box .highlight { color: var(--violet-light); }
+  .arch-box .label { color: var(--green); }
+
+  /* Cost breakdown */
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--cloud);
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row .item { color: var(--steel); }
+  .cost-row .amount { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cost-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-top: 2px solid var(--ink);
+    margin-top: 8px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  code {
+    background: #f0ecfb;
+    color: var(--violet);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  a { color: var(--violet); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .note {
+    background: #fffbeb;
+    border-left: 4px solid var(--amber);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--steel);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="tag">Infrastructure</div>
+    <h1>Knol deployment strategy</h1>
+    <p class="subtitle">Cost-effective hosting for 8 Rust microservices, 4 infrastructure dependencies, and a static marketing site</p>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- TLDR -->
+<section>
+  <h2>Recommendation at a glance</h2>
+  <div class="summary-box">
+    <p><strong>Best overall:</strong> Hetzner VPS + Docker Compose for the backend (~€15/mo), Neon for Postgres (free→$5), Upstash for Redis (free→$2), Cloudflare Pages for the website (free). Total: <strong>~$20–35/month</strong> to run the full Knol stack in production.</p>
+    <p><strong>Why not Railway/Render?</strong> With 8 services, per-service pricing adds up fast. A single VPS running all containers is 3–5× cheaper at this stage.</p>
+  </div>
+</section>
+
+<!-- What we're deploying -->
+<section>
+  <h2>What needs to be deployed</h2>
+  <p>Knol's architecture has three deployment concerns: compute (8 Rust services), stateful infrastructure (Postgres, Redis, NATS, MinIO), and a static website.</p>
+
+  <table>
+    <tr><th>Component</th><th>Type</th><th>Resources needed</th></tr>
+    <tr><td><strong>service-gateway</strong> (port 8080)</td><td>Rust binary</td><td>~30 MB RAM idle</td></tr>
+    <tr><td><strong>service-write</strong> (8081)</td><td>Rust binary</td><td>~25 MB RAM idle</td></tr>
+    <tr><td><strong>service-retrieve</strong> (8082)</td><td>Rust binary</td><td>~25 MB RAM idle</td></tr>
+    <tr><td><strong>service-graph</strong> (8083)</td><td>Rust binary</td><td>~30 MB RAM idle</td></tr>
+    <tr><td><strong>service-admin</strong> (8084)</td><td>Rust binary</td><td>~20 MB RAM idle</td></tr>
+    <tr><td><strong>service-jobs</strong> (8085)</td><td>Rust binary</td><td>~20 MB RAM idle</td></tr>
+    <tr><td><strong>service-billing</strong> (8086)</td><td>Rust binary</td><td>~20 MB RAM idle</td></tr>
+    <tr><td><strong>service-ingest</strong> (8087)</td><td>Rust binary</td><td>~25 MB RAM idle</td></tr>
+    <tr><td>PostgreSQL + pgvector</td><td>Database</td><td>~256 MB+ RAM</td></tr>
+    <tr><td>Redis</td><td>Cache</td><td>~256 MB cap</td></tr>
+    <tr><td>NATS JetStream</td><td>Message queue</td><td>~50 MB + storage</td></tr>
+    <tr><td>MinIO</td><td>Object storage</td><td>~128 MB RAM</td></tr>
+    <tr><td>web</td><td>Static HTML/JS</td><td>CDN only</td></tr>
+  </table>
+
+  <p>Rust binaries are remarkably efficient — all 8 services combined use under 200 MB of RAM at idle. This is a huge cost advantage. The entire backend comfortably fits on a 4 GB VPS with plenty of room for Postgres, Redis, and NATS.</p>
+</section>
+
+<!-- Deployment tiers -->
+<section>
+  <h2>Three deployment tiers</h2>
+  <div class="tier-grid">
+
+    <div class="tier-card recommended">
+      <span class="badge badge-rec">Recommended</span>
+      <h4>Starter</h4>
+      <p style="font-size:13px; color: var(--silver);">0 to 1,000 users</p>
+      <div class="tier-price">~$22 <span>/mo</span></div>
+      <ul>
+        <li>Hetzner CX32 (4 vCPU, 8 GB)</li>
+        <li>Neon Postgres free tier</li>
+        <li>Upstash Redis free tier</li>
+        <li>Self-hosted NATS on VPS</li>
+        <li>Self-hosted MinIO on VPS</li>
+        <li>Cloudflare Pages (website)</li>
+      </ul>
+    </div>
+
+    <div class="tier-card">
+      <span class="badge badge-alt">Easy setup</span>
+      <h4>Managed</h4>
+      <p style="font-size:13px; color: var(--silver);">0 to 500 users</p>
+      <div class="tier-price">~$55 <span>/mo</span></div>
+      <ul>
+        <li>Railway for all 8 services</li>
+        <li>Railway managed Postgres</li>
+        <li>Railway managed Redis</li>
+        <li>Self-hosted NATS on Railway</li>
+        <li>Railway volume for MinIO</li>
+        <li>Netlify (website, free tier)</li>
+      </ul>
+    </div>
+
+    <div class="tier-card">
+      <span class="badge badge-scale">Growth</span>
+      <h4>Production</h4>
+      <p style="font-size:13px; color: var(--silver);">1,000+ users</p>
+      <div class="tier-price">~$80 <span>/mo</span></div>
+      <ul>
+        <li>Hetzner CCX23 (4 dedicated, 16 GB)</li>
+        <li>Neon Scale ($0.22/CU-hr)</li>
+        <li>Upstash Redis Pro</li>
+        <li>Self-hosted NATS (clustered)</li>
+        <li>Cloudflare R2 replaces MinIO</li>
+        <li>Cloudflare Pages (website)</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- Starter breakdown -->
+<section>
+  <h2>Starter tier — detailed breakdown</h2>
+  <p>This is the recommended starting point. You get a production-ready stack for under $25/month by combining a single Hetzner VPS with managed free tiers for Postgres and Redis.</p>
+
+  <h3>Compute — Hetzner CX32</h3>
+  <div class="cost-row"><span class="item">Hetzner CX32 — 4 shared vCPU, 8 GB RAM, 80 GB NVMe, 20 TB traffic</span><span class="amount">€7.49/mo</span></div>
+  <p>All 8 Rust services + NATS + MinIO run on a single VPS via Docker Compose. Rust's tiny memory footprint makes this practical — total idle usage is ~700 MB including infrastructure containers, leaving 7+ GB for request handling.</p>
+
+  <h3>Database — Neon serverless Postgres</h3>
+  <div class="cost-row"><span class="item">Neon free tier — 100 CU-hours/mo, 0.5 GB storage, pgvector included</span><span class="amount free">$0</span></div>
+  <p>Neon is serverless Postgres with native pgvector support (critical for Knol's vector search). The free tier scales to zero when idle and provides 100 compute-unit hours per month — plenty for a pre-revenue product. When you outgrow it, Launch tier is pay-as-you-go at $0.106/CU-hour with no minimum.</p>
+
+  <h3>Cache — Upstash Redis</h3>
+  <div class="cost-row"><span class="item">Upstash free tier — 500K commands/mo, 256 MB</span><span class="amount free">$0</span></div>
+  <p>Upstash provides serverless Redis with a generous free tier. The HTTP-based API works well for cache workloads. At scale, the pay-per-request model ($0.20/100K commands) keeps costs proportional to actual usage.</p>
+
+  <h3>Message queue — NATS on VPS</h3>
+  <div class="cost-row"><span class="item">NATS 2.10 container on Hetzner VPS</span><span class="amount free">$0 (included)</span></div>
+  <p>NATS is lightweight (~30 MB RAM) and has no managed serverless offering worth using. Run it as a Docker container on the same VPS. JetStream provides persistence with minimal overhead.</p>
+
+  <h3>Object storage — MinIO on VPS (or Cloudflare R2)</h3>
+  <div class="cost-row"><span class="item">MinIO container on Hetzner VPS</span><span class="amount free">$0 (included)</span></div>
+  <p>For early stage, MinIO on the VPS works fine. When you need durability guarantees, swap to Cloudflare R2 (free egress, $0.015/GB storage).</p>
+
+  <h3>Website — Cloudflare Pages</h3>
+  <div class="cost-row"><span class="item">Cloudflare Pages — unlimited bandwidth, 500 builds/mo</span><span class="amount free">$0</span></div>
+  <p>The Next.js static export deploys perfectly to Cloudflare Pages. Unlike Netlify's 100 GB bandwidth cap, Cloudflare gives unlimited bandwidth on the free tier with a faster global CDN.</p>
+
+  <div class="cost-total">
+    <span>Starter total</span>
+    <span>~$8–22/mo</span>
+  </div>
+  <p style="font-size: 13px;">Range depends on Neon compute usage. Base cost is just the Hetzner VPS (~€7.49 ≈ $8). Add Anthropic API costs for Claude Haiku calls separately.</p>
+</section>
+
+<!-- Architecture diagram -->
+<section>
+  <h2>Starter architecture</h2>
+  <div class="arch-box">
+<span class="comment">                    ┌─────────────────────────┐</span>
+<span class="comment">                    │</span>  <span class="label">Cloudflare Pages</span>        <span class="comment">│</span>
+<span class="comment">                    │</span>  knol.dev (static)        <span class="comment">│</span>
+<span class="comment">                    └───────────┬─────────────┘</span>
+<span class="comment">                                │</span>
+<span class="comment">                    ┌───────────▼─────────────┐</span>
+<span class="comment">                    │</span>  <span class="highlight">Hetzner CX32</span>  €7.49/mo  <span class="comment">│</span>
+<span class="comment">                    │                         │</span>
+<span class="comment">                    │</span>  <span class="label">Docker Compose</span>           <span class="comment">│</span>
+<span class="comment">                    │  ┌─────────────────┐   │</span>
+<span class="comment">                    │  │</span> gateway  :8080  <span class="comment">│   │</span>  ← Caddy reverse proxy
+<span class="comment">                    │  │</span> write    :8081  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> retrieve :8082  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> graph    :8083  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> admin    :8084  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> jobs     :8085  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> billing  :8086  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> ingest   :8087  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> nats     :4222  <span class="comment">│   │</span>
+<span class="comment">                    │  │</span> minio    :9000  <span class="comment">│   │</span>
+<span class="comment">                    │  └─────────────────┘   │</span>
+<span class="comment">                    └──────┬──────────┬──────┘</span>
+<span class="comment">                           │          │</span>
+<span class="comment">              ┌─────────────▼┐    ┌───▼──────────┐</span>
+<span class="comment">              │</span>  <span class="highlight">Neon</span>  $0    <span class="comment">│    │</span>  <span class="highlight">Upstash</span>  $0  <span class="comment">│</span>
+<span class="comment">              │</span>  Postgres    <span class="comment">│    │</span>  Redis        <span class="comment">│</span>
+<span class="comment">              │</span>  + pgvector  <span class="comment">│    │</span>  serverless   <span class="comment">│</span>
+<span class="comment">              └──────────────┘    └──────────────┘</span>
+  </div>
+</section>
+
+<!-- Platform comparison -->
+<section>
+  <h2>Platform comparison for compute</h2>
+  <p>The key question is whether to use a VPS (self-managed containers) or a PaaS (managed deployment). Here's how the options compare for Knol's 8-service architecture:</p>
+
+  <table>
+    <tr>
+      <th>Platform</th>
+      <th>8 services cost</th>
+      <th>Setup effort</th>
+      <th>Best for</th>
+    </tr>
+    <tr>
+      <td><strong>Hetzner CX32</strong></td>
+      <td class="cheap">~€7.49/mo</td>
+      <td>Medium — Docker Compose + Caddy</td>
+      <td>Cost-optimized production</td>
+    </tr>
+    <tr>
+      <td><strong>Hetzner CAX21 (ARM)</strong></td>
+      <td class="cheap">~€5.49/mo</td>
+      <td>Medium — needs ARM Docker builds</td>
+      <td>Maximum savings</td>
+    </tr>
+    <tr>
+      <td><strong>Railway</strong></td>
+      <td class="price">~$40–60/mo</td>
+      <td>Low — git push deploy</td>
+      <td>Fast iteration, solo dev</td>
+    </tr>
+    <tr>
+      <td><strong>Fly.io</strong></td>
+      <td class="price">~$35–50/mo</td>
+      <td>Low-Medium — Dockerfile deploy</td>
+      <td>Edge deployment, global users</td>
+    </tr>
+    <tr>
+      <td><strong>Render</strong></td>
+      <td class="price">~$50–70/mo</td>
+      <td>Low — dashboard deploy</td>
+      <td>Team-friendly dashboard</td>
+    </tr>
+    <tr>
+      <td><strong>DigitalOcean Droplet</strong></td>
+      <td class="price">~$24/mo</td>
+      <td>Medium — Docker Compose</td>
+      <td>US-based, good docs</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>Why Hetzner wins for Knol:</strong> Rust microservices have tiny memory footprints (~20–30 MB each). PaaS platforms charge per-service, making them 5–8× more expensive for the same workload. A single 8 GB VPS easily runs all 8 services plus NATS and MinIO with room to spare.
+  </div>
+</section>
+
+<!-- Database comparison -->
+<section>
+  <h2>Database — Postgres + pgvector options</h2>
+  <p>Knol requires pgvector for embedding similarity search, which limits options. Here are the viable managed providers:</p>
+
+  <table>
+    <tr>
+      <th>Provider</th>
+      <th>Free tier</th>
+      <th>Paid entry</th>
+      <th>pgvector</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td><strong>Neon</strong></td>
+      <td class="free">100 CU-hr, 0.5 GB</td>
+      <td>$0.106/CU-hr</td>
+      <td>Yes</td>
+      <td>Scale-to-zero, branching. Best for dev→prod.</td>
+    </tr>
+    <tr>
+      <td><strong>Supabase</strong></td>
+      <td class="free">500 MB, 2 projects</td>
+      <td>$25/mo</td>
+      <td>Yes</td>
+      <td>Includes auth, storage. Pauses after 7d inactivity.</td>
+    </tr>
+    <tr>
+      <td><strong>Railway</strong></td>
+      <td>—</td>
+      <td>Usage-based</td>
+      <td>Yes (Docker)</td>
+      <td>No dedicated DB free tier. Bills by CPU/RAM.</td>
+    </tr>
+    <tr>
+      <td><strong>Fly.io Managed</strong></td>
+      <td>—</td>
+      <td>$38/mo</td>
+      <td>Yes</td>
+      <td>HA included. Expensive entry point.</td>
+    </tr>
+    <tr>
+      <td><strong>Self-hosted on VPS</strong></td>
+      <td>—</td>
+      <td>$0 (on VPS)</td>
+      <td>Yes</td>
+      <td>Full control but you manage backups.</td>
+    </tr>
+  </table>
+
+  <div class="summary-box">
+    <p><strong>Recommendation:</strong> Start with <strong>Neon</strong> free tier. It gives you serverless Postgres with pgvector, automatic scale-to-zero, and database branching for testing. When you need more, the pay-as-you-go Launch tier avoids a big cost jump. Alternatively, run Postgres on the VPS itself to keep everything in one place (but manage your own backups).</p>
+  </div>
+</section>
+
+<!-- Website -->
+<section>
+  <h2>Static website hosting</h2>
+  <p>The Knol marketing site is a Next.js static export — pure HTML/JS/CSS with no server-side rendering needed. This opens up the cheapest tier of hosting.</p>
+
+  <table>
+    <tr><th>Provider</th><th>Free tier</th><th>Bandwidth</th><th>Build minutes</th></tr>
+    <tr>
+      <td><strong>Cloudflare Pages</strong></td>
+      <td class="free">Free</td>
+      <td class="free">Unlimited</td>
+      <td>500/mo</td>
+    </tr>
+    <tr>
+      <td><strong>Vercel</strong></td>
+      <td class="free">Free</td>
+      <td>100 GB/mo</td>
+      <td>6,000/mo</td>
+    </tr>
+    <tr>
+      <td><strong>Netlify</strong></td>
+      <td class="free">Free</td>
+      <td>100 GB/mo</td>
+      <td>300/mo</td>
+    </tr>
+    <tr>
+      <td><strong>GitHub Pages</strong></td>
+      <td class="free">Free</td>
+      <td>100 GB/mo</td>
+      <td>Via Actions</td>
+    </tr>
+  </table>
+
+  <div class="summary-box">
+    <p><strong>Recommendation:</strong> <strong>Cloudflare Pages</strong> for the unlimited free bandwidth and fastest global CDN. If you want Next.js-native features later (ISR, middleware), Vercel is the natural upgrade path.</p>
+  </div>
+</section>
+
+<!-- Migration path -->
+<section>
+  <h2>Scaling migration path</h2>
+  <p>Start cheap, scale incrementally. Here's the progression as Knol grows:</p>
+
+  <h3>Phase 1 — Pre-revenue ($8–22/mo)</h3>
+  <p>Single Hetzner CX32 with Docker Compose. Neon + Upstash free tiers. Cloudflare Pages. This runs the entire Knol stack including all enterprise services. Focus on shipping, not infrastructure.</p>
+
+  <h3>Phase 2 — Early traction ($40–80/mo)</h3>
+  <p>Upgrade to Hetzner CCX23 (dedicated vCPU) for consistent performance. Move to Neon Launch tier for more compute hours. Add Cloudflare R2 to replace MinIO for durable object storage. Add automated backups via Hetzner snapshots.</p>
+
+  <h3>Phase 3 — Growth ($150–400/mo)</h3>
+  <p>Split services across 2–3 VPS nodes. Move Postgres to a dedicated Hetzner server or Neon Scale tier. Add a second NATS node for HA. Consider k3s for orchestration. Add monitoring with Grafana + Prometheus (already in codebase).</p>
+
+  <h3>Phase 4 — Scale ($500+/mo)</h3>
+  <p>Kubernetes cluster on Hetzner (3 nodes). Managed Postgres with HA (Neon Business or Crunchy Bridge). Redis cluster on Upstash Pro. NATS cluster (3 nodes). CDN + DDoS protection via Cloudflare Pro.</p>
+</section>
+
+<!-- Action items -->
+<section>
+  <h2>Immediate next steps</h2>
+
+  <table>
+    <tr><th>#</th><th>Action</th><th>Time</th><th>Cost impact</th></tr>
+    <tr><td>1</td><td>Create Hetzner Cloud account, provision CX32</td><td>15 min</td><td>€7.49/mo</td></tr>
+    <tr><td>2</td><td>Create Neon account, set up Postgres + pgvector</td><td>10 min</td><td class="free">Free</td></tr>
+    <tr><td>3</td><td>Create Upstash account, provision Redis instance</td><td>5 min</td><td class="free">Free</td></tr>
+    <tr><td>4</td><td>Write production <code>docker-compose.prod.yml</code></td><td>1–2 hrs</td><td>—</td></tr>
+    <tr><td>5</td><td>Set up Caddy as reverse proxy with auto-TLS</td><td>30 min</td><td>—</td></tr>
+    <tr><td>6</td><td>Deploy static site to Cloudflare Pages</td><td>15 min</td><td class="free">Free</td></tr>
+    <tr><td>7</td><td>Configure DNS: <code>knol.dev</code> → Hetzner, website → Cloudflare</td><td>30 min</td><td>~$10/yr</td></tr>
+    <tr><td>8</td><td>Set up GitHub Actions CI/CD for deploy on push</td><td>1–2 hrs</td><td class="free">Free</td></tr>
+  </table>
+</section>
+
+<!-- Cost comparison table -->
+<section>
+  <h2>Monthly cost comparison — all approaches</h2>
+  <p>Side-by-side comparison assuming the same workload (8 Rust services, Postgres with pgvector, Redis, NATS, MinIO, static website):</p>
+
+  <table>
+    <tr>
+      <th>Component</th>
+      <th>Hetzner + managed</th>
+      <th>All Railway</th>
+      <th>All Fly.io</th>
+      <th>AWS (baseline)</th>
+    </tr>
+    <tr>
+      <td>Compute (8 services)</td>
+      <td class="cheap">$8</td>
+      <td class="price">$40–60</td>
+      <td class="price">$35–50</td>
+      <td class="price">$80+</td>
+    </tr>
+    <tr>
+      <td>Postgres + pgvector</td>
+      <td class="free">$0 (Neon)</td>
+      <td class="price">$5–15</td>
+      <td class="price">$38</td>
+      <td class="price">$30+</td>
+    </tr>
+    <tr>
+      <td>Redis</td>
+      <td class="free">$0 (Upstash)</td>
+      <td class="price">$5–10</td>
+      <td class="price">$5–10</td>
+      <td class="price">$15+</td>
+    </tr>
+    <tr>
+      <td>NATS</td>
+      <td class="free">$0 (on VPS)</td>
+      <td class="price">$5</td>
+      <td class="price">$5</td>
+      <td class="price">$10+</td>
+    </tr>
+    <tr>
+      <td>Object storage</td>
+      <td class="free">$0 (on VPS)</td>
+      <td class="price">$2</td>
+      <td class="price">$2</td>
+      <td class="price">$5+</td>
+    </tr>
+    <tr>
+      <td>Website</td>
+      <td class="free">$0 (CF Pages)</td>
+      <td class="free">$0 (Netlify)</td>
+      <td class="free">$0 (Netlify)</td>
+      <td class="price">$5+</td>
+    </tr>
+    <tr>
+      <td style="border-top: 2px solid var(--ink);"><strong>Total</strong></td>
+      <td style="border-top: 2px solid var(--ink);" class="cheap"><strong>~$8–22</strong></td>
+      <td style="border-top: 2px solid var(--ink);" class="price"><strong>~$57–92</strong></td>
+      <td style="border-top: 2px solid var(--ink);" class="price"><strong>~$85–115</strong></td>
+      <td style="border-top: 2px solid var(--ink);" class="price"><strong>~$145+</strong></td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>Note:</strong> Anthropic API costs for Claude Haiku (used in <code>memory-llm</code> for entity extraction) are billed separately by Anthropic and depend on usage volume. At $0.25/MTok input and $1.25/MTok output, early-stage costs are typically $5–20/month.
+  </div>
+</section>
+
+</div>
+
+<footer style="background: var(--ink); color: var(--silver); padding: 32px 0; margin-top: 48px; text-align: center; font-size: 13px;">
+  Knol — Memory infrastructure for AI &middot; knol.dev
+</footer>
+
+</body>
+</html>

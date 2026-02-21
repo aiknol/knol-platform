@@ -6,8 +6,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { generateContent, TEMPLATES, pickRandom } = require('./generate');
-const { publishToChannel, publishToAll, loadCredentials } = require('./publish');
+const { generateContent } = require('./generate');
+const { publishToChannel, loadCredentials } = require('./publish');
 
 const SCHEDULE_FILE = path.join(__dirname, '..', 'schedules', 'calendar.json');
 const STATE_FILE = path.join(__dirname, '..', 'data', 'scheduler-state.json');
@@ -29,12 +29,16 @@ const CAMPAIGNS = {
         generate: async () => {
           const categories = ['tweet_technical', 'tweet_launch', 'tweet_comparison'];
           const category = categories[dayOfYear() % categories.length];
-          const template = await generateContent('tweet', category);
+          const generated = await generateContent('tweet', category, { withMeta: true });
+          const template = generated.content;
           // Templates are raw strings for tweets
-          return { text: typeof template === 'string' ? template : (template.text || template.body || JSON.stringify(template)) };
+          return {
+            text: typeof template === 'string' ? template : (template.text || template.body || JSON.stringify(template)),
+            __meta: generated.meta,
+          };
         },
         publish: async (content, creds) => {
-          return publishToChannel('twitter', { text: content.text }, creds);
+          return publishToChannel('twitter', { text: content.text, __meta: content.__meta }, creds);
         },
       },
     ],
@@ -52,11 +56,18 @@ const CAMPAIGNS = {
         generate: async () => {
           const topics = require('../channels/blog').generateTopicIdeas();
           const topic = topics[weekOfYear() % topics.length];
-          const template = await generateContent('blog', 'blog_technical');
+          const generated = await generateContent('blog', 'blog_technical', { withMeta: true });
+          const template = generated.content;
+          const body = typeof template.body === 'string'
+            ? template.body
+            : typeof template.text === 'string'
+              ? template.text
+              : `# ${template.title || topic.title}\n\n${template.description || topic.description || 'Engineering deep dive from the Knol team.'}\n\nGitHub: https://github.com/aiknol/knol\nDocs: https://aiknol.com/docs`;
           return {
             title: template.title || topic.title,
-            text: template.body || template.text || template,
+            text: body,
             tags: template.tags || topic.tags,
+            __meta: generated.meta,
           };
         },
         publish: async (content, creds) => {
@@ -65,6 +76,7 @@ const CAMPAIGNS = {
             title: content.title,
             body: content.text,
             tags: content.tags || ['rust', 'ai', 'memory'],
+            __meta: content.__meta,
           }, creds);
 
           // Cross-post to Dev.to
@@ -74,6 +86,7 @@ const CAMPAIGNS = {
               body: content.text,
               tags: content.tags || ['rust', 'ai', 'opensource', 'webdev'],
               canonicalUrl: blogResult.data?.url,
+              __meta: content.__meta,
             }, creds);
           }
 
@@ -84,11 +97,15 @@ const CAMPAIGNS = {
         id: 'weekly-linkedin',
         description: 'Post LinkedIn update',
         generate: async () => {
-          const template = await generateContent('linkedin', 'linkedin_technical');
-          return { text: typeof template === 'string' ? template : (template.text || template.body || template) };
+          const generated = await generateContent('linkedin', 'linkedin_technical', { withMeta: true });
+          const template = generated.content;
+          return {
+            text: typeof template === 'string' ? template : (template.text || template.body || template),
+            __meta: generated.meta,
+          };
         },
         publish: async (content, creds) => {
-          return publishToChannel('linkedin', { text: content.text }, creds);
+          return publishToChannel('linkedin', { text: content.text, __meta: content.__meta }, creds);
         },
       },
       {
@@ -98,11 +115,13 @@ const CAMPAIGNS = {
           const subs = ['rust', 'opensource', 'selfhosted', 'LocalLLaMA'];
           const sub = subs[weekOfYear() % subs.length];
           const category = sub === 'rust' ? 'reddit_rust' : 'reddit_ml';
-          const template = await generateContent('reddit', category);
+          const generated = await generateContent('reddit', category, { withMeta: true });
+          const template = generated.content;
           return {
-            subreddit: template.subreddit || sub,
+            subreddit: normalizeSubreddit(template.subreddit || sub),
             title: template.title || `Knol: Memory layer for AI (${sub})`,
             text: template.body || template.text || template,
+            __meta: generated.meta,
           };
         },
         publish: async (content, creds) => {
@@ -111,7 +130,33 @@ const CAMPAIGNS = {
             title: content.title,
             text: content.text,
             kind: 'self',
+            __meta: content.__meta,
           }, creds);
+        },
+      },
+      {
+        id: 'weekly-reddit-engagement',
+        description: 'Engage in relevant Reddit discussions',
+        generate: async () => {
+          return {
+            query: '(memory OR rag OR "ai agents" OR llm)',
+            subreddits: ['rust', 'MachineLearning', 'LocalLLaMA', 'opensource', 'selfhosted'],
+            limitPerSub: 3,
+            limit: 8,
+            minScore: 3,
+            minComments: 0,
+            commentTemplate: 'Maintainer here. We built an open-source memory stack for this exact problem. Happy to share design tradeoffs if useful: https://github.com/aiknol/knol',
+            __meta: { templateCategory: 'reddit_engagement', variantId: 'reddit_engagement:v0', variantIndex: 0 },
+          };
+        },
+        publish: async (content, creds) => {
+          const result = await publishToChannel('reddit_engagement', content, creds);
+          console.log('\n=== Reddit Engagement Opportunities ===');
+          for (const opp of (result.data?.opportunities || []).slice(0, 5)) {
+            console.log(`  [r/${opp.subreddit}] ${opp.title}`);
+            console.log(`  ${opp.permalink || opp.url}\n`);
+          }
+          return result;
         },
       },
     ],
@@ -127,10 +172,12 @@ const CAMPAIGNS = {
         id: 'monthly-newsletter',
         description: 'Send monthly newsletter',
         generate: async () => {
-          const template = await generateContent('email', 'email_weekly');
+          const generated = await generateContent('email', 'email_weekly', { withMeta: true });
+          const template = generated.content;
           return {
             subject: template.subject || `Knol Monthly Update`,
             text: template.body || template.text || (typeof template === 'string' ? template : JSON.stringify(template)),
+            __meta: generated.meta,
           };
         },
         publish: async (content, creds) => {
@@ -138,6 +185,7 @@ const CAMPAIGNS = {
             subject: content.subject || `Knol Monthly Update — ${new Date().toLocaleDateString('en', { month: 'long', year: 'numeric' })}`,
             text: content.text,
             htmlContent: content.text,
+            __meta: content.__meta,
           }, creds);
         },
       },
@@ -148,6 +196,7 @@ const CAMPAIGNS = {
           type: 'metadata',
           description: 'Open-source long-term memory layer for AI agents. Rust + pgvector + NATS.',
           topics: ['memory', 'llm', 'ai-agents', 'rust', 'pgvector', 'knowledge-graph', 'rag', 'vector-search'],
+          __meta: { templateCategory: 'github_metadata', variantId: 'github_metadata:v0', variantIndex: 0 },
         }),
         publish: async (content, creds) => {
           return publishToChannel('github', content, creds);
@@ -179,8 +228,12 @@ const CAMPAIGNS = {
         id: 'monthly-thread',
         description: 'Post a Twitter thread about progress',
         generate: async () => {
-          const template = await generateContent('tweet', 'tweet_launch');
-          return { text: typeof template === 'string' ? template : (template.text || template.body || JSON.stringify(template)) };
+          const generated = await generateContent('tweet', 'tweet_launch', { withMeta: true });
+          const template = generated.content;
+          return {
+            text: typeof template === 'string' ? template : (template.text || template.body || JSON.stringify(template)),
+            __meta: generated.meta,
+          };
         },
         publish: async (content, creds) => {
           const tweets = [
@@ -188,7 +241,7 @@ const CAMPAIGNS = {
             '🧵 Some highlights from this month:\n\n• Performance improvements\n• New API features\n• Community growth\n\nThread below 👇',
             'If you\'re building AI agents that need to remember context across sessions, check us out:\n\nhttps://github.com/aiknol/knol\n\nStar ⭐ if you find it useful!',
           ];
-          return publishToChannel('twitter', { tweets }, creds);
+          return publishToChannel('twitter', { tweets, __meta: content.__meta }, creds);
         },
       },
     ],
@@ -236,20 +289,39 @@ function queueDeferred(taskId, cadence, details = {}) {
   fs.writeFileSync(DEFERRED_FILE, JSON.stringify(queue, null, 2));
 }
 
-function shouldRun(cadence, state) {
+function shouldRun(cadence, campaign, state) {
   const now = new Date();
   const lastRun = state.lastRun[cadence];
+  const weekday = now.getUTCDay();
+  const dayOfMonth = now.getUTCDate();
 
-  if (!lastRun) return true;
+  if (cadence === 'weekly' && Number.isInteger(campaign.preferredDay) && weekday !== campaign.preferredDay) {
+    return {
+      allowed: false,
+      reason: `outside_preferred_weekday (today=${weekday}, preferred=${campaign.preferredDay})`,
+    };
+  }
+  if (cadence === 'monthly' && Number.isInteger(campaign.preferredDay) && dayOfMonth !== campaign.preferredDay) {
+    return {
+      allowed: false,
+      reason: `outside_preferred_month_day (today=${dayOfMonth}, preferred=${campaign.preferredDay})`,
+    };
+  }
+
+  if (!lastRun) return { allowed: true, reason: 'first_run' };
 
   const last = new Date(lastRun);
   const hoursSince = (now - last) / (1000 * 60 * 60);
 
   switch (cadence) {
-    case 'daily': return hoursSince >= 20; // At least 20h between daily
-    case 'weekly': return hoursSince >= 144; // At least 6 days
-    case 'monthly': return hoursSince >= 672; // At least 28 days
-    default: return true;
+    case 'daily':
+      return { allowed: hoursSince >= 20, reason: 'too_recent' }; // At least 20h between daily
+    case 'weekly':
+      return { allowed: hoursSince >= 144, reason: 'too_recent' }; // At least 6 days
+    case 'monthly':
+      return { allowed: hoursSince >= 672, reason: 'too_recent' }; // At least 28 days
+    default:
+      return { allowed: true, reason: 'default' };
   }
 }
 
@@ -268,8 +340,9 @@ async function runCampaign(cadence, options = {}) {
 
   const state = loadState();
 
-  if (!force && !shouldRun(cadence, state)) {
-    console.log(`[${cadence}] Skipping — ran too recently (last: ${state.lastRun[cadence]})`);
+  const eligibility = shouldRun(cadence, campaign, state);
+  if (!force && !eligibility.allowed) {
+    console.log(`[${cadence}] Skipping — ${eligibility.reason} (last: ${state.lastRun[cadence] || 'never'})`);
     return { success: true, skipped: true };
   }
 
@@ -285,7 +358,12 @@ async function runCampaign(cadence, options = {}) {
 
     try {
       // Generate content
-      const content = await task.generate();
+      const generated = await task.generate();
+      const content = annotateTaskMeta(generated, {
+        cadence,
+        campaignName: campaign.name,
+        taskId: task.id,
+      });
 
       if (dryRun) {
         console.log(`    [DRY RUN] Would publish:`, JSON.stringify(content).substring(0, 150));
@@ -312,20 +390,31 @@ async function runCampaign(cadence, options = {}) {
   }
 
   // Update state
+  const successCount = results.filter(r => r.success).length;
+  const deferredCount = results.filter(r => r.deferred).length;
+  const failedCount = results.length - successCount - deferredCount;
+
   if (!dryRun) {
-    state.lastRun[cadence] = new Date().toISOString();
+    if (successCount > 0) {
+      state.lastRun[cadence] = new Date().toISOString();
+    } else {
+      console.log(`  No successful tasks for ${cadence}; preserving previous lastRun for faster retry.`);
+    }
+
     state.history.push({
       cadence,
       timestamp: new Date().toISOString(),
-      results: results.map(r => ({ taskId: r.taskId, success: r.success })),
+      results: results.map(r => ({ taskId: r.taskId, success: r.success, deferred: !!r.deferred })),
+      successCount,
+      deferredCount,
+      failedCount,
     });
     // Keep last 100 history entries
     if (state.history.length > 100) state.history = state.history.slice(-100);
     saveState(state);
   }
 
-  const successCount = results.filter(r => r.success).length;
-  console.log(`\n  Summary: ${successCount}/${results.length} tasks succeeded\n`);
+  console.log(`\n  Summary: ${successCount}/${results.length} succeeded, ${deferredCount} deferred, ${failedCount} failed\n`);
 
   return { success: true, results };
 }
@@ -356,6 +445,25 @@ function weekOfYear() {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 1);
   return Math.ceil(((now - start) / (1000 * 60 * 60 * 24) + start.getDay() + 1) / 7);
+}
+
+function annotateTaskMeta(content, details) {
+  const fallback = content && typeof content === 'object' ? content : { text: String(content ?? '') };
+  const meta = fallback.__meta || {};
+  return {
+    ...fallback,
+    __meta: {
+      ...meta,
+      cadence: details.cadence,
+      campaignName: details.campaignName,
+      taskId: details.taskId,
+    },
+  };
+}
+
+function normalizeSubreddit(name) {
+  const value = String(name || '').trim();
+  return value.replace(/^r\//i, '');
 }
 
 // ---------------------------------------------------------------------------

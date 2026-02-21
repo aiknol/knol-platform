@@ -29,7 +29,8 @@ pub async fn status(State(state): State<Arc<AppState>>) -> Json<serde_json::Valu
         .collect();
 
     // Campaign definitions with zero-cost plan phase info
-    let campaign_list: Vec<serde_json::Value> = campaigns::all_campaigns()
+    let campaign_defs = campaigns::load_campaigns(&state).await;
+    let campaign_list: Vec<serde_json::Value> = campaign_defs
         .iter()
         .map(|c| {
             serde_json::json!({

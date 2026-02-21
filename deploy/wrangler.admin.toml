@@ -1,0 +1,8 @@
+# =============================================================================
+# Knol Admin Website — Cloudflare Pages Configuration
+# Static site deployment for admin.aiknol.com (admin)
+# =============================================================================
+
+name = "knol-admin"
+compatibility_date = "2024-09-25"
+pages_build_output_dir = "../frontend/admin/out"

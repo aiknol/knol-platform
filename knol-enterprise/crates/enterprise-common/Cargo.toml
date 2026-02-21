@@ -1,0 +1,13 @@
+[package]
+name = "enterprise-common"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+axum.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true

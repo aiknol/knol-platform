@@ -86,8 +86,10 @@ git commit -m "Initial commit — Knol context engineering platform
 Monorepo layout:
   knol-oss/        — open-source core (Apache-2.0)
   knol-enterprise/ — proprietary enterprise services
-  knol-web/        — marketing website
-  knol-demo/       — interactive demo
+  frontend/web/        — main marketing website
+  frontend/admin/      — admin frontend
+  frontend/cloud/      — tenant cloud frontend
+  frontend/demo/       — interactive demo frontend
   scripts/         — tooling & deployment
   deploy/          — infrastructure configs"
 

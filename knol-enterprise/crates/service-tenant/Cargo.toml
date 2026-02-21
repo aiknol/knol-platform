@@ -1,0 +1,39 @@
+[package]
+name = "service-tenant"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "tenant-service"
+path = "src/main.rs"
+
+[dependencies]
+enterprise-common = { path = "../enterprise-common" }
+memory-common.workspace = true
+memory-db.workspace = true
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+reqwest.workspace = true
+# Auth
+jsonwebtoken = "9"
+bcrypt = "0.16"
+rand = "0.8"
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+# Web
+tower-http = { version = "0.5", features = ["cors"] }
+tower = { version = "0.4", features = ["util"] }
+http = "1"
+# OpenAPI / Swagger
+utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "8", features = ["axum"] }

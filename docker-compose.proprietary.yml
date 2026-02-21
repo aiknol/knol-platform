@@ -33,12 +33,42 @@ services:
       ADMIN_SERVICE_PORT: "3001"
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?set ADMIN_JWT_SECRET in .env (>=32 chars)}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
-      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3006}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:?set ADMIN_INITIAL_PASSWORD in .env (>=12 chars)}
+      ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-admin@aiknol.com}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008}
+      ADMIN_SECURE_COOKIES: ${ADMIN_SECURE_COOKIES:-false}
       RUST_LOG: info
     command: ["admin-service"]
     ports:
       - "3001:8084"
     mem_limit: 320m
+
+  tenant-service:
+    image: knol-enterprise-runtime:local
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.enterprise
+      target: runtime
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      DB_MAX_CONNECTIONS: "6"
+      DB_MIN_CONNECTIONS: "1"
+      TENANT_SERVICE_PORT: "3002"
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?set ADMIN_JWT_SECRET in .env (>=32 chars)}
+      TENANT_CORS_ORIGIN: ${TENANT_CORS_ORIGIN:-http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008}
+      ADMIN_SECURE_COOKIES: ${ADMIN_SECURE_COOKIES:-false}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      RUST_LOG: info
+    command: ["tenant-service"]
+    ports:
+      - "3002:8085"
+    mem_limit: 256m
 
   jobs-service:
     image: knol-enterprise-runtime:local
@@ -75,11 +105,11 @@ services:
       DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
       DB_MAX_CONNECTIONS: "4"
       DB_MIN_CONNECTIONS: "1"
-      BILLING_SERVICE_PORT: "3003"
+      BILLING_SERVICE_PORT: "8086"
       RUST_LOG: info
     command: ["billing-service"]
     ports:
-      - "3003:3003"
+      - "3003:8086"
     mem_limit: 256m
 
   ingest-service:
@@ -100,55 +130,9 @@ services:
       NATS_URL: nats://nats:4222
       DB_MAX_CONNECTIONS: "4"
       DB_MIN_CONNECTIONS: "1"
-      INGEST_SERVICE_PORT: "3004"
+      INGEST_SERVICE_PORT: "8087"
       RUST_LOG: info
     command: ["ingest-service"]
     ports:
-      - "3004:3004"
+      - "3004:8087"
     mem_limit: 256m
-
-  website:
-    image: node:20-alpine
-    working_dir: /workspace/knol-web
-    environment:
-      NEXT_TELEMETRY_DISABLED: "1"
-      NODE_OPTIONS: "--max-old-space-size=256"
-    volumes:
-      - .:/workspace
-      - web-node-modules:/workspace/knol-web/node_modules
-    command: sh -lc "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3005"
-    ports:
-      - "3005:3005"
-    mem_limit: 512m
-
-  admin-website:
-    image: node:20-alpine
-    depends_on:
-      admin-service:
-        condition: service_started
-    working_dir: /workspace/knol-web
-    environment:
-      NEXT_TELEMETRY_DISABLED: "1"
-      NODE_OPTIONS: "--max-old-space-size=256"
-      NEXT_PUBLIC_ADMIN_API_URL: "http://localhost:3001"
-      ADMIN_WEBSITE_MODE: "true"
-    volumes:
-      - .:/workspace
-      - admin-web-node-modules:/workspace/knol-web/node_modules
-    command: sh -lc "npm ci && npm run dev -- --hostname 0.0.0.0 --port 3006"
-    ports:
-      - "3006:3006"
-    mem_limit: 512m
-
-  demo-ui:
-    image: nginx:alpine
-    volumes:
-      - ./knol-demo/index.html:/usr/share/nginx/html/index.html:ro
-      - ./knol-demo/favicon.svg:/usr/share/nginx/html/favicon.svg:ro
-    ports:
-      - "8080:80"
-    mem_limit: 128m
-
-volumes:
-  web-node-modules:
-  admin-web-node-modules:

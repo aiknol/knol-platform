@@ -76,12 +76,9 @@ async fn main() -> anyhow::Result<()> {
 
 async fn start_scheduler(state: Arc<AppState>) -> anyhow::Result<JobScheduler> {
     let sched = JobScheduler::new().await?;
+    let configured_campaigns = campaigns::load_campaigns(&state).await;
 
-    for campaign in campaigns::all_campaigns() {
-        if !campaign.enabled {
-            continue;
-        }
-
+    for campaign in configured_campaigns {
         let state = state.clone();
         let name = campaign.name.clone();
         let cron = campaign.cron.clone();
@@ -110,8 +107,8 @@ async fn start_scheduler(state: Arc<AppState>) -> anyhow::Result<JobScheduler> {
 
         sched.add(job).await?;
         info!(
-            "Scheduled campaign '{}' with cron '{}'",
-            campaign.name, campaign.cron
+            "Scheduled campaign '{}' with cron '{}' (enabled={})",
+            campaign.name, campaign.cron, campaign.enabled
         );
     }
 

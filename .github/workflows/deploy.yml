@@ -121,26 +121,50 @@ jobs:
             ./deploy.sh ${{ steps.tag.outputs.tag }}
 
   # ---------------------------------------------------------------------------
-  # Deploy website to Cloudflare Pages
+  # Deploy websites to Cloudflare Pages
   # ---------------------------------------------------------------------------
-  deploy-website:
-    name: Deploy Website
+  deploy-websites:
+    name: Deploy Web Frontends
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site:
+          - { name: main, build_script: build:web, project: knol-web, output: frontend/web/out }
+          - { name: admin, build_script: build:admin, project: knol-admin, output: frontend/admin/out }
+          - { name: cloud, build_script: build:app, project: knol-cloud, output: frontend/cloud/out }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install & build
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run ${{ matrix.site.build_script }}
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ${{ matrix.site.output }} --project-name=${{ matrix.site.project }}
+
+  deploy-demo:
+    name: Deploy Demo UI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: knol-web/package-lock.json
       - name: Install & build
-        working-directory: knol-web
+        working-directory: frontend
         run: |
-          npm ci
-          npm run build
-      - name: Deploy to Cloudflare Pages
+          npm install --no-audit --no-fund
+          npm run build:demo
+      - name: Deploy demo to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy knol-web/out --project-name=knol-web
+          command: pages deploy frontend/demo/out --project-name=knol-demo

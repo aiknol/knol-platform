@@ -28,11 +28,13 @@ RUN cargo chef cook --release --recipe-path recipe.json
 COPY knol-enterprise/ /app/knol-enterprise/
 RUN cargo build --release \
     --bin admin-service \
+    --bin tenant-service \
     --bin jobs-service \
     --bin billing-service \
     --bin ingest-service \
     --bin marketing-service \
     && strip /app/knol-enterprise/target/release/admin-service \
+    && strip /app/knol-enterprise/target/release/tenant-service \
     && strip /app/knol-enterprise/target/release/jobs-service \
     && strip /app/knol-enterprise/target/release/billing-service \
     && strip /app/knol-enterprise/target/release/ingest-service \
@@ -46,10 +48,11 @@ RUN apt-get update \
 
 RUN groupadd -r knol && useradd -r -g knol -s /sbin/nologin knol
 
-COPY --from=builder /app/knol-enterprise/target/release/admin-service   /usr/local/bin/
-COPY --from=builder /app/knol-enterprise/target/release/jobs-service    /usr/local/bin/
-COPY --from=builder /app/knol-enterprise/target/release/billing-service /usr/local/bin/
-COPY --from=builder /app/knol-enterprise/target/release/ingest-service    /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/admin-service     /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/tenant-service   /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/jobs-service     /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/billing-service  /usr/local/bin/
+COPY --from=builder /app/knol-enterprise/target/release/ingest-service   /usr/local/bin/
 COPY --from=builder /app/knol-enterprise/target/release/marketing-service /usr/local/bin/
 
 # Copy enterprise migrations if present

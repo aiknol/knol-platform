@@ -3,12 +3,18 @@
 //! These routes are intentionally unauthenticated for live demos, so they
 //! must never return decrypted credentials.
 
+use axum::http::HeaderMap;
 use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 use std::sync::Arc;
 
 use crate::routes::credentials;
 use crate::AdminAppState;
+
+/// Max demo requests per IP within the window.
+const DEMO_MAX_REQUESTS: u32 = 15;
+/// Demo rate limit window (60 seconds).
+const DEMO_WINDOW_SECS: u64 = 60;
 
 const DEFAULT_GITHUB_URL: &str = "https://github.com/aiknol/knol";
 const DEFAULT_TAGLINE: &str = "Context engineering for AI applications";
@@ -78,8 +84,48 @@ pub async fn demo_config(State(state): State<Arc<AdminAppState>>) -> Json<serde_
 /// ```
 pub async fn demo_extract(
     State(state): State<Arc<AdminAppState>>,
+    headers: HeaderMap,
     Json(body): Json<DemoExtractRequest>,
 ) -> Result<Json<serde_json::Value>, DemoHttpError> {
+    // SECURITY: Per-IP rate limiting to prevent abuse of unauthenticated LLM calls.
+    let client_ip = headers
+        .get("x-real-ip")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .or_else(|| {
+            headers
+                .get("x-forwarded-for")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|s| s.rsplit(',').next())
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+        })
+        .unwrap_or_else(|| "unknown".to_string());
+    {
+        let mut limiter = state
+            .demo_rate_limiter
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        let now = std::time::Instant::now();
+
+        // Evict expired entries
+        limiter.retain(|_, (_, first)| now.duration_since(*first).as_secs() < DEMO_WINDOW_SECS);
+
+        let entry = limiter.entry(client_ip).or_insert((0, now));
+        if now.duration_since(entry.1).as_secs() >= DEMO_WINDOW_SECS {
+            *entry = (1, now);
+        } else {
+            entry.0 += 1;
+        }
+        if entry.0 > DEMO_MAX_REQUESTS {
+            return Err(error_json(
+                StatusCode::TOO_MANY_REQUESTS,
+                "Rate limit exceeded. Please try again later.",
+            ));
+        }
+    }
+
     if body.user_message.trim().is_empty() {
         return Err(error_json(
             StatusCode::BAD_REQUEST,
@@ -323,15 +369,17 @@ async fn request_gemini(
     system_prompt: &str,
     user_message: &str,
 ) -> Result<String, String> {
+    // SECURITY: Pass API key as header instead of URL query parameter.
+    // URL parameters appear in server logs, proxy logs, and Referer headers.
     let url = format!(
-        "{}/models/{}:generateContent?key={}",
+        "{}/models/{}:generateContent",
         runtime.api_url.trim_end_matches('/'),
         runtime.model,
-        api_key
     );
 
     let resp = client
         .post(url)
+        .header("x-goog-api-key", api_key)
         .json(&serde_json::json!({
             "systemInstruction": { "parts": [{ "text": system_prompt }] },
             "contents": [{ "role": "user", "parts": [{ "text": user_message }] }],

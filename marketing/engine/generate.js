@@ -259,13 +259,22 @@ async function generateContent(contentType, templateCategory, options = {}) {
     throw new Error(`No templates found for: ${templateCategory}`);
   }
 
-  const template = options.index !== undefined ? templates[options.index] : pickRandom(templates);
+  const variantIndex = options.index !== undefined ? options.index : Math.floor(Math.random() * templates.length);
+  const template = templates[variantIndex];
+  const meta = {
+    contentType,
+    templateCategory,
+    variantIndex,
+    variantId: `${templateCategory}:v${variantIndex}`,
+    enhanced: Boolean(options.enhance),
+  };
 
   if (options.enhance) {
-    return await enhanceWithClaude(template, contentType, options.context);
+    const enhanced = await enhanceWithClaude(template, contentType, options.context);
+    return options.withMeta ? { content: enhanced, meta } : enhanced;
   }
 
-  return template;
+  return options.withMeta ? { content: template, meta } : template;
 }
 
 // ---------------------------------------------------------------------------

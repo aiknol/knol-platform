@@ -57,7 +57,7 @@ services:
     env_file: .env.production
     environment:
       GATEWAY_PORT: "8080"
-      GATEWAY_CORS_ORIGINS: ${GATEWAY_CORS_ORIGINS:-https://aiknol.com,https://www.aiknol.com,https://app.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
+      GATEWAY_CORS_ORIGINS: ${GATEWAY_CORS_ORIGINS:-https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health >/dev/null || exit 1"]
       interval: 10s
@@ -163,7 +163,7 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
-      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-https://aiknol.com,https://www.aiknol.com,https://app.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
       MARKETING_SERVICE_URL: http://marketing:8088
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/health >/dev/null || exit 1"]
@@ -176,6 +176,34 @@ services:
         limits:
           cpus: '0.5'
           memory: 96M
+    networks:
+      - knol
+
+  tenant:
+    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    container_name: knol-tenant
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: "0.5"
+    command: ["tenant-service"]
+    env_file: .env.production
+    environment:
+      TENANT_SERVICE_PORT: "8085"
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      TENANT_CORS_ORIGIN: ${TENANT_CORS_ORIGIN:-https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8085/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     networks:
       - knol
 
@@ -295,6 +323,8 @@ services:
       --jetstream
       --http_port=8222
       --store_dir=/data
+      --user=${NATS_USER:-knol}
+      --pass=${NATS_PASSWORD:?NATS_PASSWORD must be set}
     volumes:
       - nats_data:/data
     healthcheck:

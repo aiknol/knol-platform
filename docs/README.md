@@ -7,6 +7,11 @@
 - `memory-as-a-service-blueprint.md`: Technical architecture and implementation blueprint.
 - `memory-as-a-service-business-strategy.md`: Product and GTM strategy.
 - `automated-marketing-strategy.md`: Compliance-first automation strategy for multi-channel posting, rate-limit-safe scheduling, and full-funnel marketing workflows.
+- `ARCHITECTURE.html`: Platform architecture overview.
+- `COMPETITIVE_STRATEGY.html`: Competitive strategy analysis.
+- `Knol-Deployment-Guide.html`: Deployment guide.
+- `Knol-Zero-Cost-Marketing-Plan.md`: Marketing execution plan.
+- `knol-docs/`: Interactive static docs bundle (`architecture.html`, `business.html`, `dataflow.html`, `deployment.html`, `technical.html`).
 
 ## Notes
 

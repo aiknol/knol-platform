@@ -21,6 +21,37 @@ const CONFIG = {
   ],
 };
 
+function getJson(path, token) {
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'oauth.reddit.com',
+      path,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'User-Agent': 'knol-marketing/0.1.0',
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        try {
+          resolve({
+            success: true,
+            json: JSON.parse(data),
+            statusCode: res.statusCode,
+            headers: res.headers,
+          });
+        } catch (e) {
+          resolve({ success: false, error: `Parse error: ${e.message}`, statusCode: res.statusCode });
+        }
+      });
+    });
+    req.on('error', (e) => resolve({ success: false, error: e.message }));
+    req.end();
+  });
+}
+
 // Get OAuth2 access token (script app type)
 async function authenticate(credentials) {
   const { clientId, clientSecret, username, password } = credentials;
@@ -175,4 +206,47 @@ async function postComment(thingId, text, token) {
   });
 }
 
-module.exports = { authenticate, submitPost, postComment, CONFIG };
+async function findEngagementOpportunities(token, options = {}) {
+  const query = options.query || '(memory OR rag OR vector OR "ai agents" OR llm)';
+  const subreddits = Array.isArray(options.subreddits) && options.subreddits.length
+    ? options.subreddits
+    : ['rust', 'MachineLearning', 'LocalLLaMA', 'opensource', 'selfhosted'];
+  const perSubLimit = Math.max(1, Math.min(10, options.limitPerSub || 4));
+  const minScore = Number.isFinite(options.minScore) ? options.minScore : 3;
+  const minComments = Number.isFinite(options.minComments) ? options.minComments : 0;
+
+  const all = [];
+
+  for (const subreddit of subreddits) {
+    const path = `/r/${encodeURIComponent(subreddit)}/search.json?q=${encodeURIComponent(query)}&restrict_sr=1&sort=new&t=week&limit=${perSubLimit}`;
+    const response = await getJson(path, token);
+    if (!response.success || !response.json?.data?.children) continue;
+
+    for (const item of response.json.data.children) {
+      const d = item?.data || {};
+      if ((d.score || 0) < minScore) continue;
+      if ((d.num_comments || 0) < minComments) continue;
+      if (d.archived || d.locked) continue;
+      all.push({
+        id: d.id,
+        name: d.name, // Fullname (e.g. t3_abc123), required for comments.
+        title: d.title,
+        subreddit: d.subreddit,
+        score: d.score || 0,
+        comments: d.num_comments || 0,
+        author: d.author || '',
+        createdUtc: d.created_utc || null,
+        url: d.url || '',
+        permalink: d.permalink ? `https://reddit.com${d.permalink}` : '',
+      });
+    }
+  }
+
+  all.sort((a, b) => (b.score + b.comments) - (a.score + a.comments));
+  return {
+    success: true,
+    opportunities: all.slice(0, Math.max(1, Math.min(20, options.limit || 10))),
+  };
+}
+
+module.exports = { authenticate, submitPost, postComment, findEngagementOpportunities, CONFIG };

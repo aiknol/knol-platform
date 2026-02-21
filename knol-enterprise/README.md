@@ -19,7 +19,9 @@ docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d
 
 Admin web UI:
 
-- `http://localhost:3006/` (redirects to `/admin/`)
+- `http://localhost:3006/` (admin website)
+- `http://localhost:3007/` (tenant app website)
+- `http://localhost:3008/` (demo UI)
 
 ## Notes
 

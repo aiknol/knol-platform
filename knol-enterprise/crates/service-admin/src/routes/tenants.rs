@@ -83,7 +83,7 @@ pub async fn get_tenant(
 pub struct UpdateTenant {
     pub plan: Option<String>,
     pub config: Option<serde_json::Value>,
-    pub usage_limit: Option<i64>,
+    pub usage_limit: Option<i32>,
     pub name: Option<String>,
 }
 
@@ -179,8 +179,8 @@ struct TenantRow {
     plan: String,
     config: serde_json::Value,
     api_key_hash: Option<String>,
-    usage_ops_month: i64,
-    usage_limit: Option<i64>,
+    usage_ops_month: i32,
+    usage_limit: Option<i32>,
     created_at: chrono::DateTime<chrono::Utc>,
     updated_at: chrono::DateTime<chrono::Utc>,
 }

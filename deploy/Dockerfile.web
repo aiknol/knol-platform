@@ -6,14 +6,14 @@
 # Stage 1: Install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY knol-web/package.json knol-web/package-lock.json ./
+COPY frontend/web/package.json frontend/web/package-lock.json ./
 RUN npm ci --ignore-scripts
 
 # Stage 2: Build static export
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY knol-web/ .
+COPY frontend/web/ .
 
 # Build args for environment-specific values
 ARG NEXT_PUBLIC_API_URL=https://api.aiknol.com

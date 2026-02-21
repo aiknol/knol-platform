@@ -74,6 +74,17 @@ impl std::fmt::Display for MarketingPhase {
     }
 }
 
+impl MarketingPhase {
+    fn from_str_loose(value: &str) -> Self {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "launch" => MarketingPhase::Launch,
+            "community" => MarketingPhase::Community,
+            "conversion" => MarketingPhase::Conversion,
+            _ => MarketingPhase::ContentEngine,
+        }
+    }
+}
+
 /// Get all campaign definitions aligned with the Zero-Cost Marketing Plan.
 pub fn all_campaigns() -> Vec<Campaign> {
     vec![
@@ -275,6 +286,144 @@ pub fn enabled_campaigns() -> Vec<Campaign> {
     all_campaigns().into_iter().filter(|c| c.enabled).collect()
 }
 
+fn campaign_alias(name: &str) -> &str {
+    match name {
+        "daily" => "daily_twitter",
+        "weekly" => "weekly_content",
+        "monthly" => "monthly_newsletter",
+        _ => name,
+    }
+}
+
+fn default_template_category(campaign_name: &str, channel: &str) -> String {
+    match (campaign_alias(campaign_name), channel) {
+        ("daily_twitter", "twitter") => "tweet_tip".to_string(),
+        ("weekly_content", "blog") => "blog_technical".to_string(),
+        ("weekly_content", "devto")
+        | ("weekly_content", "hashnode")
+        | ("weekly_content", "medium") => "devto_tutorial".to_string(),
+        ("weekly_content", "linkedin") => "linkedin_technical".to_string(),
+        ("weekly_content", "reddit") => "reddit_rust".to_string(),
+        ("monthly_newsletter", "email") => "email_weekly".to_string(),
+        ("monthly_newsletter", "github") => "blog_launch".to_string(),
+        ("monthly_newsletter", "twitter") => "tweet_technical".to_string(),
+        (_, "twitter") => "tweet_launch".to_string(),
+        (_, "blog") => "blog_technical".to_string(),
+        (_, "reddit") => "reddit_rust".to_string(),
+        (_, "linkedin") => "linkedin_technical".to_string(),
+        (_, "devto") => "devto_tutorial".to_string(),
+        (_, "email") => "email_weekly".to_string(),
+        (_, "hackernews") => "hn_show".to_string(),
+        (_, "producthunt") => "producthunt_launch".to_string(),
+        (_, "github") => "blog_launch".to_string(),
+        (_, _) => "tweet_launch".to_string(),
+    }
+}
+
+#[derive(sqlx::FromRow)]
+struct DbCampaignRow {
+    name: String,
+    cron: String,
+    channels: Vec<String>,
+    enabled: bool,
+    phase: String,
+    description: String,
+}
+
+async fn has_column(
+    pool: &sqlx::PgPool,
+    table: &str,
+    column: &str,
+) -> Result<bool, MarketingError> {
+    let exists = sqlx::query_scalar::<_, i64>(
+        r#"SELECT 1
+           FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND table_name = $1
+             AND column_name = $2
+           LIMIT 1"#,
+    )
+    .bind(table)
+    .bind(column)
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(exists.is_some())
+}
+
+/// Load campaigns from DB; fallback to compiled defaults if table is unavailable/empty.
+pub async fn load_campaigns(state: &Arc<AppState>) -> Vec<Campaign> {
+    let pool = &state.db_pool;
+    let has_phase = match has_column(pool, "marketing_campaigns", "phase").await {
+        Ok(v) => v,
+        Err(e) => {
+            warn!(
+                "Failed to inspect marketing_campaigns.phase: {}; using defaults",
+                e
+            );
+            return all_campaigns();
+        }
+    };
+    let has_description = match has_column(pool, "marketing_campaigns", "description").await {
+        Ok(v) => v,
+        Err(e) => {
+            warn!(
+                "Failed to inspect marketing_campaigns.description: {}; using defaults",
+                e
+            );
+            return all_campaigns();
+        }
+    };
+
+    let phase_expr = if has_phase {
+        "phase"
+    } else {
+        "'content_engine'::text AS phase"
+    };
+    let description_expr = if has_description {
+        "description"
+    } else {
+        "''::text AS description"
+    };
+
+    let sql = format!(
+        "SELECT name, cron, channels, enabled, {}, {} FROM marketing_campaigns ORDER BY name",
+        phase_expr, description_expr
+    );
+
+    match sqlx::query_as::<_, DbCampaignRow>(&sql)
+        .fetch_all(pool)
+        .await
+    {
+        Ok(rows) if !rows.is_empty() => rows
+            .into_iter()
+            .map(|r| Campaign {
+                name: r.name.clone(),
+                cron: r.cron,
+                channels: r
+                    .channels
+                    .into_iter()
+                    .map(|ch| ChannelTask {
+                        template_category: default_template_category(&r.name, &ch),
+                        channel: ch,
+                    })
+                    .collect(),
+                enabled: r.enabled,
+                phase: MarketingPhase::from_str_loose(&r.phase),
+                description: r.description,
+            })
+            .collect(),
+        Ok(_) => {
+            warn!("No DB campaigns found; using compiled campaign defaults");
+            all_campaigns()
+        }
+        Err(e) => {
+            warn!("Failed to load campaigns from DB: {}; using defaults", e);
+            all_campaigns()
+        }
+    }
+}
+
 /// Day-of-week tweet category rotation per the zero-cost plan:
 /// Monday=tip, Tuesday=benchmark, Wednesday=showcase, Thursday=architecture, Friday=community.
 /// Weekends fall back to engagement tweets.
@@ -324,7 +473,7 @@ fn rotate_devto_category() -> &'static str {
 
 /// Resolve the actual template category for a task, applying rotation logic.
 fn resolve_category(campaign_name: &str, task: &ChannelTask) -> String {
-    match (campaign_name, task.channel.as_str()) {
+    match (campaign_alias(campaign_name), task.channel.as_str()) {
         ("daily_twitter", "twitter") => day_of_week_tweet_category().to_string(),
         ("weekly_content", "reddit") => rotate_reddit_category().to_string(),
         ("weekly_content", "blog") => rotate_blog_category().to_string(),
@@ -341,13 +490,24 @@ pub async fn execute_campaign(
     campaign_name: &str,
     dry_run: bool,
 ) -> Result<Vec<CampaignResult>, MarketingError> {
-    let campaigns = all_campaigns();
+    execute_campaign_with_options(state, campaign_name, dry_run, false).await
+}
+
+pub async fn execute_campaign_with_options(
+    state: &Arc<AppState>,
+    campaign_name: &str,
+    dry_run: bool,
+    force_disabled: bool,
+) -> Result<Vec<CampaignResult>, MarketingError> {
+    let campaigns = load_campaigns(state).await;
     let campaign = campaigns
         .iter()
-        .find(|c| c.name == campaign_name)
+        .find(|c| {
+            c.name == campaign_name || campaign_alias(&c.name) == campaign_alias(campaign_name)
+        })
         .ok_or_else(|| MarketingError::CampaignNotFound(campaign_name.to_string()))?;
 
-    if !campaign.enabled {
+    if !campaign.enabled && !force_disabled {
         return Err(MarketingError::CampaignPaused(campaign_name.to_string()));
     }
 

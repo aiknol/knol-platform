@@ -29,8 +29,8 @@ cargo build --workspace
 
 echo ""
 echo "4. Installing website dependencies..."
-cd "$ROOT_DIR/knol-web"
-npm install
+cd "$ROOT_DIR/frontend"
+npm install --no-audit --no-fund
 
 echo ""
 echo "=== Setup Complete ==="
@@ -41,8 +41,11 @@ echo "  cd knol-oss && cargo run --bin service-write &"
 echo "  cd knol-oss && cargo run --bin service-retrieve &"
 echo "  cd knol-oss && cargo run --bin service-graph &"
 echo ""
-echo "To start website dev server:"
-echo "  cd knol-web && npm run dev"
+echo "To start websites (main/admin/cloud/demo):"
+echo "  ./scripts/local-start-web.sh"
 echo ""
 echo "API available at: http://localhost:3000"
-echo "Website dev at:   http://localhost:3001"
+echo "Main website:     http://localhost:3005"
+echo "Admin website:    http://localhost:3006"
+echo "Cloud website:    http://localhost:3007"
+echo "Demo website:     http://localhost:3008"

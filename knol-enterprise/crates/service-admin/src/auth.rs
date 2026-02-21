@@ -60,16 +60,21 @@ pub async fn login(
     Json(body): Json<LoginRequest>,
 ) -> Result<Response, AdminError> {
     // SECURITY: Extract client IP for rate limiting and audit logging.
+    // Prefer x-real-ip (set by trusted proxy like Caddy) over x-forwarded-for.
+    // If using XFF, take the LAST entry (appended by trusted proxy) not the
+    // first (which is client-controlled and can be spoofed).
     let client_ip = headers
-        .get("x-forwarded-for")
+        .get("x-real-ip")
         .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.split(',').next())
         .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
         .or_else(|| {
             headers
-                .get("x-real-ip")
+                .get("x-forwarded-for")
                 .and_then(|v| v.to_str().ok())
-                .map(|s| s.to_string())
+                .and_then(|s| s.rsplit(',').next())
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
         })
         .unwrap_or_else(|| "unknown".to_string());
 
@@ -303,6 +308,17 @@ pub async fn change_password(
         })?;
 
     Ok(Json(serde_json::json!({"password_changed": true})))
+}
+
+/// Return the authenticated admin profile from validated JWT claims.
+pub async fn me(claims: AdminClaims) -> Result<Json<serde_json::Value>, AdminError> {
+    Ok(Json(serde_json::json!({
+        "admin": {
+            "id": claims.sub,
+            "email": claims.email,
+            "role": claims.role,
+        }
+    })))
 }
 
 // ── Auth Middleware ──────────────────────────────────────────────────

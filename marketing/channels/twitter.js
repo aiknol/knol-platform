@@ -49,7 +49,7 @@ function buildAuthHeader(oauthData) {
   return `OAuth ${parts}`;
 }
 
-async function postTweet(text, credentials) {
+async function postTweet(tweet, credentials) {
   const { apiKey, apiSecret, accessToken, accessTokenSecret } = credentials;
 
   if (!apiKey || !apiSecret || !accessToken || !accessTokenSecret) {
@@ -57,7 +57,8 @@ async function postTweet(text, credentials) {
   }
 
   const url = `${CONFIG.API_BASE}/tweets`;
-  const body = JSON.stringify({ text });
+  const payload = typeof tweet === 'string' ? { text: tweet } : (tweet || {});
+  const body = JSON.stringify(payload);
 
   const oauthData = oauthSign('POST', url, {}, apiKey, apiSecret, accessToken, accessTokenSecret);
   const authHeader = buildAuthHeader(oauthData);
@@ -114,11 +115,11 @@ async function postThread(tweets, credentials) {
   let replyToId = null;
 
   for (const text of tweets) {
-    const body = replyToId
+    const payload = replyToId
       ? { text, reply: { in_reply_to_tweet_id: replyToId } }
       : { text };
 
-    const result = await postTweet(typeof body === 'string' ? body : body.text, credentials);
+    const result = await postTweet(payload, credentials);
     results.push(result);
 
     if (!result.success) break;

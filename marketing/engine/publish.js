@@ -65,6 +65,7 @@ function hasApiCredentials(channel, credentials) {
     case 'linkedin':
       return Boolean(credentials?.linkedin?.accessToken && credentials?.linkedin?.personUrn);
     case 'reddit':
+    case 'reddit_engagement':
       return Boolean(
         credentials?.reddit?.clientId &&
         credentials?.reddit?.clientSecret &&
@@ -94,6 +95,8 @@ function endpointForChannel(channel, content) {
       return content?.articleUrl ? 'article_share' : 'ugc_create';
     case 'reddit':
       return 'submit_post';
+    case 'reddit_engagement':
+      return 'engage_comment';
     case 'devto':
       return 'article_create';
     case 'github':
@@ -105,6 +108,110 @@ function endpointForChannel(channel, content) {
     default:
       return 'publish';
   }
+}
+
+function cloneContent(content) {
+  if (content == null) return {};
+  try {
+    return JSON.parse(JSON.stringify(content));
+  } catch {
+    return typeof content === 'object' ? { ...content } : { text: String(content) };
+  }
+}
+
+function splitUrlSuffix(url) {
+  const m = String(url).match(/^(.+?)([),.!?;:]*)$/);
+  return m ? { core: m[1], suffix: m[2] } : { core: String(url), suffix: '' };
+}
+
+function appendUtm(urlString, attribution) {
+  const { core, suffix } = splitUrlSuffix(urlString);
+  let url;
+  try {
+    url = new URL(core);
+  } catch {
+    return urlString;
+  }
+
+  const params = url.searchParams;
+  params.set('utm_source', attribution.utmSource);
+  params.set('utm_medium', attribution.utmMedium);
+  params.set('utm_campaign', attribution.utmCampaign);
+  if (attribution.utmContent) params.set('utm_content', attribution.utmContent);
+  url.search = params.toString();
+  return `${url.toString()}${suffix}`;
+}
+
+function rewriteTextUrls(text, attribution, stats) {
+  if (typeof text !== 'string') return text;
+  const urlRegex = /https?:\/\/[^\s)]+/g;
+  return text.replace(urlRegex, (url) => {
+    stats.urls += 1;
+    const rewritten = appendUtm(url, attribution);
+    if (rewritten !== url) stats.utmUrls += 1;
+    return rewritten;
+  });
+}
+
+function buildAttribution(meta, channel) {
+  const cadence = meta?.cadence || 'ad_hoc';
+  const taskId = meta?.taskId || 'manual';
+  const variantId = meta?.variantId || '';
+  return {
+    utmSource: channel,
+    utmMedium: 'free_promo',
+    utmCampaign: `${cadence}_${taskId}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
+    utmContent: variantId || undefined,
+    cadence,
+    taskId,
+    variantId,
+    templateCategory: meta?.templateCategory || '',
+    variantIndex: Number.isFinite(meta?.variantIndex) ? meta.variantIndex : null,
+  };
+}
+
+function applyAttribution(content, channel) {
+  const working = cloneContent(content);
+  const meta = working.__meta || {};
+  const attribution = buildAttribution(meta, channel);
+  const stats = { urls: 0, utmUrls: 0 };
+
+  if (typeof working.text === 'string') working.text = rewriteTextUrls(working.text, attribution, stats);
+  if (typeof working.body === 'string') working.body = rewriteTextUrls(working.body, attribution, stats);
+  if (typeof working.htmlContent === 'string') working.htmlContent = rewriteTextUrls(working.htmlContent, attribution, stats);
+  if (typeof working.url === 'string') {
+    stats.urls += 1;
+    const rewritten = appendUtm(working.url, attribution);
+    if (rewritten !== working.url) stats.utmUrls += 1;
+    working.url = rewritten;
+  }
+  if (typeof working.canonicalUrl === 'string') {
+    stats.urls += 1;
+    const rewritten = appendUtm(working.canonicalUrl, attribution);
+    if (rewritten !== working.canonicalUrl) stats.utmUrls += 1;
+    working.canonicalUrl = rewritten;
+  }
+  if (Array.isArray(working.tweets)) {
+    working.tweets = working.tweets.map((t) => rewriteTextUrls(t, attribution, stats));
+  }
+
+  working.__meta = { ...meta, ...attribution };
+  working.__tracking = {
+    urlsDetected: stats.urls,
+    utmUrlsApplied: stats.utmUrls,
+  };
+  return working;
+}
+
+function summarizeContent(content) {
+  return {
+    text: typeof content?.text === 'string' ? content.text.slice(0, 240) : undefined,
+    title: typeof content?.title === 'string' ? content.title.slice(0, 140) : undefined,
+    subreddit: content?.subreddit,
+    kind: content?.kind,
+    urlsDetected: content?.__tracking?.urlsDetected || 0,
+    utmUrlsApplied: content?.__tracking?.utmUrlsApplied || 0,
+  };
 }
 
 function extractRetryAndReset(result) {
@@ -120,9 +227,16 @@ function extractRetryAndReset(result) {
 // Publish to a specific channel
 async function publishToChannel(channel, content, credentials) {
   const result = { channel, timestamp: new Date().toISOString(), content: {} };
-  const endpoint = endpointForChannel(channel, content);
+  const normalized = cloneContent(content);
+  const contentForPublish = applyAttribution(normalized, channel);
+  const policyChannel = channel === 'reddit_engagement' ? 'reddit' : channel;
+  result.content = summarizeContent(contentForPublish);
+  result.attribution = contentForPublish.__meta || {};
+  result.tracking = contentForPublish.__tracking || {};
+
+  const endpoint = endpointForChannel(channel, contentForPublish);
   const useApi = hasApiCredentials(channel, credentials);
-  const preflight = useApi ? limiter.shouldAllowPublish(channel, endpoint, content) : { allowed: true, reason: 'manual_or_no_api' };
+  const preflight = useApi ? limiter.shouldAllowPublish(policyChannel, endpoint, normalized) : { allowed: true, reason: 'manual_or_no_api' };
 
   if (!preflight.allowed) {
     result.success = false;
@@ -138,29 +252,29 @@ async function publishToChannel(channel, content, credentials) {
   }
 
   if (useApi && preflight.hash) {
-    limiter.reservePublish(channel, preflight.hash);
+    limiter.reservePublish(policyChannel, preflight.hash);
   }
 
   try {
     switch (channel) {
       case 'twitter': {
-        if (Array.isArray(content.tweets)) {
+        if (Array.isArray(contentForPublish.tweets)) {
           // Thread
-          const results = await twitter.postThread(content.tweets, credentials.twitter);
+          const results = await twitter.postThread(contentForPublish.tweets, credentials.twitter);
           result.success = results.every(r => r.success);
           result.data = results;
         } else {
-          result.data = await twitter.postTweet(content.text, credentials.twitter);
+          result.data = await twitter.postTweet(contentForPublish.text, credentials.twitter);
           result.success = result.data.success;
         }
         break;
       }
 
       case 'linkedin': {
-        if (content.articleUrl) {
-          result.data = await linkedin.postArticle(content.title, content.text, content.articleUrl, credentials.linkedin);
+        if (contentForPublish.articleUrl) {
+          result.data = await linkedin.postArticle(contentForPublish.title, contentForPublish.text, contentForPublish.articleUrl, credentials.linkedin);
         } else {
-          result.data = await linkedin.postUpdate(content.text, credentials.linkedin);
+          result.data = await linkedin.postUpdate(contentForPublish.text, credentials.linkedin);
         }
         result.success = result.data.success;
         break;
@@ -175,23 +289,69 @@ async function publishToChannel(channel, content, credentials) {
         }
 
         result.data = await reddit.submitPost(
-          content.subreddit,
-          content.title,
-          content.text,
+          contentForPublish.subreddit,
+          contentForPublish.title,
+          contentForPublish.text,
           auth.token,
-          content.kind || 'self'
+          contentForPublish.kind || 'self'
         );
         result.success = result.data.success;
         break;
       }
 
+      case 'reddit_engagement': {
+        const auth = await reddit.authenticate(credentials.reddit);
+        if (!auth.success) {
+          result.success = false;
+          result.data = { error: `Auth failed: ${auth.error}` };
+          break;
+        }
+
+        const opportunities = await reddit.findEngagementOpportunities(auth.token, {
+          query: contentForPublish.query,
+          subreddits: contentForPublish.subreddits,
+          limitPerSub: contentForPublish.limitPerSub,
+          limit: contentForPublish.limit,
+          minScore: contentForPublish.minScore,
+          minComments: contentForPublish.minComments,
+        });
+
+        if (!opportunities.success) {
+          result.success = false;
+          result.data = { error: opportunities.error || 'Failed to load opportunities' };
+          break;
+        }
+
+        const maxAutoReplies = Number.parseInt(process.env.REDDIT_ENGAGE_MAX_AUTO || '1', 10);
+        const autoReply = process.env.REDDIT_ENGAGE_AUTOREPLY === 'true';
+        const commentTemplate = contentForPublish.commentTemplate || '';
+        const comments = [];
+
+        if (autoReply && commentTemplate && Array.isArray(opportunities.opportunities)) {
+          for (const opp of opportunities.opportunities.slice(0, Math.max(0, maxAutoReplies))) {
+            if (!opp?.name) continue;
+            const commentText = commentTemplate.replaceAll('{{title}}', opp.title || '');
+            const posted = await reddit.postComment(opp.name, commentText, auth.token);
+            comments.push({ thread: opp.permalink || opp.url, success: posted.success, statusCode: posted.statusCode });
+          }
+        }
+
+        result.success = true;
+        result.data = {
+          manual: !autoReply,
+          opportunities: opportunities.opportunities || [],
+          comments,
+        };
+        break;
+      }
+
       case 'devto': {
         result.data = await devto.publishArticle({
-          title: content.title,
-          body: content.body || content.text,
-          tags: content.tags,
-          series: content.series,
-          canonicalUrl: content.canonicalUrl,
+          title: contentForPublish.title,
+          body: contentForPublish.body || contentForPublish.text,
+          tags: contentForPublish.tags,
+          series: contentForPublish.series,
+          canonicalUrl: contentForPublish.canonicalUrl,
         }, credentials.devto);
         result.success = result.data.success;
         break;
@@ -206,13 +366,13 @@ async function publishToChannel(channel, content, credentials) {
       }
 
       case 'github': {
-        if (content.type === 'release') {
+        if (contentForPublish.type === 'release') {
           result.data = await github.createRelease(
-            content.tag, content.name, content.body, credentials.github
+            contentForPublish.tag, contentForPublish.name, contentForPublish.body, credentials.github
           );
-        } else if (content.type === 'metadata') {
+        } else if (contentForPublish.type === 'metadata') {
           result.data = await github.updateRepoMetadata(
-            content.description, content.topics, credentials.github
+            contentForPublish.description, contentForPublish.topics, credentials.github
           );
         } else {
           result.data = await github.getRepoStats(credentials.github);
@@ -222,15 +382,15 @@ async function publishToChannel(channel, content, credentials) {
       }
 
       case 'email': {
-        const htmlBody = email.generateNewsletterHtml(content.htmlContent || content.text);
-        const textBody = content.text;
-        result.data = await email.sendNewsletter(content.subject, htmlBody, textBody, credentials.email);
+        const htmlBody = email.generateNewsletterHtml(contentForPublish.htmlContent || contentForPublish.text);
+        const textBody = contentForPublish.text;
+        result.data = await email.sendNewsletter(contentForPublish.subject, htmlBody, textBody, credentials.email);
         result.success = result.data.sent > 0 || result.data.manual;
         break;
       }
 
       case 'blog': {
-        const post = blog.createPost(content.title, content.body || content.text, content.tags);
+        const post = blog.createPost(contentForPublish.title, contentForPublish.body || contentForPublish.text, contentForPublish.tags);
         result.data = post;
         result.success = post.success;
         break;
@@ -247,11 +407,11 @@ async function publishToChannel(channel, content, credentials) {
 
   if (useApi) {
     if (result?.data?.headers) {
-      limiter.updateFromHeaders(channel, endpoint, result.data.headers);
+      limiter.updateFromHeaders(policyChannel, endpoint, result.data.headers);
     }
     if (result?.data?.rateLimited || result?.rateLimited || result?.data?.statusCode === 429) {
       const retryMeta = extractRetryAndReset(result.data || result);
-      limiter.markRateLimited(channel, endpoint, retryMeta);
+      limiter.markRateLimited(policyChannel, endpoint, retryMeta);
     }
   }
 
@@ -307,8 +467,8 @@ function logPublish(result) {
 
   log.push({
     ...result,
-    content: undefined, // Don't log full content
-    contentPreview: JSON.stringify(result.content).substring(0, 100),
+    content: undefined, // Avoid logging full raw content payload.
+    contentPreview: JSON.stringify(result.content || {}).substring(0, 240),
   });
 
   // Keep last 1000 entries
@@ -324,7 +484,7 @@ async function main() {
 
   if (!channel) {
     console.log('Usage: node publish.js <channel> [content.json]');
-    console.log('Channels: twitter, linkedin, reddit, devto, hackernews, github, email, blog');
+    console.log('Channels: twitter, linkedin, reddit, reddit_engagement, devto, hackernews, github, email, blog');
     process.exit(1);
   }
 

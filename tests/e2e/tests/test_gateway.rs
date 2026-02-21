@@ -101,7 +101,7 @@ async fn gateway_rejects_empty_bearer_value() {
 async fn gateway_handles_cors_preflight() {
     let resp = client()
         .request(reqwest::Method::OPTIONS, format!("{}/v1/memory", gateway_url()))
-        .header("Origin", "https://app.aiknol.com")
+        .header("Origin", "https://cloud.aiknol.com")
         .header("Access-Control-Request-Method", "POST")
         .header("Access-Control-Request-Headers", "Authorization, Content-Type")
         .send()
@@ -115,7 +115,7 @@ async fn gateway_handles_cors_preflight() {
 async fn gateway_returns_cors_headers_on_response() {
     let resp = client()
         .get(format!("{}/health", gateway_url()))
-        .header("Origin", "https://app.aiknol.com")
+        .header("Origin", "https://cloud.aiknol.com")
         .send()
         .await
         .unwrap();

@@ -58,19 +58,59 @@ curl -X POST http://localhost:3000/v1/memory/search \
   -d '{"query": "programming preferences", "user_id": "user-123"}'
 ```
 
-**Full stack (OSS + Admin Panel):**
+**Backend stack (OSS + Admin APIs/services):**
 
 ```bash
 export ADMIN_JWT_SECRET='replace-with-random-32-plus-char-secret'
 docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d --build
 ```
 
-| Service           | URL                          |
-|-------------------|------------------------------|
-| API Gateway       | `http://localhost:3000`      |
-| Admin Panel       | `http://localhost:3006`      |
-| Demo UI           | `http://localhost:8080`      |
+Start frontend surfaces locally (main/admin/cloud/demo):
+
+```bash
+./scripts/frontend-services.sh start
+```
+
+| Service           | URL                           |
+|-------------------|-------------------------------|
+| API Gateway       | `http://localhost:3000`       |
 | Admin API Health  | `http://localhost:3001/health`|
+| Main Website      | `http://localhost:3005`       |
+| Admin Panel       | `http://localhost:3006`       |
+| Cloud Website     | `http://localhost:3007`       |
+| Demo UI           | `http://localhost:3008`       |
+
+Frontend URL strategy uses env (no hardcoded localhost in code):
+
+- `NEXT_PUBLIC_BASE_DOMAIN` + `NEXT_PUBLIC_URL_SCHEME` define the base routing model.
+- Local ports: set host/port vars (`NEXT_PUBLIC_APP_HOST`, `NEXT_PUBLIC_APP_PORT`, `NEXT_PUBLIC_DEMO_HOST`, etc.).
+- Production subdomains: set `NEXT_PUBLIC_BASE_DOMAIN=aiknol.com` and hosts like `cloud.aiknol.com`, `demo.aiknol.com`, `admin.aiknol.com`.
+- Explicit overrides are also supported: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_DEMO_URL`, `NEXT_PUBLIC_ADMIN_API_URL`, `NEXT_PUBLIC_APP_API_URL`.
+
+Separate frontend project directories (deployed independently on Cloudflare Pages):
+
+- `frontend/web/` → `https://aiknol.com`
+- `frontend/admin/` → `https://admin.aiknol.com`
+- `frontend/cloud/` → `https://cloud.aiknol.com`
+- `frontend/demo/` → `https://demo.aiknol.com`
+
+Local backend-only startup helper:
+
+```bash
+./scripts/local-start-backend.sh
+```
+
+Stop local backend + web surfaces:
+
+```bash
+./scripts/local-stop.sh
+```
+
+Stop only frontend surfaces:
+
+```bash
+./scripts/frontend-services.sh stop
+```
 
 ## Production (Hetzner)
 
@@ -233,6 +273,7 @@ All configuration is managed through the admin panel or environment variables. K
 - [Architecture Deep Dive](knol-oss/ARCHITECTURE.html)
 - [Docker Stack Guide](docs/docker-stack.md)
 - [OSS vs Commercial Boundary](docs/oss-vs-commercial.md)
+- [Cloudflare Frontend Deployment](docs/cloudflare-sites.md)
 - [API Documentation](https://aiknol.com/docs)
 
 ## Project Structure
@@ -257,8 +298,11 @@ memorylayer/
 │       ├── typescript/        # TypeScript/JavaScript SDK
 │       └── mcp/               # MCP server for Claude, Cursor, etc.
 ├── knol-enterprise/           # Commercial features
-├── knol-web/                  # Admin panel (Next.js)
-├── knol-demo/                 # Interactive demo UI
+├── frontend/                  # Frontend surfaces
+│   ├── web/                   # Main marketing website (aiknol.com)
+│   ├── admin/                 # Admin website (admin.aiknol.com)
+│   ├── cloud/                 # Tenant app website (cloud.aiknol.com)
+│   └── demo/                  # Interactive demo UI (demo.aiknol.com)
 └── docker-compose.oss.yml     # One-command deployment
 ```
 
@@ -282,7 +326,7 @@ The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check
 
 - `knol-oss/` — [Apache License 2.0](knol-oss/LICENSE)
 - `knol-enterprise/` — Commercial License
-- `knol-web/` — All Rights Reserved
+- `frontend/web/`, `frontend/admin/`, `frontend/cloud/`, `frontend/demo/` — All Rights Reserved
 
 ## Contributing
 

@@ -153,7 +153,7 @@ echo ""
 echo "[4/5] Restarting application services..."
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d \
     gateway write retrieve graph \
-    admin jobs billing ingest marketing
+    admin tenant jobs billing ingest marketing
 
 echo ""
 echo "[5/5] Restarting Caddy..."
@@ -172,12 +172,13 @@ declare -A CONTAINERS=(
     [retrieve]=knol-retrieve
     [graph]=knol-graph
     [admin]=knol-admin
+    [tenant]=knol-tenant
     [jobs]=knol-jobs
     [billing]=knol-billing
     [ingest]=knol-enterprise-ingest
     [marketing]=knol-marketing
 )
-for svc in gateway write retrieve graph admin jobs billing ingest marketing; do
+for svc in gateway write retrieve graph admin tenant jobs billing ingest marketing; do
     TOTAL=$((TOTAL + 1))
     CNAME="${CONTAINERS[$svc]}"
     STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$CNAME" 2>/dev/null || echo "missing")

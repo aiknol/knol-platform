@@ -13,6 +13,7 @@ const hackernews = require('../channels/hackernews');
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const REPORT_DIR = path.join(__dirname, '..', 'reports');
 const METRICS_FILE = path.join(DATA_DIR, 'metrics-history.json');
+const ACQUISITION_FILE = path.join(DATA_DIR, 'acquisition-events.json');
 
 // ---------------------------------------------------------------------------
 // Collect metrics from all sources
@@ -30,6 +31,15 @@ async function collectMetrics() {
     email: { subscribers: 0, sent: 0 },
     engagement: { hnMentions: 0 },
     automation: { deferred: 0, rateLimited: 0 },
+    attribution: {
+      trackedLinks: 0,
+      trackedPosts: 0,
+      topVariants: [],
+      channelSuccess: {},
+      starsPerDay30d: 0,
+      clicks: 0,
+      signups: 0,
+    },
   };
 
   // GitHub stats
@@ -66,6 +76,54 @@ async function collectMetrics() {
     metrics.content.blogPosts = thisMonth.filter(e => e.channel === 'blog' && e.success).length;
     metrics.automation.deferred = thisMonth.filter(e => e.deferred).length;
     metrics.automation.rateLimited = thisMonth.filter(e => e.data?.rateLimited || e.rateLimited).length;
+
+    const variantStats = new Map();
+    const channelStats = new Map();
+    for (const entry of thisMonth) {
+      const variantId = entry?.attribution?.variantId || '';
+      const tracking = entry?.tracking || {};
+      const trackedLinks = Number.isFinite(tracking.utmUrlsApplied) ? tracking.utmUrlsApplied : 0;
+
+      if (trackedLinks > 0) {
+        metrics.attribution.trackedPosts += 1;
+        metrics.attribution.trackedLinks += trackedLinks;
+      }
+
+      const ch = entry.channel || 'unknown';
+      const chAgg = channelStats.get(ch) || { success: 0, fail: 0 };
+      if (entry.success) chAgg.success += 1; else chAgg.fail += 1;
+      channelStats.set(ch, chAgg);
+
+      if (!variantId) continue;
+      const agg = variantStats.get(variantId) || { variantId, attempts: 0, success: 0 };
+      agg.attempts += 1;
+      if (entry.success) agg.success += 1;
+      variantStats.set(variantId, agg);
+    }
+
+    metrics.attribution.topVariants = Array.from(variantStats.values())
+      .sort((a, b) => {
+        const rb = b.attempts ? b.success / b.attempts : 0;
+        const ra = a.attempts ? a.success / a.attempts : 0;
+        if (rb !== ra) return rb - ra;
+        return b.attempts - a.attempts;
+      })
+      .slice(0, 5)
+      .map((v) => ({
+        variantId: v.variantId,
+        attempts: v.attempts,
+        successRate: Number(((v.success / Math.max(v.attempts, 1)) * 100).toFixed(1)),
+      }));
+
+    metrics.attribution.channelSuccess = Object.fromEntries(
+      Array.from(channelStats.entries()).map(([ch, agg]) => [
+        ch,
+        {
+          attempts: agg.success + agg.fail,
+          successRate: Number(((agg.success / Math.max(agg.success + agg.fail, 1)) * 100).toFixed(1)),
+        },
+      ]),
+    );
   } catch {}
 
   // Email stats
@@ -81,6 +139,30 @@ async function collectMetrics() {
   try {
     const hnResults = await hackernews.searchDiscussions('knol memory AI');
     metrics.engagement.hnMentions = hnResults.stories?.length || 0;
+  } catch {}
+
+  // Optional acquisition events (click/sign-up attribution)
+  try {
+    const events = JSON.parse(fs.readFileSync(ACQUISITION_FILE, 'utf8'));
+    const now = new Date();
+    const thisMonth = events.filter((e) => {
+      const d = new Date(e.timestamp || e.date || 0);
+      return d.getUTCFullYear() === now.getUTCFullYear() && d.getUTCMonth() === now.getUTCMonth();
+    });
+    metrics.attribution.clicks = thisMonth.reduce((sum, e) => sum + (Number(e.clicks) || 0), 0);
+    metrics.attribution.signups = thisMonth.reduce((sum, e) => sum + (Number(e.signups) || 0), 0);
+  } catch {}
+
+  // 30-day star velocity from history snapshots
+  try {
+    const history = loadMetricsHistory();
+    const cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const window = history.filter((h) => new Date(h.timestamp).getTime() >= cutoff);
+    if (window.length >= 2) {
+      const first = window[0].github?.stars || 0;
+      const last = window[window.length - 1].github?.stars || 0;
+      metrics.attribution.starsPerDay30d = Number(((last - first) / 30).toFixed(2));
+    }
   } catch {}
 
   // Save to history
@@ -211,6 +293,14 @@ function generateDashboard(metrics, history) {
     <div class="label">Rate-Limited Events</div>
     <div class="value">${metrics.automation.rateLimited}</div>
   </div>
+  <div class="card">
+    <div class="label">Tracked Links (Month)</div>
+    <div class="value">${metrics.attribution.trackedLinks}</div>
+  </div>
+  <div class="card">
+    <div class="label">Signups (Month)</div>
+    <div class="value">${metrics.attribution.signups}</div>
+  </div>
 </div>
 
 <div class="section">
@@ -223,6 +313,36 @@ function generateDashboard(metrics, history) {
     <tr><td>Dev.to</td><td>${metrics.content.devtoPosts}</td><td><span class="badge ${metrics.content.devtoPosts > 0 ? 'badge-success' : 'badge-warn'}">${metrics.content.devtoPosts > 0 ? 'Active' : 'Pending'}</span></td></tr>
     <tr><td>Blog</td><td>${metrics.content.blogPosts}</td><td><span class="badge ${metrics.content.blogPosts > 0 ? 'badge-success' : 'badge-warn'}">${metrics.content.blogPosts > 0 ? 'Active' : 'Pending'}</span></td></tr>
     <tr><td>HN Mentions</td><td>${metrics.engagement.hnMentions}</td><td><span class="badge badge-info">Monitoring</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Attribution (30d/Month)</h2>
+  <table>
+    <tr><th>Metric</th><th>Value</th><th>Status</th></tr>
+    <tr><td>Stars / Day (30d)</td><td>${metrics.attribution.starsPerDay30d}</td><td><span class="badge badge-info">Velocity</span></td></tr>
+    <tr><td>Tracked Link Clicks</td><td>${metrics.attribution.clicks}</td><td><span class="badge badge-info">Attribution</span></td></tr>
+    <tr><td>Attributed Signups</td><td>${metrics.attribution.signups}</td><td><span class="badge ${metrics.attribution.signups > 0 ? 'badge-success' : 'badge-warn'}">${metrics.attribution.signups > 0 ? 'Growing' : 'Needs signal'}</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Top Variants (Month)</h2>
+  <table>
+    <tr><th>Variant</th><th>Attempts</th><th>Success Rate</th></tr>
+    ${(metrics.attribution.topVariants || []).map((v) =>
+      `<tr><td>${v.variantId}</td><td>${v.attempts}</td><td>${v.successRate}%</td></tr>`
+    ).join('') || '<tr><td colspan="3">No variant data yet</td></tr>'}
+  </table>
+</div>
+
+<div class="section">
+  <h2>Channel Success (Month)</h2>
+  <table>
+    <tr><th>Channel</th><th>Attempts</th><th>Success Rate</th></tr>
+    ${Object.entries(metrics.attribution.channelSuccess || {}).map(([channel, stats]) =>
+      `<tr><td>${channel}</td><td>${stats.attempts}</td><td>${stats.successRate}%</td></tr>`
+    ).join('') || '<tr><td colspan="3">No channel data yet</td></tr>'}
   </table>
 </div>
 
@@ -267,6 +387,7 @@ async function main() {
   console.log(`Email: ${metrics.email.subscribers} subscribers, ${metrics.email.sent} sent`);
   console.log(`Automation: ${metrics.automation.deferred} deferred, ${metrics.automation.rateLimited} rate-limited`);
   console.log(`HN: ${metrics.engagement.hnMentions} mentions found`);
+  console.log(`Attribution: ${metrics.attribution.trackedLinks} tracked links, ${metrics.attribution.clicks} clicks, ${metrics.attribution.signups} signups`);
 
   if (args.includes('--html') || args.includes('--dashboard')) {
     if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });

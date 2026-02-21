@@ -25,7 +25,14 @@ echo "==> Rust tests"
 (cd "$ROOT_DIR/knol-oss" && cargo test --workspace --lib)
 (cd "$ROOT_DIR/knol-enterprise" && cargo test --workspace --lib)
 
-echo "==> Web build"
-(cd "$ROOT_DIR/knol-web" && npm ci && npm run build)
+echo "==> Web builds"
+(cd "$ROOT_DIR/frontend" && npm install --no-audit --no-fund)
+(cd "$ROOT_DIR/frontend/web" && npm run build)
+(cd "$ROOT_DIR/frontend/admin" && npm run build)
+(cd "$ROOT_DIR/frontend/cloud" && npm run build)
+(cd "$ROOT_DIR/frontend/demo" && npm run build)
+
+echo "==> Frontend smoke checks"
+"$ROOT_DIR/scripts/frontend-smoke.sh"
 
 echo "✅ Local CI gates passed"

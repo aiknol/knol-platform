@@ -1,8 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/enterprise-common",
     "crates/service-admin-panel",
     "crates/service-admin",
+    "crates/service-tenant",
     "crates/service-jobs",
     "crates/service-billing",
     "crates/service-ingest",

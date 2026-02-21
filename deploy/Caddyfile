@@ -5,10 +5,33 @@
 
 # API — api.aiknol.com
 {$API_DOMAIN:api.aiknol.com} {
-	# Gateway is the single entry point for all API traffic
-	reverse_proxy gateway:8080 {
-		health_uri /health
-		health_interval 15s
+	# API routing:
+	# - /app/*   -> tenant service (cloud tenant auth/workspace APIs)
+	# - /admin/* -> admin service (admin control plane APIs)
+	# - all else -> gateway (OSS/public memory APIs)
+	route {
+		@tenant_api path /app/*
+		handle @tenant_api {
+			reverse_proxy tenant:8085 {
+				health_uri /health
+				health_interval 15s
+			}
+		}
+
+		@admin_api path /admin/*
+		handle @admin_api {
+			reverse_proxy admin:8084 {
+				health_uri /health
+				health_interval 15s
+			}
+		}
+
+		handle {
+			reverse_proxy gateway:8080 {
+				health_uri /health
+				health_interval 15s
+			}
+		}
 	}
 
 	# Security headers
@@ -34,33 +57,9 @@
 	# CORS is handled in the gateway service so per-origin logic stays centralized.
 }
 
-# Admin dashboard — admin.aiknol.com (enterprise)
-{$ADMIN_DOMAIN:admin.aiknol.com} {
-	# Human-friendly landing for the admin subdomain.
-	@root path /
-	redir @root https://app.aiknol.com/admin/ 308
-
-	reverse_proxy admin:8084 {
-		health_uri /health
-		health_interval 15s
-	}
-
-	header {
-		X-Content-Type-Options nosniff
-		X-Frame-Options SAMEORIGIN
-		Strict-Transport-Security "max-age=31536000; includeSubDomains"
-		-Server
-	}
-
-	log {
-		output stdout
-		format json
-	}
-}
-
 # Internal service routes — not publicly exposed, but available on
 # the internal network for service-to-service communication.
-# Caddy only proxies the gateway and admin externally.
+# Caddy only exposes the API domain externally.
 
 # MinIO console — optional, only enable for debugging
 # Uncomment to expose at minio.aiknol.com:

@@ -4,7 +4,7 @@
 //! (Slack, GitHub, email, etc.) into the memory pipeline.
 
 use axum::{
-    extract::{Json, State},
+    extract::{DefaultBodyLimit, Json, State},
     http::HeaderMap,
     routing::{get, post},
     Router,
@@ -57,6 +57,8 @@ async fn main() -> anyhow::Result<()> {
                 axum::Json(serde_json::json!({"status": "ok", "service": "memory-ingest"}))
             }),
         )
+        // SECURITY: Limit request body size to 10MB to prevent DoS via large payloads.
+        .layer(DefaultBodyLimit::max(10 * 1024 * 1024))
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -105,6 +107,9 @@ async fn list_connectors() -> Json<Vec<ConnectorInfo>> {
     ])
 }
 
+/// Maximum items per ingest request.
+const MAX_INGEST_ITEMS: usize = 1000;
+
 /// Generic webhook ingestion endpoint.
 async fn webhook_ingest(
     State(state): State<Arc<AppState>>,
@@ -112,6 +117,15 @@ async fn webhook_ingest(
     Json(body): Json<WebhookPayload>,
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
+
+    // SECURITY: Limit item count to prevent queue flooding.
+    if body.items.len() > MAX_INGEST_ITEMS {
+        return Err(memory_common::MemoryError::Validation(format!(
+            "Too many items: {} (max {})",
+            body.items.len(),
+            MAX_INGEST_ITEMS
+        )));
+    }
 
     let mut ingested = 0;
     for item in &body.items {
@@ -150,6 +164,16 @@ async fn bulk_ingest(
     Json(body): Json<BulkIngestRequest>,
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
+
+    // SECURITY: Limit item count to prevent queue flooding.
+    if body.texts.len() > MAX_INGEST_ITEMS {
+        return Err(memory_common::MemoryError::Validation(format!(
+            "Too many texts: {} (max {})",
+            body.texts.len(),
+            MAX_INGEST_ITEMS
+        )));
+    }
+
     let mut ingested = 0;
 
     for text in &body.texts {

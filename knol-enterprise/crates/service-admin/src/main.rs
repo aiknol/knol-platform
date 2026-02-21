@@ -13,9 +13,10 @@ use axum::{
     extract::{Json, Path, Query, State},
     http::{
         header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, COOKIE},
-        HeaderMap, HeaderValue, Method,
+        HeaderMap, HeaderValue, Method, StatusCode,
     },
     middleware,
+    response::IntoResponse,
     routing::{delete, get, post, put},
     Router,
 };
@@ -34,6 +35,11 @@ pub struct AdminAppState {
     /// Per-IP login rate limiter: tracks (attempt_count, first_attempt_time).
     pub login_rate_limiter:
         std::sync::Mutex<std::collections::HashMap<String, (u32, std::time::Instant)>>,
+    /// Per-IP demo rate limiter: tracks (attempt_count, window_start_time).
+    pub demo_rate_limiter:
+        std::sync::Mutex<std::collections::HashMap<String, (u32, std::time::Instant)>>,
+    /// Secret for authenticating requests from the gateway/write/retrieve services.
+    pub internal_service_secret: Option<String>,
 }
 
 #[tokio::main]
@@ -97,6 +103,13 @@ async fn main() -> anyhow::Result<()> {
     // Seed initial admin user if none exists
     auth::seed_initial_admin(&db_pool).await?;
 
+    let internal_service_secret = std::env::var("INTERNAL_SERVICE_SECRET")
+        .ok()
+        .filter(|s| !s.is_empty());
+    if internal_service_secret.is_none() {
+        warn!("INTERNAL_SERVICE_SECRET not set — internal routes are unprotected");
+    }
+
     let state = Arc::new(AdminAppState {
         db_pool,
         jwt_secret,
@@ -105,6 +118,8 @@ async fn main() -> anyhow::Result<()> {
             .timeout(std::time::Duration::from_secs(10))
             .build()?,
         login_rate_limiter: std::sync::Mutex::new(std::collections::HashMap::new()),
+        demo_rate_limiter: std::sync::Mutex::new(std::collections::HashMap::new()),
+        internal_service_secret,
     });
 
     // CORS for admin/dashboard + local demos: DB → env → default.
@@ -112,7 +127,7 @@ async fn main() -> anyhow::Result<()> {
         &state.db_pool,
         "services.admin_cors_origin",
         "ADMIN_CORS_ORIGIN",
-        "http://localhost:3006,http://localhost:3005,http://localhost:8080",
+        "http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008",
     )
     .await;
     let allowed_origin = allowed_origin.trim();
@@ -124,13 +139,13 @@ async fn main() -> anyhow::Result<()> {
         Method::OPTIONS,
     ];
     let allowed_headers = [AUTHORIZATION, CONTENT_TYPE, ACCEPT, COOKIE];
+    let insecure_dev_mode = std::env::var("ADMIN_SECURE_COOKIES")
+        .map(|v| v == "false")
+        .unwrap_or(false);
     // SECURITY: When using HttpOnly cookies (`credentials: 'include`), CORS
     // cannot use a wildcard origin. We always require explicit origins.
     let cors = if allowed_origin == "*" {
-        let is_dev = std::env::var("ADMIN_SECURE_COOKIES")
-            .map(|v| v == "false")
-            .unwrap_or(false);
-        if !is_dev {
+        if !insecure_dev_mode {
             return Err(anyhow::anyhow!(
                 "ADMIN_CORS_ORIGIN='*' is not allowed in production (credential cookies require explicit origins). \
                  Set ADMIN_CORS_ORIGIN to your frontend URL, or set ADMIN_SECURE_COOKIES=false for local dev."
@@ -142,19 +157,46 @@ async fn main() -> anyhow::Result<()> {
             .allow_methods(allowed_methods)
             .allow_headers(allowed_headers)
     } else {
-        let mut origins = Vec::new();
+        let mut origin_values: Vec<String> = Vec::new();
         for raw in allowed_origin.split(',') {
             let item = raw.trim();
             if item.is_empty() {
                 continue;
             }
+            if !origin_values.iter().any(|v| v == item) {
+                origin_values.push(item.to_string());
+            }
+        }
+
+        // Local development safeguard: always allow all frontend localhost ports
+        // when secure cookies are disabled, even if a stale DB value is present.
+        if insecure_dev_mode {
+            for origin in [
+                "http://localhost:3005",
+                "http://localhost:3006",
+                "http://localhost:3007",
+                "http://localhost:3008",
+                "http://127.0.0.1:3005",
+                "http://127.0.0.1:3006",
+                "http://127.0.0.1:3007",
+                "http://127.0.0.1:3008",
+            ] {
+                if !origin_values.iter().any(|v| v == origin) {
+                    origin_values.push(origin.to_string());
+                }
+            }
+        }
+
+        if origin_values.is_empty() {
+            return Err(anyhow::anyhow!("ADMIN_CORS_ORIGIN must not be empty"));
+        }
+
+        let mut origins = Vec::new();
+        for origin in origin_values {
             origins.push(
-                HeaderValue::from_str(item)
+                HeaderValue::from_str(&origin)
                     .map_err(|_| anyhow::anyhow!("Invalid ADMIN_CORS_ORIGIN value"))?,
             );
-        }
-        if origins.is_empty() {
-            return Err(anyhow::anyhow!("ADMIN_CORS_ORIGIN must not be empty"));
         }
         CorsLayer::new()
             .allow_origin(origins)
@@ -167,6 +209,7 @@ async fn main() -> anyhow::Result<()> {
     let admin_protected = Router::new()
         .route("/auth/logout", post(auth::logout))
         .route("/auth/change-password", post(auth::change_password))
+        .route("/auth/me", get(auth::me))
         // Config
         .route("/config", get(routes::config::list_configs))
         .route("/config/:key", get(routes::config::get_config))
@@ -225,9 +268,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/demo/extract", post(routes::demo::demo_extract))
         .merge(admin_protected);
 
-    // Build full app
-    let app = Router::new()
-        // Legacy internal routes (tenant-authenticated)
+    // Internal routes protected by INTERNAL_SERVICE_SECRET
+    let internal_routes = Router::new()
         .route("/internal/memory/:id", put(update_memory))
         .route("/internal/memory/:id", delete(delete_memory))
         .route("/internal/memory/merge", post(merge_memories))
@@ -235,6 +277,14 @@ async fn main() -> anyhow::Result<()> {
         .route("/internal/policies", get(list_policies))
         .route("/internal/policies", post(create_policy))
         .route("/internal/simulate/replay", post(simulate_replay))
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            verify_internal_secret,
+        ));
+
+    // Build full app
+    let app = Router::new()
+        .merge(internal_routes)
         // Admin panel API
         .nest("/admin", admin_routes)
         // Health
@@ -263,6 +313,38 @@ fn extract_tenant_id(headers: &HeaderMap) -> Result<Uuid, memory_common::MemoryE
         .and_then(|v| v.to_str().ok())
         .and_then(|s| Uuid::parse_str(s).ok())
         .ok_or_else(|| memory_common::MemoryError::Auth("Missing x-tenant-id".into()))
+}
+
+/// SECURITY: Verify `x-internal-secret` header on internal routes.
+/// Prevents unauthorized access from other containers on the same network.
+async fn verify_internal_secret(
+    State(state): State<Arc<AdminAppState>>,
+    request: axum::extract::Request,
+    next: middleware::Next,
+) -> axum::response::Response {
+    if let Some(expected) = &state.internal_service_secret {
+        let provided = request
+            .headers()
+            .get("x-internal-secret")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        // Constant-time comparison to prevent timing attacks
+        if provided.len() != expected.len()
+            || !provided
+                .as_bytes()
+                .iter()
+                .zip(expected.as_bytes().iter())
+                .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+                == 0
+        {
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({"error": "Invalid internal secret"})),
+            )
+                .into_response();
+        }
+    }
+    next.run(request).await
 }
 
 // ── Memory CRUD ──
@@ -453,12 +535,20 @@ async fn create_policy(
     Json(body): Json<CreatePolicyRequest>,
 ) -> Result<Json<serde_json::Value>, memory_common::MemoryError> {
     let tenant_id = extract_tenant_id(&headers)?;
+    // SECURITY: Use tenant transaction to set RLS context, ensuring the INSERT
+    // respects row-level security policies on the memory_policies table.
+    let mut tx = memory_db::begin_tenant_tx(&state.db_pool, tenant_id)
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     let id = sqlx::query_scalar::<_, Uuid>(
         "INSERT INTO memory_policies (tenant_id, name, rule_type, config) VALUES ($1, $2, $3, $4) RETURNING id",
     )
     .bind(tenant_id).bind(&body.name).bind(&body.rule_type).bind(&body.config)
-    .fetch_one(&state.db_pool).await
+    .fetch_one(&mut *tx).await
     .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
+    tx.commit()
+        .await
+        .map_err(|e| memory_common::MemoryError::Database(e.to_string()))?;
     Ok(Json(serde_json::json!({ "id": id })))
 }
 
