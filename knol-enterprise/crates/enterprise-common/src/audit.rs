@@ -6,6 +6,7 @@ use uuid::Uuid;
 ///
 /// Fire-and-forget: errors are logged but not propagated so audit failures
 /// never break the primary operation.
+#[allow(clippy::too_many_arguments)]
 pub async fn insert_tenant_audit(
     pool: &sqlx::PgPool,
     tenant_id: Uuid,
