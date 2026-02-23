@@ -20,9 +20,10 @@ frontend/**/.cache/
 .env.local
 .env.production
 
-# IDE
+# IDE / Agent
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 
@@ -35,6 +36,7 @@ Thumbs.db
 
 # Deploy secrets (never commit)
 deploy/.env.production
+deploy/.env.production.bak
 deploy/*.pem
 deploy/*.key
 
