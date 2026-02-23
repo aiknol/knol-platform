@@ -213,14 +213,13 @@ pub async fn app_auth_middleware(
     if matches!(
         method,
         axum::http::Method::POST | axum::http::Method::PUT | axum::http::Method::DELETE
-    ) {
-        if !enterprise_common::csrf::verify_csrf(request.headers()) {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(serde_json::json!({"error":"Invalid or missing CSRF token"})),
-            )
-                .into_response();
-        }
+    ) && !enterprise_common::csrf::verify_csrf(request.headers())
+    {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error":"Invalid or missing CSRF token"})),
+        )
+            .into_response();
     }
 
     // Per-tenant API rate limiting

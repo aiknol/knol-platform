@@ -39,10 +39,7 @@ pub fn verify_csrf(headers: &HeaderMap) -> bool {
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
 
-    match (cookie_token, header_token) {
-        (Some(c), Some(h)) if !c.is_empty() && c == h => true,
-        _ => false,
-    }
+    matches!((cookie_token, header_token), (Some(c), Some(h)) if !c.is_empty() && c == h)
 }
 
 fn extract_cookie_value(headers: &HeaderMap, name: &str) -> Option<String> {

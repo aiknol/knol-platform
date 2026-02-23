@@ -436,7 +436,7 @@ async fn test_api_key_management() {
         )
         .await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(revoked["revoked"].as_bool().unwrap(), true);
+    assert!(revoked["revoked"].as_bool().unwrap());
 
     // List again — key should be inactive
     let (status, list) = app
@@ -449,7 +449,7 @@ async fn test_api_key_management() {
         .iter()
         .find(|k| k["id"].as_str() == Some(key_id))
         .expect("key should still be in list");
-    assert_eq!(revoked_key["active"].as_bool().unwrap(), false);
+    assert!(!revoked_key["active"].as_bool().unwrap());
 }
 
 // ── Test 3: User Management ────────────────────────────────────────────
@@ -654,7 +654,7 @@ async fn test_settings() {
         )
         .await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(res["updated"].as_bool().unwrap(), true);
+    assert!(res["updated"].as_bool().unwrap());
 
     // Verify via GET /app/tenant
     let (status, tenant) = app
@@ -673,7 +673,7 @@ async fn test_settings() {
         )
         .await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(res["updated"].as_bool().unwrap(), true);
+    assert!(res["updated"].as_bool().unwrap());
 
     // Verify via GET /app/auth/me
     let (status, me) = app
@@ -700,7 +700,7 @@ async fn test_settings() {
         "change password failed: {:?}",
         pw_res
     );
-    assert_eq!(pw_res["password_changed"].as_bool().unwrap(), true);
+    assert!(pw_res["password_changed"].as_bool().unwrap());
     let new_token = pw_res["token"].as_str().unwrap().to_string();
 
     // Old password should fail
@@ -2063,7 +2063,7 @@ async fn test_admin_verify_email() {
         )
         .await;
     assert_eq!(status, StatusCode::OK, "verify email failed: {:?}", res);
-    assert_eq!(res["verified"].as_bool().unwrap(), true);
+    assert!(res["verified"].as_bool().unwrap());
 
     // Login as developer and check email_verified is true
     let (status, login_body) = app.login(&dev_email, TEST_PASSWORD).await;
@@ -2074,7 +2074,7 @@ async fn test_admin_verify_email() {
         .request(Method::GET, "/app/auth/me", None, Some(&dev_token))
         .await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(me["user"]["email_verified"].as_bool().unwrap(), true);
+    assert!(me["user"]["email_verified"].as_bool().unwrap());
 
     // Non-admin cannot verify email
     let (status, _) = app
@@ -2193,7 +2193,7 @@ async fn test_account_deletion() {
         "delete account failed: {:?}",
         del_res
     );
-    assert_eq!(del_res["scheduled"].as_bool().unwrap(), true);
+    assert!(del_res["scheduled"].as_bool().unwrap());
     assert!(del_res["deletion_date"].as_str().is_some());
 
     // Token should be invalidated after deletion
@@ -2330,14 +2330,14 @@ async fn test_totp_enable_disable() {
         "enable TOTP failed: {:?}",
         enable_res
     );
-    assert_eq!(enable_res["enabled"].as_bool().unwrap(), true);
+    assert!(enable_res["enabled"].as_bool().unwrap());
 
     // Verify TOTP is enabled via /me
     let (status, me) = app
         .request(Method::GET, "/app/auth/me", None, Some(&token))
         .await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(me["user"]["totp_enabled"].as_bool().unwrap(), true);
+    assert!(me["user"]["totp_enabled"].as_bool().unwrap());
 
     // Disable with wrong password should fail
     let (status, _) = app
@@ -2365,14 +2365,14 @@ async fn test_totp_enable_disable() {
         "disable TOTP failed: {:?}",
         disable_res
     );
-    assert_eq!(disable_res["disabled"].as_bool().unwrap(), true);
+    assert!(disable_res["disabled"].as_bool().unwrap());
 
     // Verify TOTP is disabled via /me
     let (status, me) = app
         .request(Method::GET, "/app/auth/me", None, Some(&token))
         .await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(me["user"]["totp_enabled"].as_bool().unwrap(), false);
+    assert!(!me["user"]["totp_enabled"].as_bool().unwrap());
 }
 
 // ── Test 37: Login with TOTP required ───────────────────────────────
@@ -2410,7 +2410,7 @@ async fn test_login_with_totp() {
     // Login should now return totp_required instead of a full session
     let (status, login_body) = app.login(&email, TEST_PASSWORD).await;
     assert_eq!(status, StatusCode::OK, "login failed: {:?}", login_body);
-    assert_eq!(login_body["totp_required"].as_bool().unwrap(), true);
+    assert!(login_body["totp_required"].as_bool().unwrap());
     let totp_token = login_body["totp_token"].as_str().unwrap().to_string();
     assert!(
         login_body.get("token").is_none() || login_body["token"].is_null(),

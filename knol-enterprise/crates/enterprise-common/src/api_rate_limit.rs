@@ -21,6 +21,12 @@ pub struct ApiRateLimiter {
     window_secs: u64,
 }
 
+impl Default for ApiRateLimiter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ApiRateLimiter {
     pub fn new() -> Self {
         Self {
