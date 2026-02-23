@@ -90,6 +90,8 @@ Monorepo layout:
   frontend/admin/      — admin frontend
   frontend/cloud/      — tenant cloud frontend
   frontend/demo/       — interactive demo frontend
+  frontend/docs/       — public docs website
+  private/docs/        — local-only private docs website
   scripts/         — tooling & deployment
   deploy/          — infrastructure configs"
 

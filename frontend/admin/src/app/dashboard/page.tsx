@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       {status && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           <StatCard label="Configurations" value={status.counts.configs} icon="⚙️" />
           <StatCard label="Credentials" value={status.counts.credentials} icon="🔑" />
           <StatCard label="Tenants" value={status.counts.tenants} icon="👥" />
@@ -114,7 +114,7 @@ export default function DashboardPage() {
             View Analytics
           </a>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
             <div className="text-xs font-bold text-red-400 mb-1">Launch</div>
             <div className="text-sm text-dark-300">HN, PH, Twitter Blitz, Reddit, Blog</div>

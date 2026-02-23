@@ -15,15 +15,15 @@ export default function LaunchPage() {
       <div className="max-w-4xl mx-auto">
         {/* Hero */}
         <section className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-dark-50 mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-dark-50 mb-6">
             The Context Engineering Platform for AI
           </h1>
-          <p className="text-xl text-dark-300 max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-dark-300 max-w-2xl mx-auto mb-8">
             One Rust binary. One PostgreSQL database. Sub-5ms latency.
             Hybrid retrieval, knowledge graphs, memory decay, and conflict detection.
             Deploy in 60 seconds. Apache 2.0.
           </p>
-          <div className="flex justify-center gap-4 flex-wrap mb-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
             <a
               href={SITE.github}
               target="_blank"
@@ -152,7 +152,8 @@ export default function LaunchPage() {
         {/* Architecture */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-6">Architecture</h2>
-          <div className="bg-dark-800 border border-dark-700 rounded-lg p-6 overflow-x-auto">
+          {/* Desktop diagram */}
+          <div className="bg-dark-800 border border-dark-700 rounded-lg p-6 overflow-x-auto hidden md:block">
             <pre className="text-xs text-dark-300 font-mono leading-relaxed">{`┌─────────────────────────────────────────────────────────────┐
 │                     Your Application                         │
 │              (Python SDK / TypeScript SDK / REST)             │
@@ -172,6 +173,25 @@ export default function LaunchPage() {
           │                    │    └──────────────┘
           └────────────────────┘
                 One Database`}</pre>
+          </div>
+          {/* Mobile diagram — simplified flow */}
+          <div className="md:hidden space-y-2">
+            {[
+              { name: 'Your Application', desc: 'Python SDK / TypeScript SDK / REST' },
+              { name: 'Gateway', desc: 'Auth, rate limiting, routing' },
+              { name: 'Write Service', desc: 'Episodes & webhooks' },
+              { name: 'Retrieve Service', desc: 'Vector + BM25 + Graph search' },
+              { name: 'Graph Service', desc: 'LLM extraction, conflict detection' },
+              { name: 'PostgreSQL + pgvector', desc: 'One database — single source of truth' },
+            ].map((svc, i) => (
+              <div key={svc.name} className="bg-dark-800 border border-dark-700 rounded-lg p-3 flex items-center gap-3">
+                <span className="text-brand-500 font-mono text-xs w-5 shrink-0">{i === 0 ? '▾' : i === 5 ? '▪' : '▸'}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-dark-100 truncate">{svc.name}</p>
+                  <p className="text-xs text-dark-400 truncate">{svc.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -196,16 +216,16 @@ export default function LaunchPage() {
         </section>
 
         {/* Final CTA */}
-        <section className="bg-dark-700/30 border border-dark-600 rounded-lg p-8 text-center">
-          <h2 className="text-3xl font-bold text-dark-50 mb-4">
+        <section className="bg-dark-700/30 border border-dark-600 rounded-lg p-5 sm:p-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-dark-50 mb-4">
             The Nginx of AI Memory
           </h2>
-          <p className="text-dark-300 mb-6 max-w-xl mx-auto">
+          <p className="text-dark-300 mb-6 max-w-xl mx-auto text-sm sm:text-base">
             While others build Python SDKs on top of three databases, we built a single Rust binary
             that handles vector search, knowledge graphs, and temporal memory on just PostgreSQL.
             Sub-5ms latency. 50MB footprint. Apache 2.0.
           </p>
-          <div className="flex justify-center gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
               href={SITE.github}
               target="_blank"
@@ -214,9 +234,9 @@ export default function LaunchPage() {
             >
               Star on GitHub
             </a>
-            <Link href="/docs/" className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
+            <a href={SITE.docsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
               Documentation
-            </Link>
+            </a>
             <Link href="/mcp/" className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
               MCP Server
             </Link>

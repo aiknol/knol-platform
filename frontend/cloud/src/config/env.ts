@@ -60,11 +60,14 @@ export function ensurePublicEnvIsValid(): void {
   assertPort('NEXT_PUBLIC_APP_PORT');
   assertHost('NEXT_PUBLIC_DEMO_HOST');
   assertPort('NEXT_PUBLIC_DEMO_PORT');
+  assertHost('NEXT_PUBLIC_DOCS_HOST');
+  assertPort('NEXT_PUBLIC_DOCS_PORT');
   assertHost('NEXT_PUBLIC_ADMIN_API_HOST');
   assertPort('NEXT_PUBLIC_ADMIN_API_PORT');
   assertHttpUrl('NEXT_PUBLIC_ADMIN_API_URL');
   assertHttpUrl('NEXT_PUBLIC_APP_API_URL');
   assertHttpUrl('NEXT_PUBLIC_DEMO_URL');
+  assertHttpUrl('NEXT_PUBLIC_DOCS_URL');
   assertHttpUrl('NEXT_PUBLIC_APP_URL');
   assertHttpUrl('NEXT_PUBLIC_APP_SIGNUP_URL');
   assertHttpUrl('NEXT_PUBLIC_APP_LOGIN_URL');

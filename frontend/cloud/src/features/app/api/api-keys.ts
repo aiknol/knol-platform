@@ -21,7 +21,10 @@ export interface RevokeApiKeyResponse {
 }
 
 export const appApiKeysAPI = {
-  list: async (): Promise<ApiKeyItem[]> => apiFetch('/app/api-keys', { method: 'GET' }),
+  list: async (): Promise<ApiKeyItem[]> => {
+    const res = await apiFetch<{ data: ApiKeyItem[] }>('/app/api-keys', { method: 'GET' });
+    return res.data;
+  },
   create: async (payload: CreateApiKeyPayload) =>
     apiFetch<CreateApiKeyResponse>('/app/api-keys', {
       method: 'POST',

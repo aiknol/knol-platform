@@ -57,6 +57,31 @@
 	# CORS is handled in the gateway service so per-origin logic stays centralized.
 }
 
+# Cloud Frontend — cloud.aiknol.com (static export)
+{$CLOUD_DOMAIN:cloud.aiknol.com} {
+	root * /srv/cloud
+	file_server
+	try_files {path} {path}/ /index.html
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' {$API_DOMAIN:api.aiknol.com} https://checkout.stripe.com; frame-src https://js.stripe.com; font-src 'self'"
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+}
+
 # Internal service routes — not publicly exposed, but available on
 # the internal network for service-to-service communication.
 # Caddy only exposes the API domain externally.

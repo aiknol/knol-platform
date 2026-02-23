@@ -656,29 +656,24 @@ pub async fn stripe_webhook(
     let event: stripe::StripeEvent = serde_json::from_slice(&body)
         .map_err(|e| AppError::BadRequest(format!("Invalid event payload: {}", e)))?;
 
-    // Idempotency check
-    let already_processed = sqlx::query_scalar::<_, bool>(
-        "SELECT processed FROM stripe_event_log WHERE stripe_event_id = $1",
-    )
-    .bind(&event.id)
-    .fetch_optional(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
-
-    if already_processed.is_some() {
-        return Ok(StatusCode::OK);
-    }
-
-    let _ = sqlx::query(
+    // Atomic idempotency check — single INSERT eliminates race window
+    let inserted = sqlx::query_scalar::<_, Uuid>(
         r#"INSERT INTO stripe_event_log (stripe_event_id, event_type, payload)
            VALUES ($1, $2, $3)
-           ON CONFLICT (stripe_event_id) DO NOTHING"#,
+           ON CONFLICT (stripe_event_id) DO NOTHING
+           RETURNING id"#,
     )
     .bind(&event.id)
     .bind(&event.event_type)
     .bind(&event.data.object)
-    .execute(&state.db_pool)
-    .await;
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?;
+
+    if inserted.is_none() {
+        // Already processed by another worker
+        return Ok(StatusCode::OK);
+    }
 
     let result = match event.event_type.as_str() {
         "checkout.session.completed" => handle_checkout_completed(&state, &event.data.object).await,
@@ -959,4 +954,55 @@ async fn handle_invoice_failed(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::stripe::StripeError;
+
+    #[test]
+    fn test_map_stripe_err_not_configured() {
+        let err = map_stripe_err(StripeError::NotConfigured);
+        match err {
+            AppError::BadRequest(msg) => assert!(msg.contains("not configured")),
+            other => panic!("expected BadRequest, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_map_stripe_err_api_error() {
+        let err = map_stripe_err(StripeError::ApiError("card declined".into()));
+        match err {
+            AppError::Internal(msg) => {
+                assert!(msg.contains("Stripe:"));
+                assert!(msg.contains("card declined"));
+            }
+            other => panic!("expected Internal, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_map_stripe_err_network() {
+        let err = map_stripe_err(StripeError::Network("timeout".into()));
+        match err {
+            AppError::Internal(msg) => {
+                assert!(msg.contains("Stripe network:"));
+                assert!(msg.contains("timeout"));
+            }
+            other => panic!("expected Internal, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_map_stripe_err_signature_invalid() {
+        let err = map_stripe_err(StripeError::SignatureInvalid);
+        assert!(matches!(err, AppError::Unauthorized));
+    }
+
+    #[test]
+    fn test_map_stripe_err_signature_expired() {
+        let err = map_stripe_err(StripeError::SignatureExpired);
+        assert!(matches!(err, AppError::Unauthorized));
+    }
 }

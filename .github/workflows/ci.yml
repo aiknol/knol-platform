@@ -95,6 +95,7 @@ jobs:
           - { name: main, build_script: build:web, output: frontend/web/out }
           - { name: admin, build_script: build:admin, output: frontend/admin/out }
           - { name: cloud, build_script: build:app, output: frontend/cloud/out }
+          - { name: docs, build_script: build:docs, output: frontend/docs/out }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -105,6 +106,21 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run ${{ matrix.site.build_script }}
+      - name: Validate output scope
+        run: |
+          case "${{ matrix.site.output }}" in
+            frontend/*) ;;
+            *)
+              echo "Invalid output path: must be under frontend/"
+              exit 1
+              ;;
+          esac
+          case "${{ matrix.site.output }}" in
+            private/*|*/private/*)
+              echo "Private folders are local-only and excluded from CI deploy artifacts."
+              exit 1
+              ;;
+          esac
       - name: Upload static output
         uses: actions/upload-artifact@v4
         with:

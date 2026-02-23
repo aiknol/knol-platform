@@ -53,6 +53,8 @@ export default function AppLoginPage() {
               id="email"
               type="email"
               required
+              maxLength={255}
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-dark-600/40 bg-dark-900/70 px-3 py-2 text-dark-100"
@@ -65,6 +67,8 @@ export default function AppLoginPage() {
               id="password"
               type="password"
               required
+              maxLength={128}
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-dark-600/40 bg-dark-900/70 px-3 py-2 text-dark-100"

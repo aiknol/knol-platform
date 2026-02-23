@@ -1,14 +1,15 @@
 //! Tenant settings and user profile management endpoints.
 
 use axum::extract::State;
-use axum::http::header;
+use axum::http::{header, HeaderMap};
 use axum::response::{IntoResponse, Json, Response};
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
 use std::sync::Arc;
 use utoipa::ToSchema;
 
-use crate::auth::{audit, AppClaims, AppError};
+use crate::auth::{
+    app_cookie, audit, clear_app_cookie, issue_session_token, AppClaims, AppError, AppUserRow,
+};
 use crate::TenantAppState;
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -176,6 +177,7 @@ pub async fn update_profile(
 pub async fn change_password(
     claims: AppClaims,
     State(state): State<Arc<TenantAppState>>,
+    headers: HeaderMap,
     Json(body): Json<ChangePasswordRequest>,
 ) -> Result<Response, AppError> {
     let current_hash = sqlx::query_scalar::<_, String>(
@@ -216,53 +218,22 @@ pub async fn change_password(
         .execute(&state.db_pool)
         .await;
 
-    // Issue fresh session
-    #[derive(sqlx::FromRow)]
-    #[allow(dead_code)]
-    struct UserRow {
-        id: uuid::Uuid,
-        tenant_id: uuid::Uuid,
-        email: String,
-        password_hash: String,
-        full_name: String,
-        role: String,
-        enabled: bool,
-    }
-    let user = sqlx::query_as::<_, UserRow>(
-        "SELECT id, tenant_id, email, password_hash, full_name, role, enabled FROM app_users WHERE id = $1",
+    // Issue fresh session using shared helper
+    let user = sqlx::query_as::<_, AppUserRow>(
+        "SELECT id, tenant_id, email, password_hash, full_name, role, enabled, failed_login_attempts, locked_until, email_verified, totp_enabled FROM app_users WHERE id = $1",
     )
     .bind(claims.sub)
     .fetch_one(&state.db_pool)
     .await
     .map_err(|e| AppError::Internal(e.to_string()))?;
 
-    let now = chrono::Utc::now();
-    let expires = now + chrono::Duration::hours(24);
-    let new_claims = AppClaims {
-        sub: user.id,
-        tenant_id: user.tenant_id,
-        email: user.email.clone(),
-        role: user.role.clone(),
-        exp: expires.timestamp(),
-        iat: now.timestamp(),
-    };
-    let token = jsonwebtoken::encode(
-        &jsonwebtoken::Header::default(),
-        &new_claims,
-        &jsonwebtoken::EncodingKey::from_secret(state.jwt_secret.as_bytes()),
-    )
-    .map_err(|e| AppError::Internal(e.to_string()))?;
-
-    let token_hash = hex::encode(Sha256::digest(token.as_bytes()));
-    sqlx::query(
-        "INSERT INTO app_sessions (app_user_id, token_hash, expires_at) VALUES ($1, $2, $3)",
-    )
-    .bind(user.id)
-    .bind(&token_hash)
-    .bind(expires)
-    .execute(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let client_ip = enterprise_common::client_ip::extract_client_ip(&headers);
+    let user_agent = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string());
+    let (token, expires) =
+        issue_session_token(&state, &user, Some(&client_ip), user_agent.as_deref()).await?;
 
     audit(
         &state,
@@ -277,22 +248,168 @@ pub async fn change_password(
     )
     .await;
 
-    let secure = crate::auth::cookie_secure_suffix();
-    let cookie = format!(
-        "app_token={}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400{}",
-        token, secure
-    );
-
     let mut response = Json(serde_json::json!({
         "password_changed": true,
         "token": token,
         "expires_at": expires.to_rfc3339(),
     }))
     .into_response();
-    if let Ok(cookie_val) = axum::http::HeaderValue::from_str(&cookie) {
-        response
-            .headers_mut()
-            .insert(header::SET_COOKIE, cookie_val);
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, app_cookie(&token)?);
+    Ok(response)
+}
+
+// ── GDPR Data Export ────────────────────────────────────────────────────
+
+/// Export all data associated with the current user.
+pub async fn data_export(
+    claims: AppClaims,
+    State(state): State<Arc<TenantAppState>>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    // User profile
+    let user = sqlx::query_as::<_, (String, String, String, bool, bool)>(
+        "SELECT email, full_name, role, enabled, email_verified FROM app_users WHERE id = $1",
+    )
+    .bind(claims.sub)
+    .fetch_one(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?;
+
+    // Sessions
+    let sessions: Vec<serde_json::Value> = sqlx::query_as::<_, (uuid::Uuid, Option<String>, Option<String>, chrono::DateTime<chrono::Utc>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT id, ip_address, user_agent, created_at, expires_at FROM app_sessions WHERE app_user_id = $1 ORDER BY created_at DESC",
+    )
+    .bind(claims.sub)
+    .fetch_all(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?
+    .into_iter()
+    .map(|(id, ip, ua, created, expires)| serde_json::json!({
+        "id": id,
+        "ip_address": ip,
+        "user_agent": ua,
+        "created_at": created.to_rfc3339(),
+        "expires_at": expires.to_rfc3339(),
+    }))
+    .collect();
+
+    // Audit log entries where this user is the actor
+    let audit_entries: Vec<serde_json::Value> = sqlx::query_as::<_, (String, String, Option<String>, chrono::DateTime<chrono::Utc>)>(
+        "SELECT action, resource_type, resource_key, created_at FROM tenant_audit_log WHERE app_user_id = $1 ORDER BY created_at DESC LIMIT 1000",
+    )
+    .bind(claims.sub)
+    .fetch_all(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?
+    .into_iter()
+    .map(|(action, rt, rk, created)| serde_json::json!({
+        "action": action,
+        "resource_type": rt,
+        "resource_key": rk,
+        "created_at": created.to_rfc3339(),
+    }))
+    .collect();
+
+    Ok(Json(serde_json::json!({
+        "export_date": chrono::Utc::now().to_rfc3339(),
+        "user": {
+            "id": claims.sub,
+            "email": user.0,
+            "full_name": user.1,
+            "role": user.2,
+            "enabled": user.3,
+            "email_verified": user.4,
+            "tenant_id": claims.tenant_id,
+        },
+        "sessions": sessions,
+        "audit_log": audit_entries,
+    })))
+}
+
+// ── GDPR Account Deletion ───────────────────────────────────────────────
+
+#[derive(Debug, Deserialize)]
+pub struct DeleteAccountRequest {
+    pub password: String,
+}
+
+/// Schedule account deletion (30-day grace period).
+pub async fn delete_account(
+    claims: AppClaims,
+    State(state): State<Arc<TenantAppState>>,
+    Json(body): Json<DeleteAccountRequest>,
+) -> Result<Response, AppError> {
+    // Verify password
+    let hash = sqlx::query_scalar::<_, String>(
+        "SELECT password_hash FROM app_users WHERE id = $1 AND tenant_id = $2",
+    )
+    .bind(claims.sub)
+    .bind(claims.tenant_id)
+    .fetch_optional(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?
+    .ok_or(AppError::Unauthorized)?;
+
+    let valid = bcrypt::verify(&body.password, &hash).map_err(|_| AppError::Unauthorized)?;
+    if !valid {
+        return Err(AppError::BadRequest("Password is incorrect".into()));
     }
+
+    // Prevent owner from deleting if they're the only owner
+    if claims.role == "owner" {
+        let owner_count = sqlx::query_scalar::<_, i64>(
+            "SELECT COUNT(*) FROM app_users WHERE tenant_id = $1 AND role = 'owner' AND enabled = true",
+        )
+        .bind(claims.tenant_id)
+        .fetch_one(&state.db_pool)
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))?;
+
+        if owner_count <= 1 {
+            return Err(AppError::BadRequest(
+                "Cannot delete the only owner. Transfer ownership first.".into(),
+            ));
+        }
+    }
+
+    // Schedule deletion for 30 days from now
+    let deletion_date = chrono::Utc::now() + chrono::Duration::days(30);
+    sqlx::query(
+        "UPDATE app_users SET deletion_requested_at = NOW(), deletion_scheduled_for = $1, updated_at = NOW() WHERE id = $2",
+    )
+    .bind(deletion_date)
+    .bind(claims.sub)
+    .execute(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?;
+
+    // Invalidate all sessions
+    let _ = sqlx::query("DELETE FROM app_sessions WHERE app_user_id = $1")
+        .bind(claims.sub)
+        .execute(&state.db_pool)
+        .await;
+
+    audit(
+        &state,
+        claims.tenant_id,
+        Some(&claims),
+        "delete_account_requested",
+        "user",
+        Some(&claims.sub.to_string()),
+        None,
+        Some(serde_json::json!({"deletion_scheduled_for": deletion_date.to_rfc3339()})),
+        None,
+    )
+    .await;
+
+    let mut response = Json(serde_json::json!({
+        "scheduled": true,
+        "deletion_date": deletion_date.to_rfc3339(),
+    }))
+    .into_response();
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, clear_app_cookie());
     Ok(response)
 }

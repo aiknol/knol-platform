@@ -5,11 +5,14 @@ target/
 # Node.js
 node_modules/
 .next/
+.next-dev/
+.next-build/
 .next-admin/
 .next-app/
 .next-main/
 out/
 .wrangler/
+frontend/**/.cache/
 *.tsbuildinfo
 
 # Environment
@@ -34,6 +37,9 @@ Thumbs.db
 deploy/.env.production
 deploy/*.pem
 deploy/*.key
+
+# Private (local-only, never deploy)
+private/
 
 # Build artifacts
 *.wasm

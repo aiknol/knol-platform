@@ -31,6 +31,7 @@ echo "==> Web builds"
 (cd "$ROOT_DIR/frontend/admin" && npm run build)
 (cd "$ROOT_DIR/frontend/cloud" && npm run build)
 (cd "$ROOT_DIR/frontend/demo" && npm run build)
+(cd "$ROOT_DIR/frontend/docs" && npm run build)
 
 echo "==> Frontend smoke checks"
 "$ROOT_DIR/scripts/frontend-smoke.sh"

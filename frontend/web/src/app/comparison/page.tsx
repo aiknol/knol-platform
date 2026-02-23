@@ -12,9 +12,9 @@ const No = () => <span className="text-red-400 font-bold text-base">✗</span>;
 
 export default function ComparisonPage() {
   return (
-    <section className="max-w-[1200px] mx-auto px-5 py-7 pb-12">
+    <section className="max-w-[1200px] mx-auto px-4 sm:px-5 py-7 pb-12">
       <h1 className="text-2xl md:text-4xl font-bold mb-2">Context Engineering Platforms: Knol vs Competitors</h1>
-      <p className="text-dark-400 mb-5">
+      <p className="text-dark-400 mb-5 text-sm sm:text-base">
         Strategic comparison for engineering teams building agentic systems with memory. Based on official documentation
         and confirmed capabilities. Updated February 2026.
       </p>
@@ -36,11 +36,11 @@ export default function ComparisonPage() {
 
       <div className="border border-brand-500/20 rounded-xl bg-gradient-to-b from-dark-800/70 to-dark-800/50 shadow-xl mb-5">
         <h2 className="text-lg font-semibold px-4 pt-4 pb-2">Core Capabilities (Yes/No)</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1200px] border-collapse">
+        <div className="overflow-x-auto -mx-px">
+          <table className="w-full min-w-[700px] lg:min-w-0 border-collapse">
             <thead>
               <tr className="bg-dark-900/90 sticky top-0 z-[2] text-sm">
-                <th className="text-left px-3.5 py-3 border-b border-brand-500/20 w-[280px]">Capability</th>
+                <th className="text-left px-3.5 py-3 border-b border-brand-500/20 w-[200px] lg:w-[280px]">Capability</th>
                 <th className="text-left px-3.5 py-3 border-b border-brand-500/20">
                   <span className="text-[#d4cafe] font-bold">Mem0</span>
                 </th>
@@ -92,7 +92,7 @@ export default function ComparisonPage() {
       </div>
 
       <div className="border border-brand-500/20 rounded-xl bg-gradient-to-b from-dark-800/70 to-dark-800/50 shadow-xl overflow-x-auto mb-5">
-        <table className="w-full min-w-[1200px] border-collapse text-sm">
+        <table className="w-full min-w-[700px] lg:min-w-0 border-collapse text-sm">
           <thead>
             <tr className="bg-dark-900/90 sticky top-0 z-[2]">
               <th className="text-left px-3.5 py-3 border-b border-brand-500/20 w-[280px]">Dimension</th>

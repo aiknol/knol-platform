@@ -28,7 +28,10 @@ export interface UpdateTenantUserResponse {
 }
 
 export const appUsersAPI = {
-  list: async (): Promise<TenantUser[]> => apiFetch('/app/users', { method: 'GET' }),
+  list: async (): Promise<TenantUser[]> => {
+    const res = await apiFetch<{ data: TenantUser[] }>('/app/users', { method: 'GET' });
+    return res.data;
+  },
   create: async (payload: CreateTenantUserPayload) =>
     apiFetch<CreateTenantUserResponse>('/app/users', {
       method: 'POST',

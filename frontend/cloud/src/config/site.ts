@@ -1,6 +1,6 @@
 // ── Core site identity and navigation ────────────────────────────
 
-import { resolveAppSignupUrl, resolveDemoUrl, resolveSiteUrl } from './urls';
+import { resolveAppSignupUrl, resolveDemoUrl, resolveDocsUrl, resolveSiteUrl } from './urls';
 
 export const SITE = {
   name: 'Knol',
@@ -11,7 +11,7 @@ export const SITE = {
   appUrl: resolveAppSignupUrl(),
   demoUrl: resolveDemoUrl(),
   github: 'https://github.com/aiknol/knol',
-  docsUrl: '/docs/',
+  docsUrl: resolveDocsUrl(),
   pypi: 'https://pypi.org/project/knol/',
   npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
   contactEmail: 'aiknolcontact@gmail.com',
@@ -33,13 +33,29 @@ export interface NavItem {
 
 export const NAV_LINKS: NavItem[] = [
   { href: SITE.demoUrl, label: 'Demo' },
-  { href: '/docs/', label: 'Docs' },
+  { href: SITE.docsUrl, label: 'Docs' },
   { href: '/mcp/', label: 'MCP' },
   { href: '/comparison', label: 'Compare' },
   { href: '/pricing/', label: 'Pricing' },
   { href: '/blog/', label: 'Blog' },
   { href: `mailto:${SITE.contactEmail}`, label: 'Contact' },
   { href: SITE.github, label: 'GitHub', external: true },
+];
+
+// ── Cloud App Navigation ────────────────────────────────────
+
+export interface AppNavItem {
+  href: string;
+  label: string;
+  adminOnly?: boolean;
+}
+
+export const APP_NAV_ITEMS: AppNavItem[] = [
+  { href: '/dashboard', label: 'Overview' },
+  { href: '/billing', label: 'Billing' },
+  { href: '/api-keys', label: 'API Keys' },
+  { href: '/team', label: 'Team', adminOnly: true },
+  { href: '/settings', label: 'Settings' },
 ];
 
 // ── Footer ──────────────────────────────────────────────────────
@@ -58,8 +74,8 @@ export const FOOTER_SECTIONS = [
   {
     title: 'Developers',
     links: [
-      { label: 'Documentation', href: '/docs/' },
-      { label: 'API Reference', href: '/docs/' },
+      { label: 'Documentation', href: SITE.docsUrl },
+      { label: 'API Reference', href: SITE.docsUrl },
       { label: 'MCP Server', href: '/mcp/' },
       { label: 'GitHub', href: SITE.github, external: true },
       { label: 'PyPI', href: SITE.pypi, external: true },

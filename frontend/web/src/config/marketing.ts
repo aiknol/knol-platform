@@ -750,7 +750,7 @@ Total memory footprint: under 512MB. Compare that to running Qdrant + Neo4j + Re
 
 Once you have memories flowing, explore LangChain integration, the MCP server for Claude Desktop, knowledge graph queries, memory decay for automatic relevance scoring, and the admin dashboard for monitoring.
 
-All documentation is at aiknol.com/docs. The project is open-source on GitHub.`,
+All documentation is at docs.aiknol.com. The project is open-source on GitHub.`,
   },
 ];
 

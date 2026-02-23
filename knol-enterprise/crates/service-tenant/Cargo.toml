@@ -3,6 +3,10 @@ name = "service-tenant"
 version.workspace = true
 edition.workspace = true
 
+[lib]
+name = "service_tenant"
+path = "src/lib.rs"
+
 [[bin]]
 name = "tenant-service"
 path = "src/main.rs"
@@ -27,13 +31,18 @@ reqwest.workspace = true
 jsonwebtoken = "9"
 bcrypt = "0.16"
 rand = "0.8"
+sha1 = "0.10"
 sha2 = "0.10"
 hmac = "0.12"
 hex = "0.4"
 # Web
-tower-http = { version = "0.5", features = ["cors"] }
+tower-http = { version = "0.5", features = ["cors", "set-header"] }
 tower = { version = "0.4", features = ["util"] }
 http = "1"
 # OpenAPI / Swagger
 utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
 utoipa-swagger-ui = { version = "8", features = ["axum"] }
+
+[dev-dependencies]
+hyper = "1"
+http-body-util = "0.1"

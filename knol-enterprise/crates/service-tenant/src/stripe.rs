@@ -225,14 +225,20 @@ pub fn verify_webhook_signature(
         timestamp,
         std::str::from_utf8(payload).map_err(|_| StripeError::SignatureInvalid)?
     );
+    // Compute HMAC of the signed payload
     let mut mac = Hmac::<Sha256>::new_from_slice(webhook_secret.as_bytes())
         .map_err(|_| StripeError::SignatureInvalid)?;
     mac.update(signed_payload.as_bytes());
-    let expected = hex::encode(mac.finalize().into_bytes());
 
+    // Compare using constant-time verification to prevent timing attacks.
+    // Decode each hex signature and compare against the computed HMAC.
     for sig in &signatures {
-        if *sig == expected {
-            return Ok(());
+        if let Ok(sig_bytes) = hex::decode(sig) {
+            // Clone the mac so we can reuse it for multiple signatures
+            let mac_clone = mac.clone();
+            if mac_clone.verify_slice(&sig_bytes).is_ok() {
+                return Ok(());
+            }
         }
     }
     Err(StripeError::SignatureInvalid)
@@ -469,5 +475,55 @@ mod tests {
     fn test_plan_mapping() {
         // Without env vars set, should return None
         assert!(plan_from_price_id("price_nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_verify_missing_timestamp() {
+        let payload = b"{\"id\":\"evt_test\"}";
+        let header = "v1=abc123";
+        assert!(matches!(
+            verify_webhook_signature(payload, header, "whsec_test", 300),
+            Err(StripeError::SignatureInvalid)
+        ));
+    }
+
+    #[test]
+    fn test_verify_missing_signatures() {
+        let payload = b"{\"id\":\"evt_test\"}";
+        let header = format!("t={}", chrono::Utc::now().timestamp());
+        assert!(matches!(
+            verify_webhook_signature(payload, &header, "whsec_test", 300),
+            Err(StripeError::SignatureInvalid)
+        ));
+    }
+
+    #[test]
+    fn test_verify_multiple_v1_sigs_one_valid() {
+        let secret = "whsec_test_secret";
+        let payload = b"{\"id\":\"evt_test\"}";
+        let timestamp = chrono::Utc::now().timestamp().to_string();
+        let signed = format!("{}.{}", timestamp, std::str::from_utf8(payload).unwrap());
+
+        let mut mac = Hmac::<Sha256>::new_from_slice(secret.as_bytes()).unwrap();
+        mac.update(signed.as_bytes());
+        let valid_sig = hex::encode(mac.finalize().into_bytes());
+
+        // Header with one invalid and one valid signature
+        let header = format!("t={},v1=badbadbadbad,v1={}", timestamp, valid_sig);
+        assert!(verify_webhook_signature(payload, &header, secret, 300).is_ok());
+    }
+
+    #[test]
+    fn test_load_plan_configs_empty() {
+        // Without STRIPE_PRICE_BUILDER or STRIPE_PRICE_GROWTH env vars
+        std::env::remove_var("STRIPE_PRICE_BUILDER");
+        std::env::remove_var("STRIPE_PRICE_GROWTH");
+        let configs = load_plan_configs();
+        assert!(configs.is_empty());
+    }
+
+    #[test]
+    fn test_plan_from_price_id_none() {
+        assert!(plan_from_price_id("price_does_not_exist").is_none());
     }
 }

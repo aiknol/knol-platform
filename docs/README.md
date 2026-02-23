@@ -4,6 +4,7 @@
 
 - `docker-stack.md`: Local Docker usage with separated OSS/proprietary compose files.
 - `oss-vs-commercial.md`: Open-source vs paid boundary, packaging model, and service mapping.
+- `tenant-service-guide.md`: Tenant API and workspace endpoint reference.
 - `memory-as-a-service-blueprint.md`: Technical architecture and implementation blueprint.
 - `memory-as-a-service-business-strategy.md`: Product and GTM strategy.
 - `automated-marketing-strategy.md`: Compliance-first automation strategy for multi-channel posting, rate-limit-safe scheduling, and full-funnel marketing workflows.
@@ -20,3 +21,7 @@
 - Runtime separation:
   - OSS: `docker-compose.oss.yml`
   - Proprietary overlay: `docker-compose.proprietary.yml`
+- Docs websites:
+  - Public: `frontend/docs/` (deployed)
+  - Private local-only: `private/docs/` (never deployed)
+  - Start private docs locally: `./scripts/private-docs.sh start`

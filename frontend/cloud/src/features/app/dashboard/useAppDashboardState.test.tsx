@@ -3,7 +3,6 @@ import { beforeEach, vi } from 'vitest';
 import { useAppDashboardState } from './useAppDashboardState';
 
 const apiMocks = vi.hoisted(() => ({
-  consumeInitialApiKey: vi.fn<() => string | null>(),
   getAppAuthUser: vi.fn(),
   getAppTenant: vi.fn(),
   appAuthAPI: {
@@ -11,27 +10,22 @@ const apiMocks = vi.hoisted(() => ({
   },
   appApiKeysAPI: {
     list: vi.fn(),
-    create: vi.fn(),
-    revoke: vi.fn(),
   },
   appUsersAPI: {
     list: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
   },
-  appAuditAPI: {
-    list: vi.fn(),
+  appBillingAPI: {
+    getUsage: vi.fn(),
   },
 }));
 
 vi.mock('@/features/app/api', () => ({
-  consumeInitialApiKey: apiMocks.consumeInitialApiKey,
   getAppAuthUser: apiMocks.getAppAuthUser,
   getAppTenant: apiMocks.getAppTenant,
   appAuthAPI: apiMocks.appAuthAPI,
   appApiKeysAPI: apiMocks.appApiKeysAPI,
   appUsersAPI: apiMocks.appUsersAPI,
-  appAuditAPI: apiMocks.appAuditAPI,
+  appBillingAPI: apiMocks.appBillingAPI,
 }));
 
 const OWNER_ME_RESPONSE = {
@@ -59,12 +53,20 @@ const DEVELOPER_ME_RESPONSE = {
   },
 };
 
+const USAGE_RESPONSE = {
+  plan: 'pro',
+  ops_this_month: 42,
+  ops_limit: 100000,
+  usage_percentage: 0.042,
+  alerts_triggered: [],
+  month: '2026-02',
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
 
   apiMocks.getAppAuthUser.mockReturnValue(null);
   apiMocks.getAppTenant.mockReturnValue(null);
-  apiMocks.consumeInitialApiKey.mockReturnValue('initial-key');
 
   apiMocks.appAuthAPI.me.mockResolvedValue(OWNER_ME_RESPONSE);
   apiMocks.appApiKeysAPI.list.mockResolvedValue([
@@ -87,18 +89,11 @@ beforeEach(() => {
       updated_at: '2026-02-20T00:00:00Z',
     },
   ]);
-  apiMocks.appAuditAPI.list.mockResolvedValue([
-    {
-      id: 'audit_1',
-      action: 'api_key.create',
-      resource_type: 'api_key',
-      created_at: '2026-02-20T00:00:00Z',
-    },
-  ]);
+  apiMocks.appBillingAPI.getUsage.mockResolvedValue(USAGE_RESPONSE);
 });
 
 describe('useAppDashboardState', () => {
-  it('loads owner dashboard data and enables management capabilities', async () => {
+  it('loads owner dashboard overview data', async () => {
     const { result } = renderHook(() => useAppDashboardState());
 
     await waitFor(() => {
@@ -110,14 +105,13 @@ describe('useAppDashboardState', () => {
     expect(result.current.user?.email).toBe('owner@example.com');
     expect(result.current.tenant?.id).toBe('tenant_1');
     expect(result.current.gatewayBaseUrl).toBe('https://gateway.example.com');
-    expect(result.current.keys).toHaveLength(1);
-    expect(result.current.users).toHaveLength(1);
-    expect(result.current.auditLogs).toHaveLength(1);
-    expect(result.current.newlyCreatedApiKey).toBe('initial-key');
+    expect(result.current.keyCount).toBe(1);
+    expect(result.current.teamCount).toBe(1);
+    expect(result.current.usage?.ops_this_month).toBe(42);
 
     expect(apiMocks.appApiKeysAPI.list).toHaveBeenCalledTimes(1);
     expect(apiMocks.appUsersAPI.list).toHaveBeenCalledTimes(1);
-    expect(apiMocks.appAuditAPI.list).toHaveBeenCalledTimes(1);
+    expect(apiMocks.appBillingAPI.getUsage).toHaveBeenCalledTimes(1);
   });
 
   it('loads limited data for non-admin roles', async () => {
@@ -132,13 +126,11 @@ describe('useAppDashboardState', () => {
     expect(result.current.error).toBe('');
     expect(result.current.canManage).toBe(false);
     expect(result.current.user?.role).toBe('developer');
-    expect(result.current.keys).toHaveLength(1);
-    expect(result.current.users).toHaveLength(0);
-    expect(result.current.auditLogs).toHaveLength(0);
+    expect(result.current.keyCount).toBe(1);
+    expect(result.current.teamCount).toBe(0);
 
     expect(apiMocks.appApiKeysAPI.list).toHaveBeenCalledTimes(1);
     expect(apiMocks.appUsersAPI.list).not.toHaveBeenCalled();
-    expect(apiMocks.appAuditAPI.list).not.toHaveBeenCalled();
   });
 
   it('surfaces load errors and exits loading state', async () => {
@@ -151,8 +143,7 @@ describe('useAppDashboardState', () => {
     });
 
     expect(result.current.error).toBe('Failed to load dashboard');
-    expect(result.current.keys).toHaveLength(0);
-    expect(result.current.users).toHaveLength(0);
-    expect(result.current.auditLogs).toHaveLength(0);
+    expect(result.current.keyCount).toBe(0);
+    expect(result.current.teamCount).toBe(0);
   });
 });

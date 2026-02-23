@@ -108,6 +108,14 @@ const DEMO_ORIGIN = resolveOrigin(
   URL_SCHEME,
 );
 
+const DOCS_ORIGIN = resolveOrigin(
+  readEnv('NEXT_PUBLIC_DOCS_URL'),
+  readEnv('NEXT_PUBLIC_DOCS_HOST'),
+  defaultPort(readEnv('NEXT_PUBLIC_DOCS_PORT'), '3009'),
+  defaultHostFor(BASE_DOMAIN, 'docs'),
+  URL_SCHEME,
+);
+
 const ADMIN_API_ORIGIN = resolveOrigin(
   null,
   readEnv('NEXT_PUBLIC_ADMIN_API_HOST'),
@@ -147,6 +155,11 @@ export function resolveDemoUrl(): string {
   if (explicit) return ensureTrailingSlash(explicit);
   if (DEMO_ORIGIN) return `${DEMO_ORIGIN}/`;
   return '/demo/';
+}
+
+export function resolveDocsUrl(): string {
+  if (DOCS_ORIGIN) return `${DOCS_ORIGIN}/`;
+  return 'https://docs.aiknol.com/';
 }
 
 function inferApiOriginFromLocation(): string | null {

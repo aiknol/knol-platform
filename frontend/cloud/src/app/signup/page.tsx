@@ -15,9 +15,25 @@ export default function AppSignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const validatePassword = (pw: string): string | null => {
+    if (pw.length < 12) return 'Password must be at least 12 characters.';
+    if (!/[A-Z]/.test(pw)) return 'Password must include an uppercase letter.';
+    if (!/[a-z]/.test(pw)) return 'Password must include a lowercase letter.';
+    if (!/[0-9]/.test(pw)) return 'Password must include a digit.';
+    if (!/[^A-Za-z0-9]/.test(pw)) return 'Password must include a special character.';
+    return null;
+  };
+
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setError(pwError);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -63,6 +79,8 @@ export default function AppSignupPage() {
               id="company"
               type="text"
               required
+              maxLength={100}
+              autoComplete="organization"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               className="w-full rounded-lg border border-dark-600/40 bg-dark-900/70 px-3 py-2 text-dark-100"
@@ -76,6 +94,8 @@ export default function AppSignupPage() {
               id="full_name"
               type="text"
               required
+              maxLength={100}
+              autoComplete="name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full rounded-lg border border-dark-600/40 bg-dark-900/70 px-3 py-2 text-dark-100"
@@ -89,6 +109,8 @@ export default function AppSignupPage() {
               id="email"
               type="email"
               required
+              maxLength={255}
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-dark-600/40 bg-dark-900/70 px-3 py-2 text-dark-100"
@@ -101,13 +123,18 @@ export default function AppSignupPage() {
             <input
               id="password"
               type="password"
-              minLength={10}
+              minLength={12}
+              maxLength={128}
               required
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-dark-600/40 bg-dark-900/70 px-3 py-2 text-dark-100"
-              placeholder="At least 10 characters"
+              placeholder="At least 12 characters"
             />
+            <p className="text-xs text-dark-500 mt-1">
+              Must include uppercase, lowercase, digit, and special character.
+            </p>
           </div>
 
           <button disabled={loading} type="submit" className="w-full btn-primary !py-2.5 disabled:opacity-60">

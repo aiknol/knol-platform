@@ -108,11 +108,27 @@ const DEMO_ORIGIN = resolveOrigin(
   URL_SCHEME,
 );
 
+const DOCS_ORIGIN = resolveOrigin(
+  readEnv('NEXT_PUBLIC_DOCS_URL'),
+  readEnv('NEXT_PUBLIC_DOCS_HOST'),
+  defaultPort(readEnv('NEXT_PUBLIC_DOCS_PORT'), '3009'),
+  defaultHostFor(BASE_DOMAIN, 'docs'),
+  URL_SCHEME,
+);
+
 const ADMIN_API_ORIGIN = resolveOrigin(
   null,
   readEnv('NEXT_PUBLIC_ADMIN_API_HOST'),
   defaultPort(readEnv('NEXT_PUBLIC_ADMIN_API_PORT'), '3001'),
   defaultHostFor(BASE_DOMAIN, 'api'),
+  URL_SCHEME,
+);
+
+const TENANT_API_ORIGIN = resolveOrigin(
+  null,
+  readEnv('NEXT_PUBLIC_TENANT_API_HOST'),
+  defaultPort(readEnv('NEXT_PUBLIC_TENANT_API_PORT'), '8085'),
+  defaultHostFor(BASE_DOMAIN, 'cloud-api'),
   URL_SCHEME,
 );
 
@@ -147,6 +163,11 @@ export function resolveDemoUrl(): string {
   if (explicit) return ensureTrailingSlash(explicit);
   if (DEMO_ORIGIN) return `${DEMO_ORIGIN}/`;
   return '/demo/';
+}
+
+export function resolveDocsUrl(): string {
+  if (DOCS_ORIGIN) return `${DOCS_ORIGIN}/`;
+  return 'https://docs.aiknol.com/';
 }
 
 function inferApiOriginFromLocation(): string | null {
@@ -185,5 +206,13 @@ export function resolveAdminApiUrl(): string {
 export function resolveAppApiUrl(): string {
   const explicit = readEnv('NEXT_PUBLIC_APP_API_URL');
   if (explicit) return stripTrailingSlash(explicit);
+
+  // In production, the tenant API is typically behind the same API gateway.
+  // In development, the tenant service runs on its own port (default 8085).
+  if (TENANT_API_ORIGIN) return TENANT_API_ORIGIN;
+
+  if (IS_DEV) return 'http://localhost:8085';
+
+  // Production fallback: tenant API shares the same origin as the admin API
   return resolveAdminApiUrl();
 }

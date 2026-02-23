@@ -219,7 +219,8 @@ export default function HomePage() {
               Each concern in its own Rust service. Scale the pieces that matter. All talking to one PostgreSQL database.
             </p>
           </div>
-          <div className="card font-mono text-sm text-dark-300 overflow-x-auto">
+          {/* Desktop architecture diagram */}
+          <div className="card font-mono text-sm text-dark-300 overflow-x-auto hidden md:block">
             <pre>{`
   ┌─────────────┐      ┌──────────────┐      ┌────────────────┐
   │   Gateway    │─────▶│  Write Svc   │─────▶│  NATS Stream   │
@@ -234,6 +235,24 @@ export default function HomePage() {
                        └──────────────┘      │  embedding gen  │
                                              └─────────────────┘
 `}</pre>
+          </div>
+          {/* Mobile architecture diagram - simplified card layout */}
+          <div className="md:hidden space-y-3">
+            {[
+              { name: 'Gateway', desc: 'Auth & rate limiting' },
+              { name: 'Write Service', desc: 'Episodes & webhooks' },
+              { name: 'NATS Stream', desc: 'Async extraction' },
+              { name: 'Retrieve Service', desc: 'Vector + BM25 + RRF fusion' },
+              { name: 'Graph Service', desc: 'Entities, edges, LLM extraction' },
+            ].map((svc) => (
+              <div key={svc.name} className="card !p-4 flex items-center gap-3">
+                <span className="text-brand-500 text-lg">▸</span>
+                <div>
+                  <p className="text-sm font-semibold text-dark-100">{svc.name}</p>
+                  <p className="text-xs text-dark-400">{svc.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

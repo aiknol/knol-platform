@@ -4,6 +4,8 @@ export interface AppUser {
   full_name?: string;
   role: 'owner' | 'admin' | 'developer' | 'read_only' | string;
   tenant_id: string;
+  email_verified?: boolean;
+  totp_enabled?: boolean;
 }
 
 export interface TenantProfile {
@@ -46,4 +48,20 @@ export interface TenantAuditItem {
   new_value?: unknown;
   metadata?: unknown;
   created_at: string;
+}
+
+export interface InviteItem {
+  id: string;
+  email: string;
+  role: string;
+  status: 'pending' | 'accepted' | 'revoked' | 'expired';
+  expires_at: string;
+  created_at: string;
+}
+
+export interface UsageHistoryItem {
+  month: string;
+  ops_count: number;
+  plan: string;
+  usage_limit: number | null;
 }

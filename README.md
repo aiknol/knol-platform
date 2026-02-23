@@ -14,7 +14,7 @@
   <a href="#features">Features</a> &middot;
   <a href="#sdks">SDKs</a> &middot;
   <a href="#architecture">Architecture</a> &middot;
-  <a href="https://aiknol.com/docs">Docs</a>
+  <a href="https://docs.aiknol.com">Docs</a>
 </p>
 
 ---
@@ -65,7 +65,7 @@ export ADMIN_JWT_SECRET='replace-with-random-32-plus-char-secret'
 docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d --build
 ```
 
-Start frontend surfaces locally (main/admin/cloud/demo):
+Start frontend surfaces locally (main/admin/cloud/demo/docs):
 
 ```bash
 ./scripts/frontend-services.sh start
@@ -79,6 +79,7 @@ Start frontend surfaces locally (main/admin/cloud/demo):
 | Admin Panel       | `http://localhost:3006`       |
 | Cloud Website     | `http://localhost:3007`       |
 | Demo UI           | `http://localhost:3008`       |
+| Public Docs       | `http://localhost:3009`       |
 
 Frontend URL strategy uses env (no hardcoded localhost in code):
 
@@ -93,6 +94,8 @@ Separate frontend project directories (deployed independently on Cloudflare Page
 - `frontend/admin/` → `https://admin.aiknol.com`
 - `frontend/cloud/` → `https://cloud.aiknol.com`
 - `frontend/demo/` → `https://demo.aiknol.com`
+- `frontend/docs/` → `https://docs.aiknol.com`
+- `private/docs/` → local-only, never deployed (`http://localhost:3010`)
 
 Local backend-only startup helper:
 
@@ -110,6 +113,13 @@ Stop only frontend surfaces:
 
 ```bash
 ./scripts/frontend-services.sh stop
+```
+
+Start/stop local-only private docs:
+
+```bash
+./scripts/private-docs.sh start
+./scripts/private-docs.sh stop
 ```
 
 ## Production (Hetzner)
@@ -274,7 +284,7 @@ All configuration is managed through the admin panel or environment variables. K
 - [Docker Stack Guide](docs/docker-stack.md)
 - [OSS vs Commercial Boundary](docs/oss-vs-commercial.md)
 - [Cloudflare Frontend Deployment](docs/cloudflare-sites.md)
-- [API Documentation](https://aiknol.com/docs)
+- [API Documentation](https://docs.aiknol.com)
 
 ## Project Structure
 
@@ -302,7 +312,10 @@ memorylayer/
 │   ├── web/                   # Main marketing website (aiknol.com)
 │   ├── admin/                 # Admin website (admin.aiknol.com)
 │   ├── cloud/                 # Tenant app website (cloud.aiknol.com)
-│   └── demo/                  # Interactive demo UI (demo.aiknol.com)
+│   ├── demo/                  # Interactive demo UI (demo.aiknol.com)
+│   └── docs/                  # Public docs website (docs.aiknol.com)
+├── private/
+│   └── docs/                  # Local-only private docs website
 └── docker-compose.oss.yml     # One-command deployment
 ```
 
@@ -326,7 +339,7 @@ The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check
 
 - `knol-oss/` — [Apache License 2.0](knol-oss/LICENSE)
 - `knol-enterprise/` — Commercial License
-- `frontend/web/`, `frontend/admin/`, `frontend/cloud/`, `frontend/demo/` — All Rights Reserved
+- `frontend/web/`, `frontend/admin/`, `frontend/cloud/`, `frontend/demo/`, `frontend/docs/`, `private/docs/` — All Rights Reserved
 
 ## Contributing
 

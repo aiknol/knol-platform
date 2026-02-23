@@ -12,9 +12,9 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, action }: PageHeaderProps) {
   return (
-    <div className="flex items-start justify-between mb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-dark-50">{title}</h1>
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+      <div className="min-w-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-dark-50">{title}</h1>
         {description && <p className="text-dark-400 text-sm mt-1">{description}</p>}
       </div>
       {action}
@@ -76,29 +76,31 @@ export function DataTable<T>({ columns, data, rowKey, emptyMessage }: DataTableP
   if (data.length === 0) return <EmptyState message={emptyMessage} />;
 
   return (
-    <div className="overflow-x-auto border border-dark-600/30 rounded-xl">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-dark-600/30 bg-dark-800/50">
-            {columns.map((col) => (
-              <th key={col.header} className={`text-left px-4 py-3 text-xs font-semibold text-dark-400 uppercase tracking-wider ${col.className || ''}`}>
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr key={rowKey(row)} className="border-b border-dark-600/20 hover:bg-dark-700/20 transition-colors">
+    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="border border-dark-600/30 rounded-xl min-w-[480px] sm:min-w-0">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-dark-600/30 bg-dark-800/50">
               {columns.map((col) => (
-                <td key={col.header} className={`px-4 py-3 text-sm text-dark-200 ${col.className || ''}`}>
-                  {typeof col.accessor === 'function' ? col.accessor(row) : (row[col.accessor] as ReactNode)}
-                </td>
+                <th key={col.header} className={`text-left px-3 sm:px-4 py-3 text-xs font-semibold text-dark-400 uppercase tracking-wider ${col.className || ''}`}>
+                  {col.header}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((row) => (
+              <tr key={rowKey(row)} className="border-b border-dark-600/20 hover:bg-dark-700/20 transition-colors">
+                {columns.map((col) => (
+                  <td key={col.header} className={`px-3 sm:px-4 py-3 text-sm text-dark-200 ${col.className || ''}`}>
+                    {typeof col.accessor === 'function' ? col.accessor(row) : (row[col.accessor] as ReactNode)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -164,7 +166,7 @@ export function StatusBadge({ status }: { status: string }) {
 
 export function AdminCard({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`bg-dark-800/30 border border-dark-600/30 rounded-xl p-6 ${className}`}>
+    <div className={`bg-dark-800/30 border border-dark-600/30 rounded-xl p-4 sm:p-6 ${className}`}>
       {children}
     </div>
   );

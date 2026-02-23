@@ -43,4 +43,26 @@ mod tests {
     fn test_missing_digit() {
         assert!(validate_password("NoDigitHere!AB").is_err());
     }
+
+    #[test]
+    fn test_missing_uppercase() {
+        assert!(validate_password("abcdefgh1234!").is_err());
+    }
+
+    #[test]
+    fn test_missing_lowercase() {
+        assert!(validate_password("ABCDEFGH1234!").is_err());
+    }
+
+    #[test]
+    fn test_exactly_12_chars_passes() {
+        // Exactly 12 chars with all requirements
+        assert!(validate_password("Abcdefgh12!x").is_ok());
+    }
+
+    #[test]
+    fn test_11_chars_fails() {
+        // 11 chars — should fail on length
+        assert!(validate_password("Abcdefg12!x").is_err());
+    }
 }

@@ -33,18 +33,22 @@ export function getAppTenant(): TenantProfile | null {
   }
 }
 
-export function setAppAuthSession(_token: string, user: AppUser, tenant: TenantProfile, _initialApiKey?: string) {
+export function setAppAuthSession(_token: string, user: AppUser, tenant: TenantProfile, initialApiKey?: string) {
   // Token is now stored in an HttpOnly cookie set by the backend - never in
   // browser-accessible storage. We only keep non-sensitive profile data for
   // UI rendering.
   if (typeof window === 'undefined') return;
   sessionStorage.setItem('app_user', JSON.stringify(user));
   sessionStorage.setItem('app_tenant', JSON.stringify(tenant));
-  // Note: initialApiKey is displayed once in the UI response body but never persisted.
+
+  // Store the initial API key so it can be displayed once on the API Keys page
+  // after signup. consumeInitialApiKey() will read and remove it.
+  if (initialApiKey) {
+    sessionStorage.setItem('app_initial_api_key', initialApiKey);
+  }
 
   // Clean up legacy storage
   sessionStorage.removeItem('app_token');
-  sessionStorage.removeItem('app_initial_api_key');
   localStorage.removeItem('app_token');
   localStorage.removeItem('app_user');
   localStorage.removeItem('app_tenant');

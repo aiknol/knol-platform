@@ -18,14 +18,14 @@ export default function MCPPage() {
           <span className="text-xs px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4 inline-block">
             Model Context Protocol
           </span>
-          <h1 className="text-5xl font-bold text-dark-50 mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-dark-50 mb-6">
             Give Claude Persistent Memory
           </h1>
-          <p className="text-xl text-dark-300 max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-dark-300 max-w-2xl mx-auto mb-8">
             Knol&apos;s MCP server lets Claude Desktop, Cursor, Windsurf, and any MCP-compatible tool
             remember users, learn preferences, and build knowledge across sessions.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
               href={SITE.appUrl}
               target="_blank"
@@ -34,9 +34,9 @@ export default function MCPPage() {
             >
               Get Started Free
             </a>
-            <Link href="/docs/" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.docsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Read the Docs
-            </Link>
+            </a>
           </div>
         </section>
 
@@ -125,8 +125,8 @@ export default function MCPPage() {
               { tool: 'knol_delete_memory', desc: 'Remove a specific memory by ID. Supports GDPR right-to-erasure compliance.' },
               { tool: 'knol_graph_query', desc: 'Traverse the knowledge graph to find relationships between entities (people, projects, concepts).' },
             ].map((item) => (
-              <div key={item.tool} className="bg-dark-700/30 border border-dark-600 rounded-lg p-4 flex gap-4">
-                <code className="text-brand-400 font-mono text-sm whitespace-nowrap">{item.tool}</code>
+              <div key={item.tool} className="bg-dark-700/30 border border-dark-600 rounded-lg p-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <code className="text-brand-400 font-mono text-sm sm:whitespace-nowrap">{item.tool}</code>
                 <p className="text-dark-300 text-sm">{item.desc}</p>
               </div>
             ))}
@@ -203,19 +203,19 @@ export default function MCPPage() {
             Knol is open-source and self-hostable. Deploy on your infrastructure,
             keep your data private, and give every AI tool you use persistent memory.
           </p>
-          <div className="flex justify-center gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
               href={SITE.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary px-6 py-3 rounded-lg font-medium"
+              className="btn-primary px-6 py-3 rounded-lg font-medium text-center"
             >
               Star on GitHub
             </a>
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium text-center">
               Try the Demo
             </a>
-            <Link href="/pricing/" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <Link href="/pricing/" className="btn-secondary px-6 py-3 rounded-lg font-medium text-center">
               View Pricing
             </Link>
           </div>

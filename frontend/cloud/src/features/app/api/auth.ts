@@ -22,6 +22,8 @@ export interface LoginResponse {
   user: AppUser;
   tenant: TenantProfile;
   expires_at: string;
+  totp_required?: boolean;
+  totp_token?: string;
 }
 
 export interface MeResponse {
@@ -51,10 +53,27 @@ export const appAuthAPI = {
       skipRedirect: true,
       body: JSON.stringify({ email, password }),
     });
+    // If TOTP is required, return early without setting session
+    if (data?.totp_required) {
+      return data as LoginResponse;
+    }
     if (data?.token && data?.user && data?.tenant) {
       setAppAuthSession(data.token, data.user, data.tenant);
     }
     return data as LoginResponse;
+  },
+
+  verifyTotp: async (totpToken: string, code: string) => {
+    const data = await apiFetch<LoginResponse>('/app/auth/totp/verify', {
+      method: 'POST',
+      skipAuth: true,
+      skipRedirect: true,
+      body: JSON.stringify({ totp_token: totpToken, code }),
+    });
+    if (data?.token && data?.user && data?.tenant) {
+      setAppAuthSession(data.token, data.user, data.tenant);
+    }
+    return data;
   },
 
   me: async () => {
@@ -67,6 +86,12 @@ export const appAuthAPI = {
       setAppProfile(data.user, data.tenant);
     }
     return data;
+  },
+
+  refresh: async () => {
+    return apiFetch<{ token: string; expires_at: string }>('/app/auth/refresh', {
+      method: 'POST',
+    });
   },
 
   logout: async () => {

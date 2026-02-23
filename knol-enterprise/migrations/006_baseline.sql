@@ -22,6 +22,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_time ON memory_audit(tenant_id, timestamp D
 CREATE INDEX IF NOT EXISTS idx_audit_actor ON memory_audit(tenant_id, actor_type, actor_id);
 
 ALTER TABLE memory_audit ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation_audit ON memory_audit;
 CREATE POLICY tenant_isolation_audit ON memory_audit
   USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
 
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS memory_policies (
 );
 
 ALTER TABLE memory_policies ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation_policies ON memory_policies;
 CREATE POLICY tenant_isolation_policies ON memory_policies
   USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
 
@@ -72,16 +74,18 @@ CREATE INDEX IF NOT EXISTS idx_consolidations_semantic ON memory_consolidations(
 CREATE INDEX IF NOT EXISTS idx_consolidations_tenant ON memory_consolidations(tenant_id);
 
 ALTER TABLE memory_consolidations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation_consolidations ON memory_consolidations;
 CREATE POLICY tenant_isolation_consolidations ON memory_consolidations
   USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
 
 -- Extension to memory_audit to include 'consolidate' action
+ALTER TABLE memory_audit DROP CONSTRAINT IF EXISTS audit_action_check;
 ALTER TABLE memory_audit ADD CONSTRAINT audit_action_check
   CHECK (action IN ('create','update','delete','merge','supersede','restore','archive','decay','consolidate'))
   NOT VALID;
 
 -- Extension to memories table status to include 'consolidated'
-ALTER TABLE memories DROP CONSTRAINT memories_status_check;
+ALTER TABLE memories DROP CONSTRAINT IF EXISTS memories_status_check;
 ALTER TABLE memories ADD CONSTRAINT memories_status_check
   CHECK (status IN ('active','superseded','archived','deleted','consolidated'));
 
@@ -100,6 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_memory_entities_entity ON memory_entities(entity_
 CREATE INDEX IF NOT EXISTS idx_memory_entities_tenant ON memory_entities(memory_id);
 
 ALTER TABLE memory_entities ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation_memory_entities ON memory_entities;
 CREATE POLICY tenant_isolation_memory_entities ON memory_entities
   USING (memory_id IN (SELECT id FROM memories WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
 
@@ -130,9 +135,9 @@ CREATE TABLE IF NOT EXISTS marketing_publish_log (
     published_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_publish_log_campaign ON marketing_publish_log (campaign);
-CREATE INDEX idx_publish_log_channel  ON marketing_publish_log (channel);
-CREATE INDEX idx_publish_log_time     ON marketing_publish_log (published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_publish_log_campaign ON marketing_publish_log (campaign);
+CREATE INDEX IF NOT EXISTS idx_publish_log_channel  ON marketing_publish_log (channel);
+CREATE INDEX IF NOT EXISTS idx_publish_log_time     ON marketing_publish_log (published_at DESC);
 
 CREATE TABLE IF NOT EXISTS marketing_audit (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -171,7 +176,7 @@ CREATE TABLE IF NOT EXISTS system_config (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_system_config_category ON system_config (category);
+CREATE INDEX IF NOT EXISTS idx_system_config_category ON system_config (category);
 
 -- ─── Encrypted Credentials ───────────────────────────────────────────
 -- API keys and secrets encrypted with AES-256-GCM at rest
@@ -186,7 +191,7 @@ CREATE TABLE IF NOT EXISTS system_credentials (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_system_credentials_service ON system_credentials (service);
+CREATE INDEX IF NOT EXISTS idx_system_credentials_service ON system_credentials (service);
 
 -- ─── Admin Users ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admin_users (
@@ -210,8 +215,8 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_admin_sessions_admin  ON admin_sessions (admin_id);
-CREATE INDEX idx_admin_sessions_expiry ON admin_sessions (expires_at);
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_admin  ON admin_sessions (admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_expiry ON admin_sessions (expires_at);
 
 -- ─── Admin Audit Log ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admin_audit_log (
@@ -226,9 +231,9 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_admin_audit_time     ON admin_audit_log (created_at DESC);
-CREATE INDEX idx_admin_audit_admin    ON admin_audit_log (admin_id);
-CREATE INDEX idx_admin_audit_resource ON admin_audit_log (resource_type, resource_key);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_time     ON admin_audit_log (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_admin    ON admin_audit_log (admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_resource ON admin_audit_log (resource_type, resource_key);
 
 -- ─── Seed Default Configs ────────────────────────────────────────────
 -- These replace the env vars that used to configure these values

@@ -220,7 +220,7 @@ export default function DocsPage() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-16">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-dark-50 mb-4">Documentation</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-dark-50 mb-4">Documentation</h1>
         <p className="text-dark-300 text-lg mb-12">
           Complete reference for the Knol REST API, Python SDK, TypeScript SDK, and framework integrations.
         </p>
@@ -504,7 +504,8 @@ cargo build --workspace --release`}
             Knol uses a microservice architecture with each concern isolated in its own Rust binary.
             All services share a single PostgreSQL database with pgvector for vector storage.
           </p>
-          <div className="card font-mono text-sm text-dark-300 overflow-x-auto">
+          {/* Desktop diagram */}
+          <div className="card font-mono text-sm text-dark-300 overflow-x-auto hidden md:block">
             <pre>{`┌─────────────┐      ┌──────────────┐      ┌────────────────┐
 │   Gateway    │─────▶│  Write Svc   │─────▶│  NATS Stream   │
 │  auth/rate   │      │  episodes    │      │  extraction    │
@@ -522,6 +523,25 @@ cargo build --workspace --release`}
                      │ PostgreSQL  │
                      │  + pgvector │
                      └─────────────┘`}</pre>
+          </div>
+          {/* Mobile architecture - card list */}
+          <div className="md:hidden space-y-2">
+            {[
+              { name: 'Gateway', desc: 'Auth, rate limiting, metrics' },
+              { name: 'Write Service', desc: 'Episodes, webhooks' },
+              { name: 'NATS Stream', desc: 'Extraction, embedding pipeline' },
+              { name: 'Retrieve Service', desc: 'Vector + BM25 + RRF + graph walk' },
+              { name: 'Graph Service', desc: 'LLM extraction, conflict detection' },
+              { name: 'PostgreSQL + pgvector', desc: 'Single database for all data' },
+            ].map((svc) => (
+              <div key={svc.name} className="card !p-3 flex items-center gap-3">
+                <span className="text-brand-500 text-sm">▸</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-dark-100">{svc.name}</p>
+                  <p className="text-xs text-dark-400">{svc.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

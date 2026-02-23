@@ -1,8 +1,8 @@
 //! Team invitation endpoints for the tenant app.
 //! Allows owners/admins to invite users via email-based tokens.
 
-use axum::extract::{Path, State};
-use axum::http::{header, HeaderMap, HeaderValue};
+use axum::extract::{Path, Query, State};
+use axum::http::{header, HeaderMap};
 use axum::response::{IntoResponse, Json, Response};
 use chrono::{Duration, Utc};
 use serde::Deserialize;
@@ -11,7 +11,7 @@ use std::sync::Arc;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::auth::{audit, normalize_email, AppClaims, AppError};
+use crate::auth::{audit, normalize_email, AppClaims, AppError, AppUserRow};
 use crate::TenantAppState;
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -118,7 +118,7 @@ pub async fn create_invite(
 
     let raw_token = random_hex(32);
     let token_hash = hash_token(&raw_token);
-    let expires_at = Utc::now() + Duration::days(7);
+    let expires_at = Utc::now() + Duration::days(3);
 
     let invite_id = sqlx::query_scalar::<_, Uuid>(
         r#"INSERT INTO team_invites (tenant_id, email, role, invited_by, token_hash, status, expires_at)
@@ -171,7 +171,8 @@ pub async fn create_invite(
 pub async fn list_invites(
     claims: AppClaims,
     State(state): State<Arc<TenantAppState>>,
-) -> Result<Json<Vec<serde_json::Value>>, AppError> {
+    Query(pagination): Query<crate::routes::app::PaginationParams>,
+) -> Result<Json<serde_json::Value>, AppError> {
     if !matches!(claims.role.as_str(), "owner" | "admin") {
         return Err(AppError::Forbidden);
     }
@@ -183,32 +184,47 @@ pub async fn list_invites(
     .execute(&state.db_pool)
     .await;
 
+    let total = sqlx::query_scalar::<_, i64>(
+        "SELECT COUNT(*) FROM team_invites WHERE tenant_id = $1",
+    )
+    .bind(claims.tenant_id)
+    .fetch_one(&state.db_pool)
+    .await
+    .map_err(|e| AppError::Internal(e.to_string()))?;
+
     let rows = sqlx::query_as::<_, InviteRow>(
         r#"SELECT id, tenant_id, email, role, invited_by, status, expires_at, created_at
            FROM team_invites
            WHERE tenant_id = $1
            ORDER BY created_at DESC
-           LIMIT 100"#,
+           LIMIT $2 OFFSET $3"#,
     )
     .bind(claims.tenant_id)
+    .bind(pagination.limit())
+    .bind(pagination.offset())
     .fetch_all(&state.db_pool)
     .await
     .map_err(|e| AppError::Internal(e.to_string()))?;
 
-    Ok(Json(
-        rows.iter()
-            .map(|r| {
-                serde_json::json!({
-                    "id": r.id,
-                    "email": r.email,
-                    "role": r.role,
-                    "status": r.status,
-                    "expires_at": r.expires_at.to_rfc3339(),
-                    "created_at": r.created_at.to_rfc3339(),
-                })
+    let items: Vec<_> = rows
+        .iter()
+        .map(|r| {
+            serde_json::json!({
+                "id": r.id,
+                "email": r.email,
+                "role": r.role,
+                "status": r.status,
+                "expires_at": r.expires_at.to_rfc3339(),
+                "created_at": r.created_at.to_rfc3339(),
             })
-            .collect(),
-    ))
+        })
+        .collect();
+    Ok(Json(serde_json::json!({
+        "data": items,
+        "total": total,
+        "page": pagination.page(),
+        "per_page": pagination.per_page(),
+    })))
 }
 
 /// Revoke a pending invite (owner/admin only).
@@ -360,12 +376,16 @@ pub async fn accept_invite(
         full_name: String,
         role: String,
         enabled: bool,
+        failed_login_attempts: i32,
+        locked_until: Option<chrono::DateTime<chrono::Utc>>,
+        email_verified: bool,
+        totp_enabled: bool,
     }
 
     let user = sqlx::query_as::<_, NewUser>(
         r#"INSERT INTO app_users (tenant_id, email, password_hash, full_name, role, enabled)
            VALUES ($1, $2, $3, $4, $5, true)
-           RETURNING id, tenant_id, email, password_hash, full_name, role, enabled"#,
+           RETURNING id, tenant_id, email, password_hash, full_name, role, enabled, failed_login_attempts, locked_until, email_verified, totp_enabled"#,
     )
     .bind(invite.tenant_id)
     .bind(&invite.email)
@@ -388,34 +408,27 @@ pub async fn accept_invite(
 
     enterprise_common::rate_limit::clear_limit(&state.rate_limiter, &rate_key);
 
-    // Issue session token
-    let now = Utc::now();
-    let expires = now + Duration::hours(24);
-    let new_claims = AppClaims {
-        sub: user.id,
+    // Build AppUserRow for issue_session_token
+    let app_user = AppUserRow {
+        id: user.id,
         tenant_id: user.tenant_id,
         email: user.email.clone(),
+        password_hash: user.password_hash.clone(),
+        full_name: user.full_name.clone(),
         role: user.role.clone(),
-        exp: expires.timestamp(),
-        iat: now.timestamp(),
+        enabled: user.enabled,
+        failed_login_attempts: user.failed_login_attempts,
+        locked_until: user.locked_until,
+        email_verified: user.email_verified,
+        totp_enabled: user.totp_enabled,
     };
-    let token = jsonwebtoken::encode(
-        &jsonwebtoken::Header::default(),
-        &new_claims,
-        &jsonwebtoken::EncodingKey::from_secret(state.jwt_secret.as_bytes()),
-    )
-    .map_err(|e| AppError::Internal(e.to_string()))?;
-
-    let session_hash = hex::encode(Sha256::digest(token.as_bytes()));
-    sqlx::query(
-        "INSERT INTO app_sessions (app_user_id, token_hash, expires_at) VALUES ($1, $2, $3)",
-    )
-    .bind(user.id)
-    .bind(&session_hash)
-    .bind(expires)
-    .execute(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let user_agent_str = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string());
+    let (token, expires) =
+        crate::auth::issue_session_token(&state, &app_user, Some(&client_ip), user_agent_str.as_deref())
+            .await?;
 
     audit(
         &state,
@@ -437,12 +450,6 @@ pub async fn accept_invite(
         .map_err(|e| AppError::Internal(e.to_string()))?
         .unwrap_or_default();
 
-    let secure = crate::auth::cookie_secure_suffix();
-    let cookie = format!(
-        "app_token={}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400{}",
-        token, secure
-    );
-
     let mut response = Json(serde_json::json!({
         "token": token,
         "expires_at": expires.to_rfc3339(),
@@ -458,10 +465,8 @@ pub async fn accept_invite(
         },
     }))
     .into_response();
-    if let Ok(cookie_val) = HeaderValue::from_str(&cookie) {
-        response
-            .headers_mut()
-            .insert(header::SET_COOKIE, cookie_val);
-    }
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, crate::auth::app_cookie(&token)?);
     Ok(response)
 }

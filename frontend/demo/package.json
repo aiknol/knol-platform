@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm run check:env && next dev",
-    "check:env": "node ./scripts/validate-env.mjs",
-    "build": "npm run check:env && next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0"
   },

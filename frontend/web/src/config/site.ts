@@ -1,6 +1,6 @@
 // ── Core site identity and navigation ────────────────────────────
 
-import { resolveAppSignupUrl, resolveDemoUrl, resolveSiteUrl } from './urls';
+import { resolveAppSignupUrl, resolveDemoUrl, resolveDocsUrl, resolveSiteUrl } from './urls';
 
 export const SITE = {
   name: 'Knol',
@@ -11,7 +11,7 @@ export const SITE = {
   appUrl: resolveAppSignupUrl(),
   demoUrl: resolveDemoUrl(),
   github: 'https://github.com/aiknol/knol',
-  docsUrl: '/docs/',
+  docsUrl: resolveDocsUrl(),
   pypi: 'https://pypi.org/project/knol/',
   npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
   contactEmail: 'aiknolcontact@gmail.com',
@@ -33,7 +33,7 @@ export interface NavItem {
 
 export const NAV_LINKS: NavItem[] = [
   { href: SITE.demoUrl, label: 'Demo' },
-  { href: '/docs/', label: 'Docs' },
+  { href: SITE.docsUrl, label: 'Docs' },
   { href: '/mcp/', label: 'MCP' },
   { href: '/comparison', label: 'Compare' },
   { href: '/pricing/', label: 'Pricing' },
@@ -58,8 +58,8 @@ export const FOOTER_SECTIONS = [
   {
     title: 'Developers',
     links: [
-      { label: 'Documentation', href: '/docs/' },
-      { label: 'API Reference', href: '/docs/' },
+      { label: 'Documentation', href: SITE.docsUrl },
+      { label: 'API Reference', href: SITE.docsUrl },
       { label: 'MCP Server', href: '/mcp/' },
       { label: 'GitHub', href: SITE.github, external: true },
       { label: 'PyPI', href: SITE.pypi, external: true },

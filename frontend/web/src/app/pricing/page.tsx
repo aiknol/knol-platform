@@ -13,7 +13,7 @@ export default function PricingPage() {
     <div className="px-4 sm:px-6 lg:px-8 py-16">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-dark-50">Competitive Pricing Built for Production</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-dark-50">Competitive Pricing Built for Production</h1>
           <p className="mt-4 text-lg text-dark-300 max-w-2xl mx-auto">
             Open-source first. One pricing metric. Predictable cloud pricing for production AI memory workloads.
           </p>
@@ -62,12 +62,12 @@ export default function PricingPage() {
         {/* Feature comparison */}
         <div className="mt-20">
           <h2 className="text-2xl font-bold text-dark-50 text-center mb-8">Feature Comparison</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full text-sm min-w-[540px]">
               <thead>
                 <tr className="border-b border-dark-600/30">
-                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Feature</th>
-                  <th className="text-center py-3 px-4 text-dark-300 font-medium">OSS</th>
+                  <th className="text-left py-3 px-3 sm:px-4 text-dark-300 font-medium">Feature</th>
+                  <th className="text-center py-3 px-2 sm:px-4 text-dark-300 font-medium">OSS</th>
                   <th className="text-center py-3 px-4 text-dark-300 font-medium">Builder</th>
                   <th className="text-center py-3 px-4 text-dark-300 font-medium">Growth</th>
                   <th className="text-center py-3 px-4 text-dark-300 font-medium">Enterprise</th>
