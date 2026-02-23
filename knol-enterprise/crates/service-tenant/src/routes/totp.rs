@@ -138,13 +138,11 @@ pub async fn disable_totp(
     Json(body): Json<DisableTotpRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     // Verify password
-    let hash = sqlx::query_scalar::<_, String>(
-        "SELECT password_hash FROM app_users WHERE id = $1",
-    )
-    .bind(claims.sub)
-    .fetch_one(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let hash = sqlx::query_scalar::<_, String>("SELECT password_hash FROM app_users WHERE id = $1")
+        .bind(claims.sub)
+        .fetch_one(&state.db_pool)
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))?;
 
     let valid = bcrypt::verify(&body.password, &hash).map_err(|_| AppError::Unauthorized)?;
     if !valid {
@@ -346,13 +344,12 @@ async fn try_backup_code(
 ) -> Result<bool, AppError> {
     let code_hash = hex::encode(Sha256::digest(code.to_uppercase().as_bytes()));
 
-    let codes: Vec<String> = sqlx::query_scalar(
-        "SELECT unnest(totp_backup_codes) FROM app_users WHERE id = $1",
-    )
-    .bind(user_id)
-    .fetch_all(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let codes: Vec<String> =
+        sqlx::query_scalar("SELECT unnest(totp_backup_codes) FROM app_users WHERE id = $1")
+            .bind(user_id)
+            .fetch_all(&state.db_pool)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
     if !codes.contains(&code_hash) {
         return Ok(false);

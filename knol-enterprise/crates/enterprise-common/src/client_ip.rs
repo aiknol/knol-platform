@@ -85,10 +85,7 @@ mod tests {
     #[test]
     fn test_xff_with_spaces() {
         let mut headers = HeaderMap::new();
-        headers.insert(
-            "x-forwarded-for",
-            "10.0.0.1 , 192.168.1.1".parse().unwrap(),
-        );
+        headers.insert("x-forwarded-for", "10.0.0.1 , 192.168.1.1".parse().unwrap());
         assert_eq!(extract_client_ip(&headers), "192.168.1.1");
     }
 }

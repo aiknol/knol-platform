@@ -138,10 +138,7 @@ pub fn build_router(
             post(routes::app::initiate_password_reset),
         )
         .route("/auth/sessions", get(routes::app::list_sessions))
-        .route(
-            "/auth/sessions/:id",
-            delete(routes::app::revoke_session),
-        )
+        .route("/auth/sessions/:id", delete(routes::app::revoke_session))
         .route("/tenant", get(routes::app::tenant))
         .route("/api-keys", get(routes::app::list_api_keys))
         .route("/api-keys", post(routes::app::create_api_key))
@@ -192,28 +189,13 @@ pub fn build_router(
         // Token refresh
         .route("/auth/refresh", post(routes::app::refresh_token))
         // Email verification (admin-initiated)
-        .route(
-            "/auth/verify-email",
-            post(routes::app::verify_email),
-        )
+        .route("/auth/verify-email", post(routes::app::verify_email))
         // TOTP 2FA management
-        .route(
-            "/settings/totp/setup",
-            post(routes::totp::setup_totp),
-        )
-        .route(
-            "/settings/totp/enable",
-            post(routes::totp::enable_totp),
-        )
-        .route(
-            "/settings/totp/disable",
-            post(routes::totp::disable_totp),
-        )
+        .route("/settings/totp/setup", post(routes::totp::setup_totp))
+        .route("/settings/totp/enable", post(routes::totp::enable_totp))
+        .route("/settings/totp/disable", post(routes::totp::disable_totp))
         // GDPR data export & account deletion
-        .route(
-            "/settings/data-export",
-            get(routes::settings::data_export),
-        )
+        .route("/settings/data-export", get(routes::settings::data_export))
         .route(
             "/settings/delete-account",
             post(routes::settings::delete_account),
@@ -226,14 +208,8 @@ pub fn build_router(
     let app_routes = Router::new()
         .route("/auth/signup", post(routes::app::signup))
         .route("/auth/login", post(routes::app::login))
-        .route(
-            "/auth/totp/verify",
-            post(routes::totp::verify_totp),
-        )
-        .route(
-            "/auth/reset-password",
-            post(routes::app::reset_password),
-        )
+        .route("/auth/totp/verify", post(routes::totp::verify_totp))
+        .route("/auth/reset-password", post(routes::app::reset_password))
         .route("/auth/accept-invite", post(routes::invites::accept_invite))
         .route("/webhooks/stripe", post(routes::billing::stripe_webhook))
         .merge(app_protected);

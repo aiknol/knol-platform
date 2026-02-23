@@ -184,13 +184,12 @@ pub async fn list_invites(
     .execute(&state.db_pool)
     .await;
 
-    let total = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM team_invites WHERE tenant_id = $1",
-    )
-    .bind(claims.tenant_id)
-    .fetch_one(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let total =
+        sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM team_invites WHERE tenant_id = $1")
+            .bind(claims.tenant_id)
+            .fetch_one(&state.db_pool)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
     let rows = sqlx::query_as::<_, InviteRow>(
         r#"SELECT id, tenant_id, email, role, invited_by, status, expires_at, created_at
@@ -426,9 +425,13 @@ pub async fn accept_invite(
         .get(header::USER_AGENT)
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
-    let (token, expires) =
-        crate::auth::issue_session_token(&state, &app_user, Some(&client_ip), user_agent_str.as_deref())
-            .await?;
+    let (token, expires) = crate::auth::issue_session_token(
+        &state,
+        &app_user,
+        Some(&client_ip),
+        user_agent_str.as_deref(),
+    )
+    .await?;
 
     audit(
         &state,

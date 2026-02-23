@@ -641,13 +641,12 @@ pub async fn list_api_keys(
     claims: AppClaims,
     Query(pagination): Query<PaginationParams>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    let total = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM tenant_api_keys WHERE tenant_id = $1",
-    )
-    .bind(claims.tenant_id)
-    .fetch_one(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let total =
+        sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM tenant_api_keys WHERE tenant_id = $1")
+            .bind(claims.tenant_id)
+            .fetch_one(&state.db_pool)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
     let rows = sqlx::query_as::<_, ApiKeyRow>(
         "SELECT id, name, role, active, last_used_at, expires_at, created_at FROM tenant_api_keys WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
@@ -820,13 +819,11 @@ pub async fn list_users(
         return Err(AppError::Forbidden);
     }
 
-    let total = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM app_users WHERE tenant_id = $1",
-    )
-    .bind(claims.tenant_id)
-    .fetch_one(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let total = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM app_users WHERE tenant_id = $1")
+        .bind(claims.tenant_id)
+        .fetch_one(&state.db_pool)
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))?;
 
     let rows = sqlx::query_as::<_, TenantAppUserRow>(
         r#"SELECT id, email, full_name, role, enabled, last_login_at, created_at, updated_at, email_verified, totp_enabled
@@ -1075,13 +1072,12 @@ pub async fn list_audit_logs(
         return Err(AppError::Forbidden);
     }
 
-    let total = sqlx::query_scalar::<_, i64>(
-        "SELECT COUNT(*) FROM tenant_audit_log WHERE tenant_id = $1",
-    )
-    .bind(claims.tenant_id)
-    .fetch_one(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let total =
+        sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM tenant_audit_log WHERE tenant_id = $1")
+            .bind(claims.tenant_id)
+            .fetch_one(&state.db_pool)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
     let rows = sqlx::query_as::<_, TenantAuditRow>(
         r#"SELECT id, app_user_email, action, resource_type, resource_key, old_value, new_value, metadata, created_at
@@ -1149,17 +1145,18 @@ pub async fn initiate_password_reset(
     }
 
     // Verify target user belongs to the same tenant
-    let target_exists = sqlx::query_scalar::<_, i32>(
-        "SELECT 1 FROM app_users WHERE id = $1 AND tenant_id = $2",
-    )
-    .bind(body.user_id)
-    .bind(claims.tenant_id)
-    .fetch_optional(&state.db_pool)
-    .await
-    .map_err(|e| AppError::Internal(e.to_string()))?;
+    let target_exists =
+        sqlx::query_scalar::<_, i32>("SELECT 1 FROM app_users WHERE id = $1 AND tenant_id = $2")
+            .bind(body.user_id)
+            .bind(claims.tenant_id)
+            .fetch_optional(&state.db_pool)
+            .await
+            .map_err(|e| AppError::Internal(e.to_string()))?;
 
     if target_exists.is_none() {
-        return Err(AppError::NotFound("User not found in this workspace".into()));
+        return Err(AppError::NotFound(
+            "User not found in this workspace".into(),
+        ));
     }
 
     let raw_token = random_hex(32);
@@ -1300,13 +1297,12 @@ pub async fn reset_password(
     )
     .await;
 
-    let tenant_name =
-        sqlx::query_scalar::<_, String>("SELECT name FROM tenants WHERE id = $1")
-            .bind(user.tenant_id)
-            .fetch_optional(&state.db_pool)
-            .await
-            .map_err(|e| AppError::Internal(e.to_string()))?
-            .unwrap_or_default();
+    let tenant_name = sqlx::query_scalar::<_, String>("SELECT name FROM tenants WHERE id = $1")
+        .bind(user.tenant_id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))?
+        .unwrap_or_default();
 
     let mut response = Json(serde_json::json!({
         "token": token,

@@ -83,7 +83,9 @@ async fn main() -> anyhow::Result<()> {
     .await;
     let allowed_origin = allowed_origin.trim();
     if insecure_dev_mode {
-        warn!("ADMIN_SECURE_COOKIES=false — running in insecure dev mode. Do NOT use in production!");
+        warn!(
+            "ADMIN_SECURE_COOKIES=false — running in insecure dev mode. Do NOT use in production!"
+        );
     }
 
     let app = service_tenant::build_router(state, allowed_origin, insecure_dev_mode)?;

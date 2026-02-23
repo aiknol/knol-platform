@@ -52,8 +52,7 @@ fn extract_cookie_value(headers: &HeaderMap, name: &str) -> Option<String> {
         .and_then(|cookies| {
             cookies.split(';').find_map(|c| {
                 let c = c.trim();
-                c.strip_prefix(&format!("{}=", name))
-                    .map(|v| v.to_string())
+                c.strip_prefix(&format!("{}=", name)).map(|v| v.to_string())
             })
         })
 }

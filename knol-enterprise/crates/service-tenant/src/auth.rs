@@ -61,9 +61,11 @@ impl IntoResponse for AppError {
                 .into_response(),
             AppError::RateLimited(secs) => {
                 let msg = format!("Too many attempts. Retry in {} seconds.", secs);
-                let mut resp =
-                    (StatusCode::TOO_MANY_REQUESTS, Json(serde_json::json!({"error": msg})))
-                        .into_response();
+                let mut resp = (
+                    StatusCode::TOO_MANY_REQUESTS,
+                    Json(serde_json::json!({"error": msg})),
+                )
+                    .into_response();
                 if let Ok(val) = axum::http::HeaderValue::from_str(&secs.to_string()) {
                     resp.headers_mut().insert("retry-after", val);
                 }
@@ -72,9 +74,11 @@ impl IntoResponse for AppError {
             AppError::Conflict(m) => {
                 (StatusCode::CONFLICT, Json(serde_json::json!({"error": m}))).into_response()
             }
-            AppError::BadRequest(m) => {
-                (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error": m}))).into_response()
-            }
+            AppError::BadRequest(m) => (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": m})),
+            )
+                .into_response(),
             AppError::NotFound(m) => {
                 (StatusCode::NOT_FOUND, Json(serde_json::json!({"error": m}))).into_response()
             }
@@ -220,14 +224,12 @@ pub async fn app_auth_middleware(
     }
 
     // Per-tenant API rate limiting
-    let plan = sqlx::query_scalar::<_, String>(
-        "SELECT plan FROM tenants WHERE id = $1",
-    )
-    .bind(claims.tenant_id)
-    .fetch_optional(&state.db_pool)
-    .await
-    .unwrap_or(None)
-    .unwrap_or_else(|| "free".to_string());
+    let plan = sqlx::query_scalar::<_, String>("SELECT plan FROM tenants WHERE id = $1")
+        .bind(claims.tenant_id)
+        .fetch_optional(&state.db_pool)
+        .await
+        .unwrap_or(None)
+        .unwrap_or_else(|| "free".to_string());
 
     let limit = match plan.as_str() {
         "growth" => 2000,

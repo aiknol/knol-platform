@@ -3,12 +3,7 @@
 //! Generates or propagates a unique `X-Request-ID` header for every request,
 //! making it easy to trace requests across logs and services.
 
-use axum::{
-    extract::Request,
-    http::HeaderValue,
-    middleware::Next,
-    response::Response,
-};
+use axum::{extract::Request, http::HeaderValue, middleware::Next, response::Response};
 use uuid::Uuid;
 
 const REQUEST_ID_HEADER: &str = "x-request-id";

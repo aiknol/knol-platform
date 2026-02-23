@@ -75,10 +75,7 @@ impl TestApp {
                 post(routes::app::initiate_password_reset),
             )
             .route("/auth/sessions", get(routes::app::list_sessions))
-            .route(
-                "/auth/sessions/:id",
-                delete(routes::app::revoke_session),
-            )
+            .route("/auth/sessions/:id", delete(routes::app::revoke_session))
             .route("/tenant", get(routes::app::tenant))
             .route("/api-keys", get(routes::app::list_api_keys))
             .route("/api-keys", post(routes::app::create_api_key))
@@ -148,10 +145,7 @@ impl TestApp {
         let app_routes = Router::new()
             .route("/auth/signup", post(routes::app::signup))
             .route("/auth/login", post(routes::app::login))
-            .route(
-                "/auth/reset-password",
-                post(routes::app::reset_password),
-            )
+            .route("/auth/reset-password", post(routes::app::reset_password))
             .route("/auth/accept-invite", post(routes::invites::accept_invite))
             .route("/auth/totp/verify", post(routes::totp::verify_totp))
             .merge(app_protected);
@@ -182,8 +176,8 @@ impl TestApp {
         }
 
         // Attach CSRF tokens for authenticated POST/PUT/DELETE requests
-        let needs_csrf = token.is_some()
-            && matches!(method, Method::POST | Method::PUT | Method::DELETE);
+        let needs_csrf =
+            token.is_some() && matches!(method, Method::POST | Method::PUT | Method::DELETE);
         if needs_csrf {
             let csrf = "test-csrf-token-for-integration-tests";
             builder = builder.header("x-csrf-token", csrf);
@@ -234,8 +228,8 @@ impl TestApp {
             builder = builder.header("authorization", format!("Bearer {}", t));
         }
 
-        let needs_csrf = token.is_some()
-            && matches!(method, Method::POST | Method::PUT | Method::DELETE);
+        let needs_csrf =
+            token.is_some() && matches!(method, Method::POST | Method::PUT | Method::DELETE);
         if needs_csrf {
             let csrf = "test-csrf-token-for-integration-tests";
             builder = builder.header("x-csrf-token", csrf);
@@ -360,7 +354,10 @@ async fn test_signup_login_logout_flow() {
     // Signup
     let (token, body) = app.signup("flow").await;
     assert_eq!(body["user"]["role"].as_str().unwrap(), "owner");
-    assert!(body["user"]["email"].as_str().unwrap().contains("@test.local"));
+    assert!(body["user"]["email"]
+        .as_str()
+        .unwrap()
+        .contains("@test.local"));
     assert!(body["tenant"]["slug"].as_str().is_some());
     assert!(body["initial_api_key"].as_str().is_some());
 
@@ -374,7 +371,13 @@ async fn test_signup_login_logout_flow() {
     // Login with same credentials
     let email = body["user"]["email"].as_str().unwrap();
     let (status, login_body) = app.login(email, TEST_PASSWORD).await;
-    assert_eq!(status, StatusCode::OK, "login failed for {}: {:?}", email, login_body);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "login failed for {}: {:?}",
+        email,
+        login_body
+    );
     let login_token = login_body["token"].as_str().unwrap().to_string();
     assert!(!login_token.is_empty());
 
@@ -538,7 +541,10 @@ async fn test_team_invites() {
         )
         .await;
     assert_eq!(status, StatusCode::OK);
-    let invite_token = invite["token"].as_str().expect("no invite token").to_string();
+    let invite_token = invite["token"]
+        .as_str()
+        .expect("no invite token")
+        .to_string();
     let invite_id = invite["id"].as_str().unwrap().to_string();
 
     // List invites — should have our pending invite
@@ -567,17 +573,24 @@ async fn test_team_invites() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "accept invite failed: {:?}", accepted);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "accept invite failed: {:?}",
+        accepted
+    );
     let invited_token = accepted["token"].as_str().unwrap().to_string();
 
     // Login as invited user
     let (status, login_body) = app.login(&invite_email, TEST_PASSWORD).await;
-    assert_eq!(status, StatusCode::OK, "login as invited user failed: {:?}", login_body);
-    // The role should be "developer" (viewer maps to read_only, but we passed developer)
     assert_eq!(
-        login_body["user"]["role"].as_str().unwrap(),
-        "developer"
+        status,
+        StatusCode::OK,
+        "login as invited user failed: {:?}",
+        login_body
     );
+    // The role should be "developer" (viewer maps to read_only, but we passed developer)
+    assert_eq!(login_body["user"]["role"].as_str().unwrap(), "developer");
 
     // Use invited user's token to access /me
     let (status, _) = app
@@ -681,7 +694,12 @@ async fn test_settings() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "change password failed: {:?}", pw_res);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "change password failed: {:?}",
+        pw_res
+    );
     assert_eq!(pw_res["password_changed"].as_bool().unwrap(), true);
     let new_token = pw_res["token"].as_str().unwrap().to_string();
 
@@ -715,12 +733,7 @@ async fn test_billing_without_stripe() {
 
     // GET /app/billing/subscription — should return free plan info
     let (status, sub) = app
-        .request(
-            Method::GET,
-            "/app/billing/subscription",
-            None,
-            Some(&token),
-        )
+        .request(Method::GET, "/app/billing/subscription", None, Some(&token))
         .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(sub["plan"].as_str().unwrap(), "free");
@@ -759,12 +772,7 @@ async fn test_billing_without_stripe() {
 
     // POST /app/billing/portal — should fail (Stripe not configured)
     let (status, _) = app
-        .request(
-            Method::POST,
-            "/app/billing/portal",
-            None,
-            Some(&token),
-        )
+        .request(Method::POST, "/app/billing/portal", None, Some(&token))
         .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
 }
@@ -913,13 +921,22 @@ async fn test_audit_log() {
         .request(Method::GET, "/app/audit", None, Some(&token))
         .await;
     assert_eq!(status, StatusCode::OK);
-    let entries = logs["data"].as_array().expect("audit should have data array");
-    assert!(entries.len() >= 3, "expected at least 3 audit entries (signup + key + user), got {}", entries.len());
+    let entries = logs["data"]
+        .as_array()
+        .expect("audit should have data array");
+    assert!(
+        entries.len() >= 3,
+        "expected at least 3 audit entries (signup + key + user), got {}",
+        entries.len()
+    );
 
     // Verify each entry has expected fields
     for entry in entries {
         assert!(entry["action"].as_str().is_some(), "missing action");
-        assert!(entry["resource_type"].as_str().is_some(), "missing resource_type");
+        assert!(
+            entry["resource_type"].as_str().is_some(),
+            "missing resource_type"
+        );
         assert!(entry["created_at"].as_str().is_some(), "missing created_at");
     }
 
@@ -930,15 +947,15 @@ async fn test_audit_log() {
     assert!(signup_entry.is_some(), "no signup audit entry found");
 
     // Verify we have an api_key create entry
-    let key_entry = entries
-        .iter()
-        .find(|e| e["action"].as_str() == Some("create") && e["resource_type"].as_str() == Some("api_key"));
+    let key_entry = entries.iter().find(|e| {
+        e["action"].as_str() == Some("create") && e["resource_type"].as_str() == Some("api_key")
+    });
     assert!(key_entry.is_some(), "no api_key create audit entry found");
 
     // Verify we have a user create entry
-    let user_entry = entries
-        .iter()
-        .find(|e| e["action"].as_str() == Some("create") && e["resource_type"].as_str() == Some("user"));
+    let user_entry = entries.iter().find(|e| {
+        e["action"].as_str() == Some("create") && e["resource_type"].as_str() == Some("user")
+    });
     assert!(user_entry.is_some(), "no user create audit entry found");
 }
 
@@ -962,7 +979,12 @@ async fn test_input_validation() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST, "short password should be rejected: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::BAD_REQUEST,
+        "short password should be rejected: {:?}",
+        body
+    );
 
     // Signup with password missing uppercase
     let (status, _) = app
@@ -1132,9 +1154,7 @@ async fn test_no_auth_header() {
     let app = TestApp::new().await;
 
     // Request without any auth token
-    let (status, body) = app
-        .request(Method::GET, "/app/auth/me", None, None)
-        .await;
+    let (status, body) = app.request(Method::GET, "/app/auth/me", None, None).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert!(body["error"].as_str().is_some());
 }
@@ -1305,7 +1325,12 @@ async fn test_signup_validation() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST, "short password: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::BAD_REQUEST,
+        "short password: {:?}",
+        body
+    );
 
     // Missing uppercase
     let (status, _) = app
@@ -1369,11 +1394,13 @@ async fn test_expired_session_rejected() {
         .await
         .unwrap();
 
-    sqlx::query("UPDATE app_sessions SET expires_at = NOW() - INTERVAL '1 hour' WHERE app_user_id = $1")
-        .bind(uuid::Uuid::parse_str(user_id).unwrap())
-        .execute(&pool)
-        .await
-        .unwrap();
+    sqlx::query(
+        "UPDATE app_sessions SET expires_at = NOW() - INTERVAL '1 hour' WHERE app_user_id = $1",
+    )
+    .bind(uuid::Uuid::parse_str(user_id).unwrap())
+    .execute(&pool)
+    .await
+    .unwrap();
 
     // Token should now be rejected
     let (status, _) = app
@@ -1398,7 +1425,12 @@ async fn test_update_workspace_name_too_short() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST, "1-char name should be rejected: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::BAD_REQUEST,
+        "1-char name should be rejected: {:?}",
+        body
+    );
 
     // Empty name should fail
     let (status, _) = app
@@ -1441,10 +1473,18 @@ async fn test_change_password_wrong_current() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST, "wrong current password: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::BAD_REQUEST,
+        "wrong current password: {:?}",
+        body
+    );
     assert!(
         body["error"].as_str().unwrap_or("").contains("incorrect")
-            || body["error"].as_str().unwrap_or("").contains("Current password"),
+            || body["error"]
+                .as_str()
+                .unwrap_or("")
+                .contains("Current password"),
         "error should mention incorrect password: {:?}",
         body
     );
@@ -1466,14 +1506,22 @@ async fn test_create_api_key_with_expiry() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "create key with expiry failed: {:?}", created);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "create key with expiry failed: {:?}",
+        created
+    );
     assert!(created["api_key"].as_str().is_some());
-    assert!(created["expires_at"].as_str().is_some(), "key should have expires_at field");
+    assert!(
+        created["expires_at"].as_str().is_some(),
+        "key should have expires_at field"
+    );
 
     // Verify expiry is roughly 30 days from now
     let expires = created["expires_at"].as_str().unwrap();
-    let expires_dt = chrono::DateTime::parse_from_rfc3339(expires)
-        .expect("expires_at should be valid RFC3339");
+    let expires_dt =
+        chrono::DateTime::parse_from_rfc3339(expires).expect("expires_at should be valid RFC3339");
     let now = chrono::Utc::now();
     let days_diff = (expires_dt.timestamp() - now.timestamp()) / 86400;
     assert!(
@@ -1533,7 +1581,11 @@ async fn test_accept_expired_invite() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::NOT_FOUND, "expired invite should return 404");
+    assert_eq!(
+        status,
+        StatusCode::NOT_FOUND,
+        "expired invite should return 404"
+    );
 }
 
 // ── Test 23: Profile name too short ────────────────────────────────────
@@ -1576,16 +1628,30 @@ async fn test_account_lockout() {
     // Make 5 failed login attempts to trigger lockout
     for i in 0..5 {
         let (status, _) = app.login(&email, "WrongPassword123!@#").await;
-        assert_eq!(status, StatusCode::UNAUTHORIZED, "attempt {} should fail with 401", i + 1);
+        assert_eq!(
+            status,
+            StatusCode::UNAUTHORIZED,
+            "attempt {} should fail with 401",
+            i + 1
+        );
     }
 
     // 6th attempt should be rate-limited (account locked)
     let (status, body) = app.login(&email, "WrongPassword123!@#").await;
-    assert_eq!(status, StatusCode::TOO_MANY_REQUESTS, "locked account should return 429: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::TOO_MANY_REQUESTS,
+        "locked account should return 429: {:?}",
+        body
+    );
 
     // Even correct password should be rejected while locked
     let (status, _) = app.login(&email, TEST_PASSWORD).await;
-    assert_eq!(status, StatusCode::TOO_MANY_REQUESTS, "correct password should still be rejected while locked");
+    assert_eq!(
+        status,
+        StatusCode::TOO_MANY_REQUESTS,
+        "correct password should still be rejected while locked"
+    );
 }
 
 // ── Test 25: Password reset flow ────────────────────────────────────────
@@ -1640,8 +1706,16 @@ async fn test_password_reset_flow() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "reset password failed: {:?}", reset_res);
-    assert!(reset_res["token"].as_str().is_some(), "should return new session token");
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "reset password failed: {:?}",
+        reset_res
+    );
+    assert!(
+        reset_res["token"].as_str().is_some(),
+        "should return new session token"
+    );
 
     // Login with new password should work
     let (status, _) = app.login(&dev_email, NEW_PASSWORD).await;
@@ -1701,14 +1775,22 @@ async fn test_session_management() {
         .await;
     assert_eq!(status, StatusCode::OK);
     let session_list = sessions.as_array().expect("should be array");
-    assert!(session_list.len() >= 2, "expected at least 2 sessions, got {}", session_list.len());
+    assert!(
+        session_list.len() >= 2,
+        "expected at least 2 sessions, got {}",
+        session_list.len()
+    );
 
     // One session should be marked as current
-    let current = session_list.iter().find(|s| s["current"].as_bool() == Some(true));
+    let current = session_list
+        .iter()
+        .find(|s| s["current"].as_bool() == Some(true));
     assert!(current.is_some(), "should have one current session");
 
     // Find a non-current session to revoke
-    let non_current = session_list.iter().find(|s| s["current"].as_bool() == Some(false));
+    let non_current = session_list
+        .iter()
+        .find(|s| s["current"].as_bool() == Some(false));
     assert!(non_current.is_some(), "should have a non-current session");
     let revoke_id = non_current.unwrap()["id"].as_str().unwrap();
 
@@ -1793,11 +1875,17 @@ async fn test_request_correlation_id() {
         .await;
     assert_eq!(status, StatusCode::OK);
     let request_id = headers.get("x-request-id");
-    assert!(request_id.is_some(), "response should include X-Request-ID header");
+    assert!(
+        request_id.is_some(),
+        "response should include X-Request-ID header"
+    );
     let id_val = request_id.unwrap().to_str().unwrap();
     assert!(!id_val.is_empty());
     // Should be a valid UUID
-    assert!(Uuid::parse_str(id_val).is_ok(), "X-Request-ID should be a valid UUID");
+    assert!(
+        Uuid::parse_str(id_val).is_ok(),
+        "X-Request-ID should be a valid UUID"
+    );
 
     // When we send our own X-Request-ID, it should be echoed back
     let custom_id = Uuid::new_v4().to_string();
@@ -1810,8 +1898,16 @@ async fn test_request_correlation_id() {
     let req = builder.body(Body::empty()).unwrap();
     let response = app.router.clone().oneshot(req).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-    let echoed = response.headers().get("x-request-id").unwrap().to_str().unwrap();
-    assert_eq!(echoed, custom_id, "should echo back the provided X-Request-ID");
+    let echoed = response
+        .headers()
+        .get("x-request-id")
+        .unwrap()
+        .to_str()
+        .unwrap();
+    assert_eq!(
+        echoed, custom_id,
+        "should echo back the provided X-Request-ID"
+    );
 }
 
 // ── Test 29: Token refresh ──────────────────────────────────────────
@@ -1832,7 +1928,10 @@ async fn test_token_refresh() {
         .request(Method::POST, "/app/auth/refresh", None, Some(&token))
         .await;
     assert_eq!(status, StatusCode::OK, "refresh failed: {:?}", refresh_body);
-    let new_token = refresh_body["token"].as_str().expect("no new token").to_string();
+    let new_token = refresh_body["token"]
+        .as_str()
+        .expect("no new token")
+        .to_string();
     assert!(refresh_body["expires_at"].as_str().is_some());
     assert_ne!(token, new_token, "new token should differ from old token");
 
@@ -1840,7 +1939,11 @@ async fn test_token_refresh() {
     let (status, _) = app
         .request(Method::GET, "/app/auth/me", None, Some(&token))
         .await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED, "old token should be invalid after refresh");
+    assert_eq!(
+        status,
+        StatusCode::UNAUTHORIZED,
+        "old token should be invalid after refresh"
+    );
 
     // New token should work
     let (status, _) = app
@@ -1917,7 +2020,12 @@ async fn test_idle_session_timeout() {
     let (status, body) = app
         .request(Method::GET, "/app/auth/me", None, Some(&token))
         .await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED, "idle session should be rejected: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::UNAUTHORIZED,
+        "idle session should be rejected: {:?}",
+        body
+    );
 }
 
 // ── Test 31: Admin verify email ──────────────────────────────────────
@@ -1995,12 +2103,18 @@ async fn test_data_export() {
     assert_eq!(status, StatusCode::OK, "data export failed: {:?}", export);
 
     // Verify export structure
-    assert!(export["export_date"].as_str().is_some(), "should have export_date");
+    assert!(
+        export["export_date"].as_str().is_some(),
+        "should have export_date"
+    );
     assert_eq!(export["user"]["email"].as_str().unwrap(), email);
     assert!(export["user"]["id"].as_str().is_some());
     assert!(export["user"]["role"].as_str().is_some());
     assert!(export["sessions"].is_array(), "should have sessions array");
-    assert!(export["audit_log"].is_array(), "should have audit_log array");
+    assert!(
+        export["audit_log"].is_array(),
+        "should have audit_log array"
+    );
 
     // Sessions should include at least the current session
     let sessions = export["sessions"].as_array().unwrap();
@@ -2023,7 +2137,12 @@ async fn test_account_deletion() {
             Some(&owner_token),
         )
         .await;
-    assert_eq!(status, StatusCode::BAD_REQUEST, "sole owner should not be able to delete: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::BAD_REQUEST,
+        "sole owner should not be able to delete: {:?}",
+        body
+    );
 
     // Create a second owner, then the first can delete
     let dev_email = format!("del-dev-{}@test.local", Uuid::new_v4());
@@ -2068,7 +2187,12 @@ async fn test_account_deletion() {
             Some(&dev_token),
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "delete account failed: {:?}", del_res);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "delete account failed: {:?}",
+        del_res
+    );
     assert_eq!(del_res["scheduled"].as_bool().unwrap(), true);
     assert!(del_res["deletion_date"].as_str().is_some());
 
@@ -2094,14 +2218,14 @@ async fn test_csrf_required_for_mutations() {
 
     // POST without CSRF should fail with 403
     let (status, body) = app
-        .request_no_csrf(
-            Method::POST,
-            "/app/auth/logout",
-            None,
-            Some(&token),
-        )
+        .request_no_csrf(Method::POST, "/app/auth/logout", None, Some(&token))
         .await;
-    assert_eq!(status, StatusCode::FORBIDDEN, "POST without CSRF should be rejected: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::FORBIDDEN,
+        "POST without CSRF should be rejected: {:?}",
+        body
+    );
     assert!(
         body["error"].as_str().unwrap_or("").contains("CSRF"),
         "error should mention CSRF: {:?}",
@@ -2117,7 +2241,11 @@ async fn test_csrf_required_for_mutations() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::FORBIDDEN, "PUT without CSRF should be rejected");
+    assert_eq!(
+        status,
+        StatusCode::FORBIDDEN,
+        "PUT without CSRF should be rejected"
+    );
 
     // POST with CSRF should succeed
     let (status, _) = app
@@ -2140,10 +2268,16 @@ async fn test_totp_setup() {
     assert_eq!(status, StatusCode::OK, "TOTP setup failed: {:?}", setup);
     assert!(setup["secret"].as_str().is_some(), "should return secret");
     assert!(setup["qr_uri"].as_str().is_some(), "should return qr_uri");
-    assert!(setup["backup_codes"].is_array(), "should return backup codes");
+    assert!(
+        setup["backup_codes"].is_array(),
+        "should return backup codes"
+    );
 
     let qr_uri = setup["qr_uri"].as_str().unwrap();
-    assert!(qr_uri.starts_with("otpauth://totp/"), "qr_uri should be otpauth format");
+    assert!(
+        qr_uri.starts_with("otpauth://totp/"),
+        "qr_uri should be otpauth format"
+    );
     assert!(qr_uri.contains("algorithm=SHA1"), "should use SHA1");
     assert!(qr_uri.contains("digits=6"), "should use 6 digits");
 
@@ -2190,7 +2324,12 @@ async fn test_totp_enable_disable() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "enable TOTP failed: {:?}", enable_res);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "enable TOTP failed: {:?}",
+        enable_res
+    );
     assert_eq!(enable_res["enabled"].as_bool().unwrap(), true);
 
     // Verify TOTP is enabled via /me
@@ -2220,7 +2359,12 @@ async fn test_totp_enable_disable() {
             Some(&token),
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "disable TOTP failed: {:?}", disable_res);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "disable TOTP failed: {:?}",
+        disable_res
+    );
     assert_eq!(disable_res["disabled"].as_bool().unwrap(), true);
 
     // Verify TOTP is disabled via /me
@@ -2268,8 +2412,10 @@ async fn test_login_with_totp() {
     assert_eq!(status, StatusCode::OK, "login failed: {:?}", login_body);
     assert_eq!(login_body["totp_required"].as_bool().unwrap(), true);
     let totp_token = login_body["totp_token"].as_str().unwrap().to_string();
-    assert!(login_body.get("token").is_none() || login_body["token"].is_null(),
-        "should not return a full session token when TOTP is required");
+    assert!(
+        login_body.get("token").is_none() || login_body["token"].is_null(),
+        "should not return a full session token when TOTP is required"
+    );
 
     // Verify with wrong code should fail
     let (status, _) = app
@@ -2280,7 +2426,11 @@ async fn test_login_with_totp() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::UNAUTHORIZED, "wrong TOTP code should be rejected");
+    assert_eq!(
+        status,
+        StatusCode::UNAUTHORIZED,
+        "wrong TOTP code should be rejected"
+    );
 
     // Verify with correct code should succeed
     let valid_code = generate_test_totp(&secret);
@@ -2292,8 +2442,15 @@ async fn test_login_with_totp() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "TOTP verify failed: {:?}", verify_body);
-    let session_token = verify_body["token"].as_str().expect("should return session token");
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "TOTP verify failed: {:?}",
+        verify_body
+    );
+    let session_token = verify_body["token"]
+        .as_str()
+        .expect("should return session token");
     assert!(!session_token.is_empty());
 
     // Session token should work
@@ -2315,7 +2472,12 @@ async fn test_login_with_totp() {
             None,
         )
         .await;
-    assert_eq!(status, StatusCode::OK, "backup code verify failed: {:?}", verify_body2);
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "backup code verify failed: {:?}",
+        verify_body2
+    );
     assert!(verify_body2["token"].as_str().is_some());
 }
 
