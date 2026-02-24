@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import HMRErrorHandler from '@/components/HMRErrorHandler';
 import { SITE, pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className="font-sans bg-gradient-dark min-h-screen">
+        <HMRErrorHandler />
         <Navbar />
         <main className="pt-16">{children}</main>
         <Footer />

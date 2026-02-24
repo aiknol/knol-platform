@@ -24,10 +24,12 @@ describe('URL resolvers', () => {
     expect(resolveAppApiUrl()).toBe('http://custom:9000');
   });
 
-  it('resolveAppApiUrl returns dev default', async () => {
-    // NODE_ENV is 'test' which counts as not production (IS_DEV = true)
+  it('resolveAppApiUrl returns empty string in dev for same-origin proxy', async () => {
+    // NODE_ENV is 'test' which counts as not production (IS_DEV = true).
+    // In dev, the URL is empty so requests are relative and proxied by
+    // the Next.js dev server, keeping auth cookies on the same origin.
     const { resolveAppApiUrl } = await importUrlsFresh();
-    expect(resolveAppApiUrl()).toBe('http://localhost:8085');
+    expect(resolveAppApiUrl()).toBe('');
   });
 
   it('resolveAdminApiUrl returns explicit env', async () => {
@@ -70,9 +72,8 @@ describe('URL resolvers', () => {
     expect(url).toMatch(/^https?:\/\//);
   });
 
-  it('respects custom base domain', async () => {
-    process.env.NEXT_PUBLIC_BASE_DOMAIN = 'myapp.com';
-    process.env.NEXT_PUBLIC_URL_SCHEME = 'https';
+  it('respects custom base domain via explicit URL', async () => {
+    process.env.NEXT_PUBLIC_APP_API_URL = 'https://cloud-api.myapp.com';
     const { resolveAppApiUrl } = await importUrlsFresh();
     const url = resolveAppApiUrl();
     expect(url).toContain('myapp.com');

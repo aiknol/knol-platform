@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { DOCS_SITE } from '@/config/site';
+import HMRErrorHandler from '@/components/HMRErrorHandler';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <HMRErrorHandler />
         <header className="topbar">
           <div className="container topbarInner">
             <Link href="/" className="brand" aria-label="Knol Docs Home">

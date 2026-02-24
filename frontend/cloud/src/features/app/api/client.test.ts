@@ -8,7 +8,7 @@ const sessionMocks = vi.hoisted(() => ({
 
 // Mock urls module
 const urlMocks = vi.hoisted(() => ({
-  resolveAppApiUrl: vi.fn().mockReturnValue('http://localhost:8085'),
+  resolveAppApiUrl: vi.fn().mockReturnValue('http://localhost:3002'),
 }));
 
 vi.mock('@/config/urls', () => ({
@@ -53,7 +53,7 @@ describe('apiFetch', () => {
     });
     expect(fetch).toHaveBeenCalledTimes(1);
     const call = (fetch as any).mock.calls[0];
-    expect(call[0]).toBe('http://localhost:8085/app/test');
+    expect(call[0]).toBe('http://localhost:3002/app/test');
   });
 
   it('401 clears session and redirects', async () => {

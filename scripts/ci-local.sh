@@ -36,4 +36,7 @@ echo "==> Web builds"
 echo "==> Frontend smoke checks"
 "$ROOT_DIR/scripts/frontend-smoke.sh"
 
+echo "==> E2E tests (gateway + tenant API)"
+"$ROOT_DIR/scripts/e2e-tests.sh"
+
 echo "✅ Local CI gates passed"

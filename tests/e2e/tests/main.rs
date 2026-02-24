@@ -29,6 +29,7 @@
 // =============================================================================
 
 mod harness;
+mod tenant_helpers;
 mod test_gateway;
 mod test_write;
 mod test_retrieve;
@@ -39,3 +40,11 @@ mod test_billing;
 mod test_ingest;
 mod test_cross_service;
 mod test_deploy;
+mod test_signup_flow;
+mod test_session_management;
+mod test_memory_crud;
+mod test_user_management;
+mod test_team_invites;
+mod test_graph_api;
+mod test_webhooks;
+mod test_tenant_settings;

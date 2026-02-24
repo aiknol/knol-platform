@@ -127,7 +127,7 @@ const ADMIN_API_ORIGIN = resolveOrigin(
 const TENANT_API_ORIGIN = resolveOrigin(
   null,
   readEnv('NEXT_PUBLIC_TENANT_API_HOST'),
-  defaultPort(readEnv('NEXT_PUBLIC_TENANT_API_PORT'), '8085'),
+  defaultPort(readEnv('NEXT_PUBLIC_TENANT_API_PORT'), '3002'),
   defaultHostFor(BASE_DOMAIN, 'cloud-api'),
   URL_SCHEME,
 );
@@ -207,11 +207,13 @@ export function resolveAppApiUrl(): string {
   const explicit = readEnv('NEXT_PUBLIC_APP_API_URL');
   if (explicit) return stripTrailingSlash(explicit);
 
-  // In production, the tenant API is typically behind the same API gateway.
-  // In development, the tenant service runs on its own port (default 8085).
-  if (TENANT_API_ORIGIN) return TENANT_API_ORIGIN;
+  // In development, use relative URLs so the Next.js dev server proxies
+  // requests to the tenant service. This keeps the browser origin the same
+  // for frontend and API, which lets HttpOnly auth cookies work correctly.
+  if (IS_DEV) return '';
 
-  if (IS_DEV) return 'http://localhost:8085';
+  // In production, the tenant API is typically behind the same API gateway.
+  if (TENANT_API_ORIGIN) return TENANT_API_ORIGIN;
 
   // Production fallback: tenant API shares the same origin as the admin API
   return resolveAdminApiUrl();

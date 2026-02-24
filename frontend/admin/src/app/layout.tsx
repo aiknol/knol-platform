@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import AdminShell from '@/components/AdminShell';
+import HMRErrorHandler from '@/components/HMRErrorHandler';
 import { SITE, pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className="font-sans bg-gradient-dark min-h-screen">
+        <HMRErrorHandler />
         <AdminShell>{children}</AdminShell>
       </body>
     </html>
