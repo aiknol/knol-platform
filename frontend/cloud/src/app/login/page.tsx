@@ -19,7 +19,7 @@ export default function AppLoginPage() {
     setLoading(true);
     try {
       await appAuthAPI.login(email, password);
-      router.push('/dashboard');
+      router.push('/playground');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

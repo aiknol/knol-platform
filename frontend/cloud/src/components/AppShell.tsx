@@ -25,7 +25,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     pathname === '/login' ||
     pathname === '/login/' ||
     pathname === '/signup' ||
-    pathname === '/signup/';
+    pathname === '/signup/' ||
+    pathname === '/playground' ||
+    pathname === '/playground/';
 
   const canManage = user?.role === 'owner' || user?.role === 'admin';
 

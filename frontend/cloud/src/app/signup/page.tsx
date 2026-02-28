@@ -43,7 +43,7 @@ export default function AppSignupPage() {
         email,
         password,
       });
-      router.push('/dashboard');
+      router.push('/api-keys');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
     } finally {

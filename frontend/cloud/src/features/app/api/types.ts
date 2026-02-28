@@ -22,6 +22,7 @@ export interface ApiKeyItem {
   name: string;
   role: string;
   active: boolean;
+  key_prefix?: string;
   last_used_at?: string | null;
   expires_at?: string | null;
   created_at: string;

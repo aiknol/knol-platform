@@ -11,6 +11,10 @@ export {
   setAppProfile,
   clearAppAuthSession,
   consumeInitialApiKey,
+  getInitialApiKey,
+  storeSessionApiKey,
+  getSessionApiKeys,
+  getSessionApiKeyValue,
 } from './session';
 
 export { appAuthAPI } from './auth';

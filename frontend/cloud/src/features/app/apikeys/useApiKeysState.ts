@@ -8,6 +8,7 @@ import {
   appAuthAPI,
   consumeInitialApiKey,
   getAppAuthUser,
+  storeSessionApiKey,
 } from '@/features/app/api';
 
 export function useApiKeysState() {
@@ -23,6 +24,10 @@ export function useApiKeysState() {
   const [newExpiryDays, setNewExpiryDays] = useState('30');
   const [createBusy, setCreateBusy] = useState(false);
   const [newlyCreatedApiKey, setNewlyCreatedApiKey] = useState<string | null>(consumeInitialApiKey());
+  const [keyVisible, setKeyVisible] = useState(false);
+
+  // Per-key visibility in the list (set of key IDs whose prefix is revealed)
+  const [visibleKeyIds, setVisibleKeyIds] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     setError('');
@@ -60,6 +65,16 @@ export function useApiKeysState() {
       }
       const created = await appApiKeysAPI.create(payload);
       setNewlyCreatedApiKey(created.api_key);
+      setKeyVisible(false);
+
+      // Store full key in session vault so Playground can use it
+      storeSessionApiKey({
+        id: created.id,
+        name: created.name || newName,
+        role: created.role || newRole,
+        api_key: created.api_key,
+      });
+
       const keyList = await appApiKeysAPI.list();
       setKeys(keyList);
     } catch (err) {
@@ -83,6 +98,22 @@ export function useApiKeysState() {
     }
   };
 
+  const toggleKeyVisibility = () => setKeyVisible((v) => !v);
+
+  const toggleListKeyVisibility = (id: string) => {
+    setVisibleKeyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const isListKeyVisible = (id: string) => visibleKeyIds.has(id);
+
   const copyToClipboard = async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
@@ -105,6 +136,11 @@ export function useApiKeysState() {
     setNewExpiryDays,
     createBusy,
     newlyCreatedApiKey,
+    keyVisible,
+    toggleKeyVisibility,
+    visibleKeyIds,
+    toggleListKeyVisibility,
+    isListKeyVisible,
     onCreateKey,
     onRevoke,
     copyToClipboard,

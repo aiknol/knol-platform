@@ -184,12 +184,28 @@ clean_next_caches() {
   done
 }
 
+any_frontend_port_in_use() {
+  local ports=(3005 3006 3007 3008 3009)
+  local port
+  for port in "${ports[@]}"; do
+    if is_listening "$port"; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 start_all() {
   require_bin npm
   ensure_frontend_dependencies
 
   # Prevent stale Next dev cache issues after refactors/renames.
-  clean_next_caches
+  # IMPORTANT: only clear caches when we're actually starting services.
+  # If a dev server is already running on these ports, deleting `.next`
+  # can crash that server and make smoke checks fail.
+  if ! any_frontend_port_in_use; then
+    clean_next_caches
+  fi
 
   echo "Starting frontend services..."
   start_service web-main "$MAIN_WEB_DIR" 3005

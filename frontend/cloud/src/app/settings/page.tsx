@@ -30,6 +30,14 @@ export default function SettingsPage() {
     setConfirmPassword,
     passwordBusy,
     onChangePassword,
+    // Delete account
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    deletePassword,
+    setDeletePassword,
+    deleteBusy,
+    deleteError,
+    onDeleteAccount,
   } = useSettingsState();
 
   if (loading) {
@@ -160,6 +168,68 @@ export default function SettingsPage() {
             {passwordBusy ? 'Changing...' : 'Change Password'}
           </button>
         </form>
+      </section>
+
+      {/* Danger Zone */}
+      <section className="rounded-xl border border-red-500/20 bg-dark-800/50 backdrop-blur-sm p-6">
+        <h3 className="text-lg font-semibold text-red-400 mb-1">Danger Zone</h3>
+        <p className="text-sm text-dark-400 mb-5">
+          Permanently delete your account and all associated data.
+        </p>
+
+        {!showDeleteConfirm ? (
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-4 py-2 text-sm rounded-lg border border-red-500/40 text-red-300 hover:bg-red-500/10 transition-colors"
+          >
+            Delete my account
+          </button>
+        ) : (
+          <form onSubmit={onDeleteAccount} className="space-y-4 max-w-md">
+            {deleteError && <div className="alert-error">{deleteError}</div>}
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-sm text-red-300">
+              Your account will be scheduled for permanent deletion after a 30-day grace period.
+              All your data, API keys, and workspace settings will be permanently removed. This
+              action cannot be undone.
+            </div>
+            <div>
+              <label htmlFor="delete-password" className="form-label">
+                Enter your password to confirm
+              </label>
+              <input
+                id="delete-password"
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                className="input-field"
+                maxLength={128}
+                autoComplete="current-password"
+                placeholder="Your current password"
+                required
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={deleteBusy}
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-60 transition-colors"
+              >
+                {deleteBusy ? 'Deleting...' : 'Confirm Delete Account'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeletePassword('');
+                }}
+                className="px-4 py-2 text-sm rounded-lg border border-dark-600/40 text-dark-300 hover:border-dark-400 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
       </section>
     </div>
   );

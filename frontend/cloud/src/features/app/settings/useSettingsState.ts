@@ -6,6 +6,7 @@ import {
   TenantProfile,
   appAuthAPI,
   appSettingsAPI,
+  clearAppAuthSession,
   getAppAuthUser,
   getAppTenant,
   setAppProfile,
@@ -33,6 +34,12 @@ export function useSettingsState() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordBusy, setPasswordBusy] = useState(false);
+
+  // Delete account
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const load = useCallback(async () => {
     setError('');
@@ -149,6 +156,32 @@ export function useSettingsState() {
     }
   };
 
+  const onDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeleteError('');
+
+    if (!deletePassword.trim()) {
+      setDeleteError('Please enter your password to confirm account deletion.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your account? Your account will be scheduled for permanent deletion in 30 days. This action cannot be undone.',
+    );
+    if (!confirmed) return;
+
+    setDeleteBusy(true);
+    try {
+      await appSettingsAPI.deleteAccount({ password: deletePassword });
+      clearAppAuthSession();
+      window.location.href = '/login';
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete account');
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
+
   return {
     user,
     tenant,
@@ -175,5 +208,13 @@ export function useSettingsState() {
     setConfirmPassword,
     passwordBusy,
     onChangePassword,
+    // Delete account
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    deletePassword,
+    setDeletePassword,
+    deleteBusy,
+    deleteError,
+    onDeleteAccount,
   };
 }

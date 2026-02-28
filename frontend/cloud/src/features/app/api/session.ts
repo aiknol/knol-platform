@@ -82,3 +82,50 @@ export function consumeInitialApiKey(): string | null {
   }
   return key;
 }
+
+/**
+ * Read the initial API key without consuming it. Used by the Playground
+ * to pre-populate the key field after signup.
+ */
+export function getInitialApiKey(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem('app_initial_api_key');
+}
+
+// ---------------------------------------------------------------------------
+// Session key vault – stores full API key values created during this browser
+// session so the Playground can use them.  SessionStorage is tab-scoped and
+// cleared when the tab closes, which is the appropriate security boundary.
+// ---------------------------------------------------------------------------
+const SESSION_KEYS_STORAGE = 'app_session_api_keys';
+
+interface SessionKeyEntry {
+  id: string;
+  name: string;
+  role: string;
+  api_key: string;
+}
+
+export function storeSessionApiKey(entry: SessionKeyEntry): void {
+  if (typeof window === 'undefined') return;
+  const existing = getSessionApiKeys();
+  const filtered = existing.filter((e) => e.id !== entry.id);
+  filtered.push(entry);
+  sessionStorage.setItem(SESSION_KEYS_STORAGE, JSON.stringify(filtered));
+}
+
+export function getSessionApiKeys(): SessionKeyEntry[] {
+  if (typeof window === 'undefined') return [];
+  const raw = sessionStorage.getItem(SESSION_KEYS_STORAGE);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export function getSessionApiKeyValue(id: string): string | null {
+  const entries = getSessionApiKeys();
+  return entries.find((e) => e.id === id)?.api_key ?? null;
+}

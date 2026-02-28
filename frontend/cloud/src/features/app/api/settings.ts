@@ -29,6 +29,15 @@ export interface ChangePasswordResponse {
   expires_at: string;
 }
 
+export interface DeleteAccountPayload {
+  password: string;
+}
+
+export interface DeleteAccountResponse {
+  scheduled: boolean;
+  deletion_date: string;
+}
+
 export const appSettingsAPI = {
   updateTenant: async (payload: UpdateTenantPayload) =>
     apiFetch<UpdateTenantResponse>('/app/settings/tenant', {
@@ -44,6 +53,12 @@ export const appSettingsAPI = {
 
   changePassword: async (payload: ChangePasswordPayload) =>
     apiFetch<ChangePasswordResponse>('/app/settings/change-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  deleteAccount: async (payload: DeleteAccountPayload) =>
+    apiFetch<DeleteAccountResponse>('/app/settings/delete-account', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),

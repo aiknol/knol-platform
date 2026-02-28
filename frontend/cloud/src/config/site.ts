@@ -51,9 +51,10 @@ export interface AppNavItem {
 }
 
 export const APP_NAV_ITEMS: AppNavItem[] = [
+  { href: '/playground', label: 'Playground' },
   { href: '/dashboard', label: 'Overview' },
-  { href: '/billing', label: 'Billing' },
   { href: '/api-keys', label: 'API Keys' },
+  { href: '/billing', label: 'Billing' },
   { href: '/team', label: 'Team', adminOnly: true },
   { href: '/settings', label: 'Settings' },
 ];

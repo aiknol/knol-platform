@@ -4,6 +4,12 @@ import { useApiKeysState } from '@/features/app/apikeys/useApiKeysState';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 
+function maskPrefix(prefix: string): string {
+  if (prefix.length <= 8) return '\u2022'.repeat(prefix.length);
+  // Show first 8 chars (e.g. "knol_sk_") and last 4, mask the rest
+  return prefix.slice(0, 8) + '\u2022'.repeat(Math.max(0, prefix.length - 12)) + prefix.slice(-4);
+}
+
 export default function ApiKeysPage() {
   const {
     gatewayBaseUrl,
@@ -18,6 +24,10 @@ export default function ApiKeysPage() {
     setNewExpiryDays,
     createBusy,
     newlyCreatedApiKey,
+    keyVisible,
+    toggleKeyVisibility,
+    toggleListKeyVisibility,
+    isListKeyVisible,
     onCreateKey,
     onRevoke,
     copyToClipboard,
@@ -38,13 +48,25 @@ export default function ApiKeysPage() {
         <section className="alert-success !p-5">
           <h3 className="text-sm font-semibold text-emerald-200 mb-2">Your API key (shown once)</h3>
           <div className="flex flex-col md:flex-row gap-3 md:items-center">
-            <code className="text-xs md:text-sm break-all text-emerald-100">{newlyCreatedApiKey}</code>
-            <button
-              onClick={() => copyToClipboard(newlyCreatedApiKey)}
-              className="px-3 py-1.5 rounded-lg border border-emerald-400/40 text-emerald-100 text-sm hover:bg-emerald-500/10"
-            >
-              Copy
-            </button>
+            <code className="text-xs md:text-sm break-all text-emerald-100">
+              {keyVisible
+                ? newlyCreatedApiKey
+                : '\u2022'.repeat(Math.max(0, newlyCreatedApiKey.length - 4)) + newlyCreatedApiKey.slice(-4)}
+            </code>
+            <div className="flex gap-2">
+              <button
+                onClick={toggleKeyVisibility}
+                className="px-3 py-1.5 rounded-lg border border-emerald-400/40 text-emerald-100 text-sm hover:bg-emerald-500/10"
+              >
+                {keyVisible ? 'Hide' : 'Reveal'}
+              </button>
+              <button
+                onClick={() => copyToClipboard(newlyCreatedApiKey)}
+                className="px-3 py-1.5 rounded-lg border border-emerald-400/40 text-emerald-100 text-sm hover:bg-emerald-500/10"
+              >
+                Copy
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -119,27 +141,46 @@ export default function ApiKeysPage() {
             {keys.map((k) => (
               <div
                 key={k.id}
-                className="rounded-lg border border-dark-600/40 bg-dark-900/40 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+                className="rounded-lg border border-dark-600/40 bg-dark-900/40 p-4 flex flex-col gap-3"
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm text-dark-100 font-medium">{k.name}</p>
-                    <StatusBadge status={k.role} />
-                    <StatusBadge status={k.active ? 'enabled' : 'disabled'} label={k.active ? 'Active' : 'Revoked'} />
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-sm text-dark-100 font-medium">{k.name}</p>
+                      <StatusBadge status={k.role} />
+                      <StatusBadge status={k.active ? 'enabled' : 'disabled'} label={k.active ? 'Active' : 'Revoked'} />
+                    </div>
+                    <p className="text-xs text-dark-400">
+                      Created: {new Date(k.created_at).toLocaleDateString()}
+                      {k.last_used_at && ` | Last used: ${new Date(k.last_used_at).toLocaleDateString()}`}
+                      {k.expires_at && ` | Expires: ${new Date(k.expires_at).toLocaleDateString()}`}
+                    </p>
                   </div>
-                  <p className="text-xs text-dark-400">
-                    Created: {new Date(k.created_at).toLocaleDateString()}
-                    {k.last_used_at && ` | Last used: ${new Date(k.last_used_at).toLocaleDateString()}`}
-                    {k.expires_at && ` | Expires: ${new Date(k.expires_at).toLocaleDateString()}`}
-                  </p>
+                  <div className="flex gap-2 shrink-0">
+                    {k.active && (
+                      <button
+                        onClick={() => onRevoke(k.id)}
+                        className="px-3 py-1.5 rounded-lg border border-red-500/40 text-red-300 text-sm hover:bg-red-500/10"
+                      >
+                        Revoke
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {k.active && (
-                  <button
-                    onClick={() => onRevoke(k.id)}
-                    className="px-3 py-1.5 rounded-lg border border-red-500/40 text-red-300 text-sm hover:bg-red-500/10 shrink-0"
-                  >
-                    Revoke
-                  </button>
+
+                {/* Key prefix with show/hide toggle */}
+                {k.key_prefix && (
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs font-mono text-dark-300 break-all">
+                      {isListKeyVisible(k.id) ? k.key_prefix : maskPrefix(k.key_prefix)}
+                    </code>
+                    <button
+                      onClick={() => toggleListKeyVisibility(k.id)}
+                      className="px-2 py-1 rounded border border-dark-600/40 text-dark-400 text-xs hover:bg-dark-700/40 shrink-0"
+                    >
+                      {isListKeyVisible(k.id) ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
