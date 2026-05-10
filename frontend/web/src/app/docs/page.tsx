@@ -246,6 +246,180 @@ cargo build --workspace --release`}
           />
         </section>
 
+        {/* knol-local */}
+        <section className="mb-16" id="knol-local">
+          <h2 className="text-2xl font-bold text-dark-50 mb-2">knol-local — Local MCP &amp; CLI</h2>
+          <p className="text-dark-300 mb-6">
+            A lightweight, standalone memory server backed by SQLite. No Docker, no PostgreSQL, no API key required.
+            Works with Claude Desktop, Cursor, Windsurf, and Claude Code out of the box.
+          </p>
+
+          <h3 className="text-lg font-semibold text-dark-100 mb-3">Installation</h3>
+          <CodeBlock
+            code={`npm install -g knol-local`}
+            language="bash"
+            title="Global install"
+          />
+          <p className="text-dark-400 text-sm mt-3 mb-6">
+            The postinstall script automatically patches any existing Claude Desktop or Cursor config files.
+            Re-run <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">node $(npm root -g)/knol-local/setup.mjs</code> at any time to re-apply.
+          </p>
+
+          <h3 className="text-lg font-semibold text-dark-100 mb-3">Manual Client Setup</h3>
+          <CodeBlock
+            code={`knol-local setup claude       # Claude Desktop (creates config if missing)
+knol-local setup cursor       # Cursor (~/.cursor/mcp.json)
+knol-local setup claude-code  # Claude Code CLI (claude mcp add)
+knol-local setup codex        # Codex — shows HTTP API instructions
+knol-local setup              # Auto-detect and configure all found clients`}
+            language="bash"
+            title="Setup commands"
+          />
+          <p className="text-dark-400 text-sm mt-3 mb-6">
+            For Claude Code you can also add it per-project in <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">.claude/settings.json</code>:
+          </p>
+          <CodeBlock
+            code={`{ "mcpServers": { "knol-local": { "command": "knol-local" } } }`}
+            language="json"
+            title=".claude/settings.json"
+          />
+
+          <h3 className="text-lg font-semibold text-dark-100 mb-3 mt-8">MCP Tools</h3>
+          <p className="text-dark-300 mb-4">
+            Once connected, Claude (or any MCP client) can call these tools:
+          </p>
+          <div className="space-y-3 mb-6">
+            {[
+              { tool: 'remember', desc: 'Store a memory — accepts content, optional tags, and an importance score (0–1).' },
+              { tool: 'recall', desc: 'Full-text search across memories. Returns ranked results with relevance scores.' },
+              { tool: 'forget', desc: 'Delete a memory by ID.' },
+              { tool: 'list_memories', desc: 'List recent memories with optional tag filters and a limit.' },
+              { tool: 'update_memory', desc: 'Update the content, tags, or importance of an existing memory.' },
+              { tool: 'memory_stats', desc: 'Return total count, oldest, and newest memory timestamps.' },
+            ].map((item) => (
+              <div key={item.tool} className="bg-dark-700/30 border border-dark-600 rounded-lg p-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <code className="text-brand-400 font-mono text-sm sm:whitespace-nowrap">{item.tool}</code>
+                <p className="text-dark-300 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <h3 className="text-lg font-semibold text-dark-100 mb-3">CLI Commands</h3>
+          <CodeBlock
+            code={`# Add a memory
+knol-local add "Prefer strict TypeScript and functional patterns" --tag coding
+
+# Search memories
+knol-local search "TypeScript preferences" --limit 5
+
+# List all memories
+knol-local list --limit 20 --tag coding
+
+# Summary statistics
+knol-local stats
+
+# Export / import
+knol-local export --out backup.json
+knol-local import backup.json
+
+# Backup / restore the SQLite database
+knol-local backup --out ~/backups/
+knol-local restore ~/backups/memories-2026-05-09.db
+
+# Start the HTTP REST API (useful for Codex)
+knol-local serve --port 3001 --key my-secret`}
+            language="bash"
+            title="knol-local CLI"
+          />
+
+          <h3 className="text-lg font-semibold text-dark-100 mb-3 mt-8">HTTP REST API</h3>
+          <p className="text-dark-300 mb-4">
+            Start the server with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">knol-local serve</code> to expose a local REST API — useful for Codex or any tool without native MCP support.
+          </p>
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-dark-600/30">
+                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Method</th>
+                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Path</th>
+                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['GET',  '/memories',        'List memories (supports ?tag=&limit=)'],
+                  ['POST', '/memories',        'Add a memory { content, tags?, importance? }'],
+                  ['GET',  '/memories/search', 'Full-text search (?q=&limit=&tag=)'],
+                  ['DELETE','/memories/:id',   'Delete a memory by ID'],
+                  ['GET',  '/export',          'Export all memories as JSON'],
+                  ['POST', '/import',          'Import memories from JSON'],
+                  ['GET',  '/health',          'Health check'],
+                ].map(([method, path, desc]) => (
+                  <tr key={path + method} className="border-b border-dark-600/20">
+                    <td className="py-3 px-4">
+                      <span className={`font-mono text-xs px-2 py-0.5 rounded ${
+                        method === 'GET' ? 'bg-green-900/30 text-green-400' :
+                        method === 'POST' ? 'bg-blue-900/30 text-blue-400' :
+                        method === 'DELETE' ? 'bg-red-900/30 text-red-400' :
+                        'bg-yellow-900/30 text-yellow-400'
+                      }`}>{method}</span>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-dark-200 text-xs">{path}</td>
+                    <td className="py-3 px-4 text-dark-300">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h3 className="text-lg font-semibold text-dark-100 mb-3 mt-6">Environment &amp; Data</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-dark-600/30">
+                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Variable</th>
+                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Default</th>
+                  <th className="text-left py-3 px-4 text-dark-300 font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['KNOL_LOCAL_DB', '~/.knol-local/memories.db', 'Path to the SQLite database file'],
+                ].map(([name, def, desc]) => (
+                  <tr key={name} className="border-b border-dark-600/20">
+                    <td className="py-3 px-4 font-mono text-brand-400 text-xs">{name}</td>
+                    <td className="py-3 px-4 font-mono text-dark-400 text-xs">{def}</td>
+                    <td className="py-3 px-4 text-dark-300">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-dark-400 text-sm mt-4">
+            Node 22.5+ uses the built-in <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">node:sqlite</code> with no extra dependencies.
+            Older Node versions (e.g. Claude Desktop embeds Node 18) automatically install <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">better-sqlite3</code> during postinstall.
+          </p>
+
+          <div className="flex gap-4 mt-6">
+            <a
+              href="https://www.npmjs.com/package/knol-local"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-300 hover:text-brand-200 text-sm font-medium transition-colors"
+            >
+              npm page →
+            </a>
+            <a
+              href="https://github.com/aiknol/knol-local"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-300 hover:text-brand-200 text-sm font-medium transition-colors"
+            >
+              GitHub →
+            </a>
+          </div>
+        </section>
+
         {/* Authentication */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-4">Authentication</h2>

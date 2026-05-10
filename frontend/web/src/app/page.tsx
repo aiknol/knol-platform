@@ -316,6 +316,104 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* knol-local — zero-setup local memory */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="inline-block mb-4 px-3 py-1 rounded-full border border-brand-500/20 bg-brand-500/5 text-brand-300 text-xs tracking-wide font-mono">
+              npm install -g knol-local
+            </span>
+            <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">
+              Local memory, zero setup
+            </h2>
+            <p className="mt-4 text-dark-400 max-w-2xl mx-auto">
+              <strong className="text-dark-200">knol-local</strong> is a lightweight, standalone MCP server backed by SQLite.
+              No Docker, no PostgreSQL, no API key. Install once — it auto-configures Claude Desktop, Cursor, and Claude Code.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {/* Left: install + auto-setup */}
+            <div className="space-y-4">
+              <div className="card">
+                <p className="text-xs text-dark-400 font-mono uppercase tracking-wider mb-3">Install globally</p>
+                <pre className="text-sm font-mono text-brand-300">npm install -g knol-local</pre>
+                <p className="text-xs text-dark-500 mt-2">Auto-configures Claude Desktop &amp; Cursor on install</p>
+              </div>
+              <div className="card">
+                <p className="text-xs text-dark-400 font-mono uppercase tracking-wider mb-3">Manual setup</p>
+                <pre className="text-sm font-mono text-dark-200 leading-relaxed">{`knol-local setup claude      # Claude Desktop
+knol-local setup cursor      # Cursor
+knol-local setup claude-code # Claude Code CLI`}</pre>
+              </div>
+              <div className="card">
+                <p className="text-xs text-dark-400 font-mono uppercase tracking-wider mb-3">CLI — manage memories</p>
+                <pre className="text-sm font-mono text-dark-200 leading-relaxed">{`knol-local add "Prefer TypeScript strict mode"
+knol-local search "coding preferences"
+knol-local list
+knol-local stats`}</pre>
+              </div>
+            </div>
+
+            {/* Right: features */}
+            <div className="space-y-4">
+              {[
+                {
+                  badge: 'Zero dependencies',
+                  title: 'SQLite + FTS5, nothing else',
+                  desc: 'All memory lives in a single file at ~/.knol-local/memories.db. No server to run, no network calls, full offline support.',
+                },
+                {
+                  badge: 'MCP native',
+                  title: 'Works with Claude, Cursor & Codex',
+                  desc: 'Exposes remember, recall, forget, list, update, and stats tools via the Model Context Protocol.',
+                },
+                {
+                  badge: 'HTTP API',
+                  title: 'REST server for Codex & scripts',
+                  desc: 'Run knol-local serve to expose a local REST API — useful for Codex or any tool without native MCP support.',
+                },
+                {
+                  badge: 'Open source',
+                  title: 'MIT licensed, Node 18+',
+                  desc: 'Uses the built-in node:sqlite on Node 22.5+ with zero warnings. Falls back to better-sqlite3 for older environments like Claude Desktop.',
+                },
+              ].map((f) => (
+                <div key={f.title} className="card">
+                  <span className="inline-block mb-2 px-2 py-0.5 rounded text-xs font-mono text-brand-300 bg-brand-500/10 border border-brand-500/20">
+                    {f.badge}
+                  </span>
+                  <h3 className="text-sm font-semibold text-dark-100 mb-1">{f.title}</h3>
+                  <p className="text-dark-400 text-xs leading-relaxed">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="https://www.npmjs.com/package/knol-local"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary text-sm"
+            >
+              View on npm
+            </a>
+            <a
+              href="https://github.com/aiknol/knol-local"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary text-sm"
+            >
+              GitHub →
+            </a>
+            <a href="/docs/#knol-local" className="btn-secondary text-sm">
+              Full CLI docs →
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Migration Wedge */}
       <section className="px-4 sm:px-6 lg:px-8 py-16 bg-dark-800/30">
         <div className="max-w-5xl mx-auto">
