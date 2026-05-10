@@ -169,21 +169,16 @@ fn validate_config_update(
     }
 
     match value_type {
-        "string" => {
-            if !value.is_string() {
-                return Err(AdminError::BadRequest("Value must be a string".into()));
-            }
+        "string" if !value.is_string() => {
+            return Err(AdminError::BadRequest("Value must be a string".into()));
         }
-        "number" => {
-            if !value.is_number() {
-                return Err(AdminError::BadRequest("Value must be a number".into()));
-            }
+        "number" if !value.is_number() => {
+            return Err(AdminError::BadRequest("Value must be a number".into()));
         }
-        "boolean" => {
-            if !value.is_boolean() {
-                return Err(AdminError::BadRequest("Value must be a boolean".into()));
-            }
+        "boolean" if !value.is_boolean() => {
+            return Err(AdminError::BadRequest("Value must be a boolean".into()));
         }
+        "string" | "number" | "boolean" => {}
         "string_array" => {
             let valid = value
                 .as_array()
