@@ -262,7 +262,7 @@ impl EmbeddingProvider {
                 results[*idx] = Some(embedding.clone());
             }
         } else {
-            for (idx, embedding) in uncached_indices.iter().zip(embeddings.into_iter()) {
+            for (idx, embedding) in uncached_indices.iter().zip(embeddings) {
                 results[*idx] = Some(embedding);
             }
         }
