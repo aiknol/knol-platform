@@ -15,8 +15,8 @@ export const SITE = {
   pypi: 'https://pypi.org/project/knol/',
   npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
   contactEmail: 'aiknolcontact@gmail.com',
-  contactPhone: '+14155055990',
-  contactPhoneDisplay: '(415) 505-5990',
+  contactPhone: '+14155953988',
+  contactPhoneDisplay: '(415) 595-3988',
 } as const;
 
 export function pageTitle(title?: string): string {
@@ -35,6 +35,7 @@ export const NAV_LINKS: NavItem[] = [
   { href: SITE.demoUrl, label: 'Demo' },
   { href: SITE.docsUrl, label: 'Docs' },
   { href: '/mcp/', label: 'MCP' },
+  { href: '/knol-local/', label: 'knol-local' },
   { href: '/comparison', label: 'Compare' },
   { href: '/pricing/', label: 'Pricing' },
   { href: '/blog/', label: 'Blog' },
@@ -61,6 +62,7 @@ export const FOOTER_SECTIONS = [
       { label: 'Documentation', href: SITE.docsUrl },
       { label: 'API Reference', href: SITE.docsUrl },
       { label: 'MCP Server', href: '/mcp/' },
+      { label: 'knol-local', href: '/knol-local/' },
       { label: 'GitHub', href: SITE.github, external: true },
       { label: 'PyPI', href: SITE.pypi, external: true },
       { label: 'npm', href: SITE.npm, external: true },
