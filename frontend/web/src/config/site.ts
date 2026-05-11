@@ -75,6 +75,7 @@ export const FOOTER_SECTIONS = [
       { label: 'About', href: '/about/' },
       { label: 'Contact', href: `mailto:${SITE.contactEmail}` },
       { label: SITE.contactPhoneDisplay, href: `tel:${SITE.contactPhone}` },
+      { label: 'Subhendu Das', href: 'https://www.linkedin.com/in/sumaninster/', external: true },
     ],
   },
   {
