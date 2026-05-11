@@ -113,13 +113,23 @@ impl AppState {
             "http://localhost:8084",
         )
         .await;
-        let cors_origins = db_config::load_str(
-            &db_pool,
-            "gateway.cors_origins",
-            "GATEWAY_CORS_ORIGINS",
-            "http://localhost:3005,http://localhost:3006,http://localhost:8080",
-        )
-        .await;
+        // CORS origins: env var takes priority (so docker-compose `environment:`
+        // always wins), then fall back to DB config, then compiled default.
+        let cors_origins = match std::env::var("GATEWAY_CORS_ORIGINS") {
+            Ok(val) if !val.is_empty() => {
+                info!("CORS origins loaded from env: {}", val);
+                val
+            }
+            _ => {
+                db_config::load_str(
+                    &db_pool,
+                    "gateway.cors_origins",
+                    "",
+                    "http://localhost:3005,http://localhost:3006,http://localhost:8080",
+                )
+                .await
+            }
+        };
 
         // Load optional webhook encryption key (try WEBHOOK_ENCRYPTION_KEY, fall back to ADMIN_ENCRYPTION_KEY)
         let webhook_encryption_key = Self::load_webhook_encryption_key();
