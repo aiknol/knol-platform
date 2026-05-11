@@ -30,6 +30,9 @@ pub struct AppState {
     /// If None, webhook secrets are stored in plaintext (with a warning).
     pub webhook_encryption_key: Option<[u8; 32]>,
     /// If true, allow requests through when Redis is down (skip rate limiting).
+    /// Currently the gateway always allows requests on Redis failure (graceful
+    /// degradation), so this field is unused but kept for future configurability.
+    #[allow(dead_code)]
     pub skip_rate_limit_on_redis_failure: bool,
     /// Configurable graph traversal limits (loaded from system_config).
     pub graph_max_traversal_depth: u32,

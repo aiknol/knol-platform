@@ -454,25 +454,16 @@ async fn rate_limit_middleware(
         match memory_cache::check_rate_limit_sliding(redis, &rate_key, max_rps, window_secs).await {
             Ok(allowed) => allowed,
             Err(e) => {
-                warn!(
-                    "Rate limit check failed (Redis error): {e}. skip_on_failure={}",
-                    state.skip_rate_limit_on_redis_failure
-                );
-                if !state.skip_rate_limit_on_redis_failure {
-                    return Err(MemoryError::ServiceUnavailable(
-                        "Rate limiting service unavailable".into(),
-                    ));
-                }
+                // Always allow requests through when Redis operations fail.
+                // Redis is a performance optimisation, not a hard dependency.
+                warn!("Rate limit check failed (Redis error): {e} — allowing request");
                 true
             }
         }
     } else {
-        if !state.skip_rate_limit_on_redis_failure {
-            return Err(MemoryError::ServiceUnavailable(
-                "Rate limiting service unavailable".into(),
-            ));
-        }
-        true // No Redis = skip rate limiting
+        // No Redis client at all — allow requests through.
+        warn!("No Redis client configured — skipping rate limiting");
+        true
     };
 
     if !allowed {
