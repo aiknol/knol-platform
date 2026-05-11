@@ -58,6 +58,7 @@ services:
     environment:
       GATEWAY_PORT: "8080"
       GATEWAY_CORS_ORIGINS: ${GATEWAY_CORS_ORIGINS:-https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
+      RESILIENCE_SKIP_RATE_LIMIT_ON_REDIS_FAILURE: "true"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health >/dev/null || exit 1"]
       interval: 10s
@@ -160,6 +161,7 @@ services:
     env_file: .env.production
     environment:
       ADMIN_SERVICE_PORT: "8084"
+      SKIP_RUNTIME_MIGRATIONS: "true"
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
