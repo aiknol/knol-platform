@@ -151,7 +151,7 @@ sleep 3
 
 echo ""
 echo "[4/5] Restarting application services..."
-docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d \
+docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --force-recreate \
     gateway write retrieve graph \
     admin tenant jobs billing ingest marketing
 
