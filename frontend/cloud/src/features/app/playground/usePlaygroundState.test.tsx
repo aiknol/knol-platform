@@ -701,4 +701,95 @@ describe('usePlaygroundState – sample data', () => {
     expect(result.current.sampleData!.entityIds).toContain('ent_1');
     expect(result.current.sampleData!.entityItems[0].label).toBe('Node.js');
   });
+
+  it('fetchSampleData aborts previous request when called again before completion', async () => {
+    // The second call is triggered while the first is still "pending".
+    // Only the second call's data should end up in state.
+    let callCount = 0;
+    const abortedSignals: AbortSignal[] = [];
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation((_url, opts) => {
+      const signal = (opts as RequestInit & { signal?: AbortSignal })?.signal;
+      callCount++;
+
+      return new Promise<Response>((resolve, reject) => {
+        if (signal) {
+          // If the signal is already aborted, reject immediately.
+          if (signal.aborted) {
+            abortedSignals.push(signal);
+            reject(new DOMException('Aborted', 'AbortError'));
+            return;
+          }
+          // If aborted while pending, reject.
+          signal.addEventListener('abort', () => {
+            abortedSignals.push(signal);
+            reject(new DOMException('Aborted', 'AbortError'));
+          });
+        }
+
+        // Only resolve after a microtask so the second call has time to abort the first.
+        queueMicrotask(() => {
+          if (signal?.aborted) return; // already rejected above
+          const body = JSON.parse((opts as RequestInit)?.body as string || '{}');
+          if (body.url?.includes('/v1/memory/export')) {
+            resolve(proxyResponse(200, {
+              memories: [{ id: `mem_call${callCount}`, content: `Call ${callCount}` }],
+            }));
+          } else {
+            resolve(proxyResponse(200, []));
+          }
+        });
+      });
+    });
+
+    const { result } = renderHook(() => usePlaygroundState());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Fire two consecutive fetchSampleData calls – second should abort the first.
+    await act(async () => {
+      result.current.setApiKey('knol_sk_first');
+    });
+    await act(async () => {
+      result.current.setApiKey('knol_sk_second');
+    });
+
+    await waitFor(() => expect(result.current.sampleLoading).toBe(false));
+
+    // At least one fetch was aborted.
+    expect(abortedSignals.length).toBeGreaterThan(0);
+    // The final sample data reflects the last request, not an intermediate one.
+    expect(result.current.sampleData).not.toBeNull();
+  });
+
+  it('fetchSampleData does not update state after component unmounts', async () => {
+    // Verify unmount cleanup cancels the in-flight request.
+    const abortedSignals: AbortSignal[] = [];
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation((_url, opts) => {
+      const signal = (opts as RequestInit & { signal?: AbortSignal })?.signal;
+      return new Promise<Response>((resolve, reject) => {
+        if (signal) {
+          signal.addEventListener('abort', () => {
+            abortedSignals.push(signal);
+            reject(new DOMException('Aborted', 'AbortError'));
+          });
+        }
+        // Resolve after a longer delay to ensure unmount happens first.
+        setTimeout(() => resolve(proxyResponse(200, { memories: [] })), 100);
+      });
+    });
+
+    apiMocks.getInitialApiKey.mockReturnValue('knol_sk_test');
+
+    const { result, unmount } = renderHook(() => usePlaygroundState());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Unmount before the delayed response arrives.
+    unmount();
+
+    // Wait long enough for the request to have resolved if it weren't aborted.
+    await new Promise((r) => setTimeout(r, 150));
+
+    expect(abortedSignals.length).toBeGreaterThan(0);
+  });
 });

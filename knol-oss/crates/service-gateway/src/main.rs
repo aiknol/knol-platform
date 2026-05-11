@@ -724,14 +724,15 @@ async fn update_memory(
     Path(id): Path<Uuid>,
     Json(body): Json<serde_json::Value>,
 ) -> Result<Json<serde_json::Value>, MemoryError> {
-    let response: serde_json::Value = state
+    let req_builder = state
         .http_client
         .put(format!(
             "{}/internal/memory/{}",
             state.admin_service_url, id
         ))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .json(&body)
+        .json(&body);
+    let response: serde_json::Value = attach_internal_secret(req_builder, &state)
         .send()
         .await
         .map_err(|e| MemoryError::DownstreamServiceError {
@@ -761,13 +762,14 @@ async fn delete_memory(
                 "Permanent delete requires Admin role".into(),
             ));
         }
-        let _: serde_json::Value = state
+        let req_builder = state
             .http_client
             .delete(format!(
                 "{}/internal/memory/{}",
                 state.admin_service_url, id
             ))
-            .header("x-tenant-id", ctx.tenant_id.to_string())
+            .header("x-tenant-id", ctx.tenant_id.to_string());
+        let _: serde_json::Value = attach_internal_secret(req_builder, &state)
             .send()
             .await
             .map_err(|e| MemoryError::DownstreamServiceError {
@@ -968,11 +970,12 @@ async fn list_audit_log(
     ctx: axum::Extension<TenantContext>,
     Query(params): Query<AuditParams>,
 ) -> Result<Json<Vec<serde_json::Value>>, MemoryError> {
-    let response: Vec<serde_json::Value> = state
+    let req_builder = state
         .http_client
         .get(format!("{}/internal/audit", state.admin_service_url))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .query(&params)
+        .query(&params);
+    let response: Vec<serde_json::Value> = attach_internal_secret(req_builder, &state)
         .send()
         .await
         .map_err(|e| MemoryError::DownstreamServiceError {
@@ -1012,11 +1015,12 @@ async fn create_policy(
     ctx: axum::Extension<TenantContext>,
     Json(body): Json<serde_json::Value>,
 ) -> Result<(StatusCode, Json<serde_json::Value>), MemoryError> {
-    let response: serde_json::Value = state
+    let req_builder = state
         .http_client
         .post(format!("{}/internal/policies", state.admin_service_url))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .json(&body)
+        .json(&body);
+    let response: serde_json::Value = attach_internal_secret(req_builder, &state)
         .send()
         .await
         .map_err(|e| MemoryError::DownstreamServiceError {
@@ -1040,11 +1044,12 @@ async fn export_memories(
     ctx: axum::Extension<TenantContext>,
     Json(req): Json<serde_json::Value>,
 ) -> Result<Json<serde_json::Value>, MemoryError> {
-    let response: serde_json::Value = state
+    let req_builder = state
         .http_client
         .post(format!("{}/internal/export", state.retrieve_service_url))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .json(&req)
+        .json(&req);
+    let response: serde_json::Value = attach_internal_secret(req_builder, &state)
         .send()
         .await
         .map_err(|e| MemoryError::DownstreamServiceError {
@@ -1066,11 +1071,12 @@ async fn import_memories(
     ctx: axum::Extension<TenantContext>,
     Json(req): Json<serde_json::Value>,
 ) -> Result<(StatusCode, Json<serde_json::Value>), MemoryError> {
-    let response: serde_json::Value = state
+    let req_builder = state
         .http_client
         .post(format!("{}/internal/import", state.write_service_url))
         .header("x-tenant-id", ctx.tenant_id.to_string())
-        .json(&req)
+        .json(&req);
+    let response: serde_json::Value = attach_internal_secret(req_builder, &state)
         .send()
         .await
         .map_err(|e| MemoryError::DownstreamServiceError {

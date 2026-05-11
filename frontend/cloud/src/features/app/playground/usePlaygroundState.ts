@@ -40,14 +40,6 @@ function isLocalFrontend(): boolean {
   return host === 'localhost' || host === '127.0.0.1';
 }
 
-function isDefaultPublicGateway(url: string): boolean {
-  try {
-    return new URL(url).hostname === 'api.aiknol.com';
-  } catch {
-    return false;
-  }
-}
-
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
@@ -142,6 +134,9 @@ export function usePlaygroundState() {
   const [sampleData, setSampleData] = useState<SampleData | null>(null);
   const [sampleLoading, setSampleLoading] = useState(false);
   const [sampleError, setSampleError] = useState('');
+
+  /** Tracks the AbortController for the in-flight fetchSampleData request. */
+  const fetchAbortRef = useRef<AbortController | null>(null);
 
   const selectedOperation: OperationDef =
     OPERATIONS.find((op) => op.id === selectedOperationId) || OPERATIONS[0];
@@ -460,6 +455,12 @@ export function usePlaygroundState() {
   // Fetch sample data from the gateway to pre-populate fields with real IDs.
   const fetchSampleData = useCallback(async () => {
     if (!apiKey.trim() || !gatewayBaseUrl) return;
+
+    // Cancel any in-flight request before starting a new one.
+    fetchAbortRef.current?.abort();
+    const controller = new AbortController();
+    fetchAbortRef.current = controller;
+
     setSampleLoading(true);
     setSampleError('');
 
@@ -478,6 +479,7 @@ export function usePlaygroundState() {
             },
             body,
           }),
+          signal: controller.signal,
         });
 
         let data: any = null;
@@ -575,18 +577,35 @@ export function usePlaygroundState() {
           }));
       }
 
+      // Bail out if a newer request has already started.
+      if (controller.signal.aborted) return;
+
       if (errors.length > 0) {
         setSampleError(errors[0]);
       }
-      setSampleData(result);
-    } catch {
+      const hasAnyData =
+        result.memoryIds.length > 0 || result.entityIds.length > 0 || result.userIds.length > 0;
+      if (hasAnyData || errors.length === 0) {
+        setSampleData(result);
+      }
+    } catch (err) {
+      // Ignore AbortError — a newer request is already in flight.
+      if (err instanceof Error && err.name === 'AbortError') return;
       setSampleError('Failed to load sample data.');
     } finally {
-      setSampleLoading(false);
+      // Only clear the loading spinner for the request that actually completed.
+      if (!controller.signal.aborted) {
+        setSampleLoading(false);
+      }
     }
   }, [apiKey, gatewayBaseUrl]);
 
   const prevInputsRef = useRef<{ apiKey: string; gatewayBaseUrl: string }>({ apiKey: '', gatewayBaseUrl: '' });
+
+  // Cancel any in-flight sample-data request on unmount.
+  useEffect(() => {
+    return () => { fetchAbortRef.current?.abort(); };
+  }, []);
 
   // Clear + refetch sample data when connection inputs change.
   useEffect(() => {

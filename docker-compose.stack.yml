@@ -121,6 +121,7 @@ services:
       WRITE_SERVICE_URL: http://write-service:8081
       RETRIEVE_SERVICE_URL: http://retrieve-service:8082
       ADMIN_SERVICE_URL: http://admin-service:8084
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-}
       RUST_LOG: info
     command: ["gateway"]
     ports:
@@ -147,6 +148,7 @@ services:
       DB_MAX_CONNECTIONS: "6"
       DB_MIN_CONNECTIONS: "1"
       WRITE_SERVICE_PORT: "8081"
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-}
       RUST_LOG: info
     command: ["write-service"]
     ports:
@@ -171,6 +173,7 @@ services:
       DB_MIN_CONNECTIONS: "1"
       RETRIEVE_SERVICE_PORT: "8082"
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-}
       RUST_LOG: info
     command: ["retrieve-service"]
     ports:
@@ -228,6 +231,7 @@ services:
       ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008}
       ADMIN_SECURE_COOKIES: "false"
       SKIP_RUNTIME_MIGRATIONS: "true"
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-}
       MARKETING_SERVICE_URL: http://marketing-service:8088
       RUST_LOG: info
     command: ["admin-service"]
