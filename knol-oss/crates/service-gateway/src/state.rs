@@ -121,15 +121,15 @@ impl AppState {
         // Load optional webhook encryption key (try WEBHOOK_ENCRYPTION_KEY, fall back to ADMIN_ENCRYPTION_KEY)
         let webhook_encryption_key = Self::load_webhook_encryption_key();
 
-        // Resilience config — if Redis is unavailable, default to skipping rate
-        // limiting so the gateway can still serve requests.  Operators can opt out
-        // by explicitly setting RESILIENCE_SKIP_RATE_LIMIT_ON_REDIS_FAILURE=false.
-        let default_skip = redis_client.is_none();
+        // Resilience config — default to skipping rate limiting when Redis
+        // is unavailable so the gateway can still serve requests.  Operators
+        // can opt out by setting RESILIENCE_SKIP_RATE_LIMIT_ON_REDIS_FAILURE=false
+        // (or via the DB system_config table).
         let skip_rate_limit_on_redis_failure = db_config::load_bool(
             &db_pool,
             "resilience.skip_rate_limit_on_redis_failure",
             "RESILIENCE_SKIP_RATE_LIMIT_ON_REDIS_FAILURE",
-            default_skip,
+            true,
         )
         .await;
 
