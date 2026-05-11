@@ -109,6 +109,53 @@ function extractUpstreamError(json: any, fallback: string): string {
   return fallback;
 }
 
+/**
+ * Unified fetch helper that routes through the server-side proxy in local dev
+ * (to avoid CORS) and makes direct gateway requests in production (static export
+ * has no server-side API routes).
+ */
+async function gatewayFetch(
+  gwUrl: string,
+  method: string,
+  apiKey: string,
+  body?: string,
+  signal?: AbortSignal,
+): Promise<{ status: number; body: string }> {
+  if (isLocalFrontend()) {
+    // Local dev: route through Next.js API proxy
+    const proxyRes = await fetch('/api/playground/proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: gwUrl,
+        method,
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body,
+      }),
+      signal,
+    });
+    const data = await proxyRes.json();
+    if (data?.error) throw new Error(data.error);
+    return { status: Number(data?.status ?? proxyRes.status), body: String(data?.body ?? '') };
+  }
+
+  // Production (static export): call the gateway directly
+  const res = await fetch(gwUrl, {
+    method,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: method !== 'GET' && method !== 'HEAD' ? body : undefined,
+    signal,
+  });
+  const text = await res.text();
+  return { status: res.status, body: text };
+}
+
 export function usePlaygroundState() {
   const [gatewayBaseUrl, setGatewayBaseUrlState] = useState(() => inferDefaultGatewayBaseUrl());
   const [workspaceMode, setWorkspaceMode] = useState(false);
@@ -355,38 +402,11 @@ export function usePlaygroundState() {
       const url = buildUrl();
       const body = buildBody();
 
-      // Route through the server-side proxy to avoid CORS issues.
-      // The proxy makes the gateway request server-side and returns { status, body }.
-      const proxyRes = await fetch('/api/playground/proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url,
-          method: selectedOperation.method,
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body,
-        }),
-      });
+      const result = await gatewayFetch(url, selectedOperation.method, apiKey, body);
 
       const duration = Math.round(performance.now() - start);
-      let proxyData: any = null;
-      try {
-        proxyData = await proxyRes.json();
-      } catch {
-        const text = await proxyRes.text().catch(() => '');
-        setResponseError(text || `Proxy error (HTTP ${proxyRes.status})`);
-        return;
-      }
 
-      if (proxyData.error) {
-        setResponseError(proxyData.error);
-        return;
-      }
-
-      let formatted = proxyData.body || '';
+      let formatted = result.body || '';
       const MAX_BODY_CHARS = 200_000;
       if (formatted.length > MAX_BODY_CHARS) {
         formatted = `${formatted.slice(0, MAX_BODY_CHARS)}\n\n[truncated: response too large to display]`;
@@ -397,10 +417,10 @@ export function usePlaygroundState() {
           // not JSON, keep as-is
         }
       }
-      if (proxyData.status >= 400) {
+      if (result.status >= 400) {
         // Try to surface a useful upstream error message.
         try {
-          const parsed = JSON.parse(proxyData.body || '{}');
+          const parsed = JSON.parse(result.body || '{}');
           const msg =
             parsed?.error ||
             parsed?.message ||
@@ -409,13 +429,13 @@ export function usePlaygroundState() {
           if (msg && typeof msg === 'string') {
             setResponseError(msg);
           } else {
-            setResponseError(`Request failed (HTTP ${proxyData.status}).`);
+            setResponseError(`Request failed (HTTP ${result.status}).`);
           }
         } catch {
-          setResponseError(`Request failed (HTTP ${proxyData.status}).`);
+          setResponseError(`Request failed (HTTP ${result.status}).`);
         }
       }
-      setResponse({ status: proxyData.status, body: formatted, duration });
+      setResponse({ status: result.status, body: formatted, duration });
     } catch (err) {
       setResponseError(err instanceof Error ? err.message : 'Request failed');
     } finally {
@@ -466,61 +486,43 @@ export function usePlaygroundState() {
 
     try {
       const errors: string[] = [];
-      const proxyCall = async (path: string, method: string, body?: string) => {
-        const res = await fetch('/api/playground/proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: `${normalizeGatewayBaseUrl(gatewayBaseUrl)}${path}`,
-            method,
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body,
-          }),
-          signal: controller.signal,
-        });
-
-        let data: any = null;
+      const sampleCall = async (path: string, method: string, body?: string) => {
+        const gwUrl = `${normalizeGatewayBaseUrl(gatewayBaseUrl)}${path}`;
         try {
-          data = await res.json();
-        } catch {
-          return { status: res.status, error: `Proxy did not return JSON (HTTP ${res.status})` } as const;
+          const result = await gatewayFetch(gwUrl, method, apiKey, body, controller.signal);
+
+          let parsed: any = null;
+          try {
+            parsed = JSON.parse(result.body);
+          } catch {
+            parsed = null;
+          }
+
+          if (result.status >= 400) {
+            return {
+              status: result.status,
+              error: extractUpstreamError(parsed, `Upstream error (HTTP ${result.status}).`),
+              bodyText: result.body,
+              json: parsed,
+            } as const;
+          }
+
+          return { status: result.status, bodyText: result.body, json: parsed } as const;
+        } catch (err) {
+          if (err instanceof Error && err.name === 'AbortError') throw err;
+          return { status: 0, error: err instanceof Error ? err.message : 'Request failed' } as const;
         }
-
-        if (data?.error) return { status: res.status, error: data.error } as const;
-        const upstreamStatus = Number(data?.status ?? 0);
-        const upstreamBody = String(data?.body ?? '');
-
-        let parsed: any = null;
-        try {
-          parsed = JSON.parse(upstreamBody);
-        } catch {
-          parsed = null;
-        }
-
-        if (upstreamStatus >= 400) {
-          return {
-            status: upstreamStatus,
-            error: extractUpstreamError(parsed, `Upstream error (HTTP ${upstreamStatus}).`),
-            bodyText: upstreamBody,
-            json: parsed,
-          } as const;
-        }
-
-        return { status: upstreamStatus, bodyText: upstreamBody, json: parsed } as const;
       };
 
       // Use /v1/memory/export to get all memories (works even without vectors),
       // /v1/graph/entities for entity data.
       const [exportRes, entityRes] = await Promise.allSettled([
-        proxyCall(
+        sampleCall(
           '/v1/memory/export',
           'POST',
           JSON.stringify({ limit: 50, include_graph: false, include_episodes: false }),
         ),
-        proxyCall('/v1/graph/entities?limit=20', 'GET'),
+        sampleCall('/v1/graph/entities?limit=20', 'GET'),
       ]);
 
       const result: SampleData = {
