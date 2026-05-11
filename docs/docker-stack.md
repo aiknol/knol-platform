@@ -7,7 +7,7 @@ This guide covers local startup with separated OSS and proprietary compose files
 OSS only:
 
 ```bash
-cd /Users/dev/projects/knol/memorylayer
+# From the repository root
 docker compose -f docker-compose.oss.yml up -d --build
 ```
 

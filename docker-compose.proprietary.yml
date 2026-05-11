@@ -37,6 +37,7 @@ services:
       ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-admin@aiknol.com}
       ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008}
       ADMIN_SECURE_COOKIES: ${ADMIN_SECURE_COOKIES:-false}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?set INTERNAL_SERVICE_SECRET in .env}
       RUST_LOG: info
     command: ["admin-service"]
     ports:

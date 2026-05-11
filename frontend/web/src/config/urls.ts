@@ -154,7 +154,7 @@ export function resolveDemoUrl(): string {
   const explicit = readEnv('NEXT_PUBLIC_DEMO_URL');
   if (explicit) return ensureTrailingSlash(explicit);
   if (DEMO_ORIGIN) return `${DEMO_ORIGIN}/`;
-  return '/demo/';
+  return IS_DEV ? '/demo/' : 'https://demo.aiknol.com/';
 }
 
 export function resolveDocsUrl(): string {

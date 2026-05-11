@@ -1,0 +1,33 @@
+Knol Enterprise License
+=======================
+
+Copyright 2025 Knol Contributors
+
+The code in this directory (knol-enterprise/) is source-available under
+the following terms:
+
+1. VIEWING AND LEARNING
+   You may read, study, and reference this code for educational and
+   evaluation purposes.
+
+2. SELF-HOSTING
+   You may use this code to run Knol Enterprise for your own internal
+   business purposes, provided you hold a valid Knol Enterprise license
+   obtained from https://aiknol.com/pricing/.
+
+3. RESTRICTIONS
+   You may NOT:
+   - Redistribute this code or derivative works as a competing product
+   - Offer this code as a managed/hosted service to third parties
+   - Remove or alter license notices
+
+4. CONTRIBUTIONS
+   Contributions to this directory are welcome and will be licensed
+   under these same terms. By submitting a pull request, you agree
+   to license your contribution accordingly.
+
+5. OSS CORE
+   The OSS core (knol-oss/) is licensed separately under Apache 2.0.
+   This enterprise license does NOT affect the OSS core license.
+
+For commercial licensing inquiries: hello@aiknol.com

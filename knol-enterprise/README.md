@@ -1,33 +1,38 @@
 # Knol Enterprise
 
-Enterprise services for Knol.
+Enterprise extensions for [Knol](https://github.com/aiknol/knol-platform) — the context engineering platform for AI applications.
 
 ## Services
 
-- `admin-service`: `http://localhost:3001/health`
-- `jobs-service`: background worker (no public HTTP endpoint)
-- `billing-service`: `http://localhost:3003/health`
-- `ingest-service`: `http://localhost:3004/health`
+| Service | Port | Description |
+|---------|------|-------------|
+| `admin-service` | 8084 | Admin API, demo endpoints, system config |
+| `tenant-service` | 8085 | Multi-tenant workspace management |
+| `billing-service` | 8086 | Usage tracking, plan enforcement, Stripe |
+| `jobs-service` | — | Background job processing (NATS consumer) |
+| `ingest-service` | 8087 | Bulk memory ingestion pipeline |
+| `marketing-service` | 8088 | Marketing automation and campaigns |
 
-## Local Run (Preferred)
+## Local Development
 
 ```bash
-cd /Users/dev/projects/knol/memorylayer
-export ADMIN_JWT_SECRET='replace-with-random-32-plus-char-secret'
+# From the repository root
+cp .env.example .env
+# Edit .env with your secrets
+
 docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d --build
 ```
 
-Admin web UI:
+Frontend:
 
-- `http://localhost:3006/` (admin website)
-- `http://localhost:3007/` (tenant app website)
-- `http://localhost:3008/` (demo UI)
+- Admin Panel: `http://localhost:3006/`
+- Cloud Dashboard: `http://localhost:3007/`
+- Demo UI: `http://localhost:3008/`
 
-## Notes
+## Architecture
 
-- `admin-panel-service` is removed from the stack.
-- Enterprise crates depend on shared OSS crates in `../knol-oss/crates`.
+Enterprise crates depend on shared OSS crates in `../knol-oss/crates/` for database access, caching, queueing, and common types.
 
 ## License
 
-Commercial license.
+Source-available. See [LICENSE](LICENSE) for terms.

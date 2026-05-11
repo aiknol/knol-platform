@@ -1,11 +1,17 @@
 <p align="center">
-  <h1 align="center">Knol</h1>
+  <h1 align="center">Knol Platform</h1>
   <p align="center">
-    <strong>Long-term memory infrastructure for LLM applications</strong>
+    <strong>Context engineering infrastructure for AI applications</strong>
   </p>
   <p align="center">
     Built in Rust. Open core. Self-hostable.
   </p>
+</p>
+
+<p align="center">
+  <a href="https://github.com/aiknol/knol-platform/actions"><img src="https://github.com/aiknol/knol-platform/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
+  <a href="https://github.com/aiknol/knol-platform"><img src="https://img.shields.io/badge/rust-1.77+-orange.svg" alt="Rust"></a>
 </p>
 
 <p align="center">
@@ -21,6 +27,8 @@
 
 Knol gives your AI agents **persistent, structured memory** — not just vector search. Every conversation turn is processed through an intelligent extraction pipeline that builds a **knowledge graph** of entities, relationships, and facts alongside traditional semantic embeddings. Memories are grounded with source citations, verified for accuracy, and automatically resolved when they conflict.
 
+> **Looking for the OSS-only repo?** See [github.com/aiknol/knol](https://github.com/aiknol/knol) — a standalone copy of `knol-oss/` that you can run without the enterprise services.
+
 ```python
 from memory_sdk import MemoryClient
 
@@ -31,12 +39,12 @@ client.add("I work at Acme Corp as a senior engineer. I prefer dark mode.", user
 
 # Search with hybrid retrieval (vector + graph + temporal)
 results = client.search("What does the user do for work?", user_id="user-123")
-# → [{"content": "User works at Acme Corp as a senior engineer", "confidence": 0.95, ...}]
+# -> [{"content": "User works at Acme Corp as a senior engineer", "confidence": 0.95, ...}]
 ```
 
 ## Quick Start
 
-**One command to run everything:**
+**One command to run the OSS core:**
 
 ```bash
 docker compose -f docker-compose.oss.yml up -d --build
@@ -58,16 +66,19 @@ curl -X POST http://localhost:3000/v1/memory/search \
   -d '{"query": "programming preferences", "user_id": "user-123"}'
 ```
 
-**Backend stack (OSS + Admin APIs/services):**
+**Full stack (OSS + Enterprise services):**
 
 ```bash
-export ADMIN_JWT_SECRET='replace-with-random-32-plus-char-secret'
+cp .env.example .env
+# Edit .env with your secrets (ADMIN_JWT_SECRET, ADMIN_ENCRYPTION_KEY, etc.)
+
 docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d --build
 ```
 
-Start frontend surfaces locally (main/admin/cloud/demo/docs):
+**Frontend development:**
 
 ```bash
+cd frontend && npm install
 ./scripts/frontend-services.sh start
 ```
 
@@ -77,60 +88,9 @@ Start frontend surfaces locally (main/admin/cloud/demo/docs):
 | Admin API Health  | `http://localhost:3001/health`|
 | Main Website      | `http://localhost:3005`       |
 | Admin Panel       | `http://localhost:3006`       |
-| Cloud Website     | `http://localhost:3007`       |
+| Cloud Dashboard   | `http://localhost:3007`       |
 | Demo UI           | `http://localhost:3008`       |
-| Public Docs       | `http://localhost:3009`       |
-
-Frontend URL strategy uses env (no hardcoded localhost in code):
-
-- `NEXT_PUBLIC_BASE_DOMAIN` + `NEXT_PUBLIC_URL_SCHEME` define the base routing model.
-- Local ports: set host/port vars (`NEXT_PUBLIC_APP_HOST`, `NEXT_PUBLIC_APP_PORT`, `NEXT_PUBLIC_DEMO_HOST`, etc.).
-- Production subdomains: set `NEXT_PUBLIC_BASE_DOMAIN=aiknol.com` and hosts like `cloud.aiknol.com`, `demo.aiknol.com`, `admin.aiknol.com`.
-- Explicit overrides are also supported: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_DEMO_URL`, `NEXT_PUBLIC_ADMIN_API_URL`, `NEXT_PUBLIC_APP_API_URL`.
-
-Separate frontend project directories (deployed independently on Cloudflare Pages):
-
-- `frontend/web/` → `https://aiknol.com`
-- `frontend/admin/` → `https://admin.aiknol.com`
-- `frontend/cloud/` → `https://cloud.aiknol.com`
-- `frontend/demo/` → `https://demo.aiknol.com`
-- `frontend/docs/` → `https://docs.aiknol.com`
-- `private/docs/` → local-only, never deployed (`http://localhost:3010`)
-
-Local backend-only startup helper:
-
-```bash
-./scripts/local-start-backend.sh
-```
-
-Stop local backend + web surfaces:
-
-```bash
-./scripts/local-stop.sh
-```
-
-Stop only frontend surfaces:
-
-```bash
-./scripts/frontend-services.sh stop
-```
-
-Start/stop local-only private docs:
-
-```bash
-./scripts/private-docs.sh start
-./scripts/private-docs.sh stop
-```
-
-## Production (Hetzner)
-
-Use the production deployment stack:
-
-```bash
-docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production up -d
-```
-
-Do not use `docker-compose.stack.yml` for production. It is a development/demo stack.
+| Documentation     | `http://localhost:3009`       |
 
 ## Why Knol
 
@@ -154,22 +114,22 @@ Most memory solutions offer vector search and call it a day. Knol goes further:
 - **Hybrid search** — Vector similarity + knowledge graph + temporal scoring in one query
 - **Knowledge graph** — N-hop traversal, path finding, entity neighbors, relationship typing
 - **Embedding generation** — OpenAI, Voyage AI, Google Gemini, or local embeddings at write time
-- **Conflict detection** — Automatic contradiction, duplicate, and refinement detection with configurable resolution (newest-wins, highest-confidence, manual review)
+- **Conflict detection** — Automatic contradiction, duplicate, and refinement detection
 - **Memory decay** — Configurable importance decay (exponential, linear, step) with access boost
 - **Citation grounding** — Source quotes linked to every extracted memory
 - **Content triage** — Skip trivial messages (greetings, acks) without LLM calls
 - **Multi-provider LLM** — Anthropic Claude, OpenAI GPT-4o, Google Gemini with hot-swappable config
 - **Webhook events** — Subscribe to memory.created, entity.created, conflict.detected, and more
-- **Export/Import** — Bulk memory export (JSON/CSV) and import with conflict strategies
 - **Guardrails** — Input validation, prompt injection detection, PII filtering
 
-### Enterprise (Commercial License)
+### Enterprise (Source-Available)
 
 - **Admin panel** — Web UI for managing LLM providers, API keys, guardrails, and system config
-- **Dynamic provider switching** — Change LLM provider/model without restart (auto-refreshes from DB)
-- **Token usage tracking** — Per-tenant, per-model cost monitoring with cache hit tracking
-- **Audit logging** — Full audit trail of memory operations
-- **SSO / RBAC** — Enterprise authentication and role-based access control
+- **Multi-tenant** — Workspace isolation with per-tenant API keys and billing
+- **Billing & usage** — Usage tracking, plan enforcement, and Stripe integration
+- **Background jobs** — NATS-based async processing for heavy operations
+- **Ingest pipeline** — Bulk memory ingestion with deduplication
+- **Marketing automation** — Scheduled social media and content campaigns
 
 ## SDKs
 
@@ -218,13 +178,6 @@ memory = KnolMemory(api_key="key", user_id="u1")
 retriever = KnolRetriever(api_key="key", user_id="u1")
 ```
 
-**CrewAI:**
-```python
-from memory_sdk.integrations.crewai import KnolCrewMemory
-
-memory = KnolCrewMemory(api_key="key", user_id="u1")
-```
-
 **MCP Server:**
 ```bash
 npm install -g @knol/mcp-server
@@ -241,32 +194,84 @@ KNOL_API_KEY=your-key knol-mcp
        │                  │                   │
 ┌──────▼──────┐  ┌────────▼────────┐  ┌───────▼───────┐
 │Write Service│  │Retrieve Service │  │ Admin Service  │
-│   (:8081)   │  │    (:8082)      │  │   (:3001)      │
+│   (:8081)   │  │    (:8082)      │  │   (:8084)      │
 │             │  │                 │  │                │
-│ Episodes →  │  │ Vector search + │  │ Config, keys,  │
+│ Episodes -> │  │ Vector search + │  │ Config, keys,  │
 │ NATS queue  │  │ Graph traversal │  │ guardrails     │
 └──────┬──────┘  │ + Temporal rank │  └────────────────┘
        │         └────────┬────────┘
        ▼                  │
 ┌──────────────┐          │
 │Graph Service │          │
-│  (:8083)     │◄─────────┘
+│  (:8083)     │◀─────────┘
 │              │
 │ LLM extract  │    ┌────────────┐  ┌───────┐  ┌───────┐
-│ Embed vectors│───►│ PostgreSQL │  │ Redis │  │ NATS  │
+│ Embed vectors│───>│ PostgreSQL │  │ Redis │  │ NATS  │
 │ Detect       │    │ + pgvector │  │ Cache │  │  JS   │
 │  conflicts   │    └────────────┘  └───────┘  └───────┘
 │ Fire webhooks│
 └──────────────┘
 ```
 
-**Write path:** API Gateway → Write Service → NATS → Graph Service → LLM extraction → Embedding generation → Conflict detection → PostgreSQL + pgvector → Webhook dispatch
+**Write path:** API Gateway -> Write Service -> NATS -> Graph Service -> LLM extraction -> Embedding generation -> Conflict detection -> PostgreSQL + pgvector -> Webhook dispatch
 
-**Read path:** API Gateway → Retrieve Service → Query embedding → Vector search + Graph traversal + Temporal ranking → Decay-adjusted results
+**Read path:** API Gateway -> Retrieve Service -> Query embedding -> Vector search + Graph traversal + Temporal ranking -> Decay-adjusted results
+
+## Project Structure
+
+```
+knol-platform/
+├── knol-oss/                  # Open source core (Apache 2.0)
+│   ├── crates/
+│   │   ├── memory-common/     # Shared types, config, webhook definitions
+│   │   ├── memory-db/         # Database pool, migrations, tenant isolation
+│   │   ├── memory-cache/      # Redis client wrapper
+│   │   ├── memory-queue/      # NATS JetStream producer/consumer
+│   │   ├── memory-llm/        # LLM providers, extraction, embedding, conflict
+│   │   ├── memory-vector/     # pgvector storage and similarity search
+│   │   ├── memory-graph/      # Knowledge graph CRUD and traversal
+│   │   ├── service-gateway/   # API gateway with auth and routing
+│   │   ├── service-write/     # Write service (episodes -> NATS)
+│   │   ├── service-retrieve/  # Search service (hybrid retrieval)
+│   │   └── service-graph/     # Graph builder (extraction + embedding + webhooks)
+│   └── sdk/                   # Python, TypeScript, MCP SDKs
+├── knol-enterprise/           # Enterprise extensions (source-available)
+│   └── crates/
+│       ├── service-admin/     # Admin API + demo endpoints
+│       ├── service-tenant/    # Multi-tenant workspace management
+│       ├── service-billing/   # Usage tracking + Stripe
+│       ├── service-jobs/      # Background job processing
+│       ├── service-ingest/    # Bulk memory ingestion
+│       └── service-marketing/ # Marketing automation
+├── frontend/                  # Next.js web applications
+│   ├── web/                   # Marketing site
+│   ├── cloud/                 # Cloud dashboard
+│   ├── admin/                 # Admin panel
+│   ├── demo/                  # Interactive demo
+│   └── docs/                  # Documentation site
+├── deploy/                    # Production deployment (Docker Compose, Caddy)
+├── tests/                     # E2E integration tests
+└── scripts/                   # Dev and CI utilities
+```
+
+## Production Deployment
+
+See [deploy/](deploy/) for the production Docker Compose setup with:
+- Caddy reverse proxy with automatic TLS via Let's Encrypt
+- Rolling deployments with health checks
+- Resource limits tuned for a 4 vCPU / 8 GB VPS
+- Neon Postgres + Upstash Redis (external managed services)
+
+```bash
+# On your VPS
+cp deploy/.env.production.example deploy/.env.production
+# Fill in real values
+./deploy/deploy.sh v1.0.9
+```
 
 ## Configuration
 
-All configuration is managed through the admin panel or environment variables. Key settings:
+All configuration is managed through the admin panel or environment variables:
 
 | Setting | Env Var | Default | Description |
 |---------|---------|---------|-------------|
@@ -276,71 +281,25 @@ All configuration is managed through the admin panel or environment variables. K
 | Conflict Detection | `CONFLICT_DETECTION_ENABLED` | `true` | Auto-detect contradictions |
 | Webhooks | `WEBHOOKS_ENABLED` | `true` | Fire webhook events |
 | Content Triage | `TRIAGE_ENABLED` | `true` | Skip trivial messages |
-| LLM Cache | `LLM_CACHE_ENABLED` | `true` | Redis-backed response cache |
-
-## Documentation
-
-- [Architecture Deep Dive](knol-oss/ARCHITECTURE.html)
-- [Docker Stack Guide](docs/docker-stack.md)
-- [OSS vs Commercial Boundary](docs/oss-vs-commercial.md)
-- [Cloudflare Frontend Deployment](docs/cloudflare-sites.md)
-- [API Documentation](https://docs.aiknol.com)
-
-## Project Structure
-
-```
-memorylayer/
-├── knol-oss/                  # Open source (Apache 2.0)
-│   ├── crates/
-│   │   ├── memory-common/     # Shared types, config, webhook definitions
-│   │   ├── memory-db/         # Database pool, migrations, tenant isolation
-│   │   ├── memory-cache/      # Redis client wrapper
-│   │   ├── memory-queue/      # NATS JetStream producer/consumer
-│   │   ├── memory-llm/        # LLM providers, extraction, embedding, decay, conflict
-│   │   ├── memory-vector/     # pgvector storage and similarity search
-│   │   ├── memory-graph/      # Knowledge graph CRUD and traversal
-│   │   ├── service-gateway/   # API gateway with auth and routing
-│   │   ├── service-write/     # Write service (episodes → NATS)
-│   │   ├── service-retrieve/  # Search service (hybrid retrieval)
-│   │   └── service-graph/     # Graph builder (extraction + embedding + webhooks)
-│   └── sdk/
-│       ├── python/            # Python SDK + LangChain + CrewAI integrations
-│       ├── typescript/        # TypeScript/JavaScript SDK
-│       └── mcp/               # MCP server for Claude, Cursor, etc.
-├── knol-enterprise/           # Commercial features
-├── frontend/                  # Frontend surfaces
-│   ├── web/                   # Main marketing website (aiknol.com)
-│   ├── admin/                 # Admin website (admin.aiknol.com)
-│   ├── cloud/                 # Tenant app website (cloud.aiknol.com)
-│   ├── demo/                  # Interactive demo UI (demo.aiknol.com)
-│   └── docs/                  # Public docs website (docs.aiknol.com)
-├── private/
-│   └── docs/                  # Local-only private docs website
-└── docker-compose.oss.yml     # One-command deployment
-```
-
-## Local Push Gate
-
-To block pushes when local CI fails, install the tracked git hooks:
-
-```bash
-./scripts/install-git-hooks.sh
-```
-
-The pre-push hook runs `./scripts/ci-local.sh` and rejects the push if any check fails, including:
-
-- `cargo fmt --all -- --check` in `knol-oss/`
-- `cargo fmt --all -- --check` in `knol-enterprise/`
-- `cargo clippy --workspace --all-targets -- -D warnings` in `knol-oss/`
-- `cargo clippy --workspace --all-targets -- -D warnings` in `knol-enterprise/`
-- `cargo clippy -p service-graph --all-targets -- -D warnings` in `knol-oss/`
-
-## License
-
-- `knol-oss/` — [Apache License 2.0](knol-oss/LICENSE)
-- `knol-enterprise/` — Commercial License
-- `frontend/web/`, `frontend/admin/`, `frontend/cloud/`, `frontend/demo/`, `frontend/docs/`, `private/docs/` — All Rights Reserved
 
 ## Contributing
 
-Contributions to `knol-oss/` are welcome under the Apache 2.0 license. Please open an issue to discuss significant changes before submitting a PR.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+1. Fork the repository
+2. Create a feature branch
+3. Run `cargo fmt` and `cargo clippy` before committing
+4. Submit a pull request
+
+## License
+
+- **OSS Core** (`knol-oss/`, `frontend/`, `deploy/`, `tests/`, `scripts/`): [Apache License 2.0](LICENSE)
+- **Enterprise** (`knol-enterprise/`): [Source-available](knol-enterprise/LICENSE) — free to read and self-host with a license
+
+## Links
+
+- [Website](https://aiknol.com)
+- [Documentation](https://docs.aiknol.com)
+- [Cloud Dashboard](https://cloud.aiknol.com)
+- [Live Demo](https://demo.aiknol.com)
+- [OSS Core Repo](https://github.com/aiknol/knol)

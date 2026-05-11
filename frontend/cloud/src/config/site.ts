@@ -15,8 +15,8 @@ export const SITE = {
   pypi: 'https://pypi.org/project/knol/',
   npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
   contactEmail: 'aiknolcontact@gmail.com',
-  contactPhone: '+14155055990',
-  contactPhoneDisplay: '(415) 505-5990',
+  contactPhone: '+14155953988',
+  contactPhoneDisplay: '(415) 595-3988',
 } as const;
 
 export function pageTitle(title?: string): string {

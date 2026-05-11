@@ -5,7 +5,8 @@ Next.js TypeScript demo site deployed as `demo.aiknol.com`.
 ## Run
 
 ```bash
-cd /Users/dev/projects/knol/memorylayer/frontend/demo
+# From the repository root
+cd frontend/demo
 npm run dev
 ```
 
@@ -16,7 +17,7 @@ Local URL:
 ## Build
 
 ```bash
-cd /Users/dev/projects/knol/memorylayer/frontend/demo
+cd frontend/demo
 npm run build
 ```
 

@@ -104,12 +104,15 @@ services:
     environment:
       DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
       REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
       DB_MAX_CONNECTIONS: "8"
       DB_MIN_CONNECTIONS: "1"
       GATEWAY_PORT: "8080"
       WRITE_SERVICE_URL: http://write-service:8081
       RETRIEVE_SERVICE_URL: http://retrieve-service:8082
       ADMIN_SERVICE_URL: http://admin-service:3001
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?set INTERNAL_SERVICE_SECRET in .env}
       RUST_LOG: info
     command: ["gateway"]
     ports:
@@ -132,9 +135,12 @@ services:
     environment:
       DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
       NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
       DB_MAX_CONNECTIONS: "6"
       DB_MIN_CONNECTIONS: "1"
       WRITE_SERVICE_PORT: "8081"
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?set INTERNAL_SERVICE_SECRET in .env}
       RUST_LOG: info
     command: ["write-service"]
     ports:
@@ -156,10 +162,13 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://memory:memory_dev@postgres:5432/memory
+      NATS_URL: nats://nats:4222
       REDIS_URL: redis://redis:6379
       DB_MAX_CONNECTIONS: "6"
       DB_MIN_CONNECTIONS: "1"
       RETRIEVE_SERVICE_PORT: "8082"
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?set INTERNAL_SERVICE_SECRET in .env}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       RUST_LOG: info
     command: ["retrieve-service"]
@@ -188,6 +197,7 @@ services:
       REDIS_URL: redis://redis:6379
       DB_MAX_CONNECTIONS: "4"
       DB_MIN_CONNECTIONS: "1"
+      ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       RUST_LOG: info
     command: ["graph-service"]
