@@ -21,6 +21,10 @@ on:
         type: boolean
         default: false
 
+# Top-level: minimal permissions. Jobs override as needed.
+permissions:
+  contents: read
+
 env:
   REGISTRY: ghcr.io
   OSS_IMAGE: ghcr.io/${{ github.repository_owner }}/knol-oss
@@ -133,6 +137,7 @@ jobs:
   deploy-websites:
     name: Deploy Web Frontends
     runs-on: ubuntu-latest
+    environment: cloudflare
     strategy:
       matrix:
         site:
@@ -175,6 +180,7 @@ jobs:
   deploy-demo:
     name: Deploy Demo UI
     runs-on: ubuntu-latest
+    environment: cloudflare
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

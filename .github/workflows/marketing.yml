@@ -26,6 +26,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write   # needed for committing blog posts
+
 env:
   NODE_VERSION: '20'
 
@@ -58,6 +61,7 @@ jobs:
   run-campaign:
     needs: determine-campaign
     runs-on: ubuntu-latest
+    environment: marketing
     steps:
       - uses: actions/checkout@v4
 
