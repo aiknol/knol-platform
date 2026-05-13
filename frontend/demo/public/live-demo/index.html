@@ -805,6 +805,14 @@ const CONFIG = {
             document.querySelectorAll('.github-link').forEach(el => el.href = CONFIG.githubUrl);
             const sub = document.querySelector('.welcome-sub');
             if (sub) sub.textContent = CONFIG.tagline + '. Watch it learn, remember, and build knowledge — in real time.';
+            // Update provider badge if demo already started (fixes race condition)
+            const badge = document.getElementById('providerBadge');
+            if (badge && badge.textContent) {
+                const p = CONFIG.llmProvider;
+                const icon = p === 'gemini' ? '✦' : p === 'openai' ? '◉' : '◈';
+                badge.textContent = `${icon} ${CONFIG.llmModel}${CONFIG.llmReady ? '' : ' (offline)'}`;
+                badge.title = `Provider: ${p} | Model: ${CONFIG.llmModel} | LLM ready: ${CONFIG.llmReady ? 'yes' : 'no'} | Config: Admin API`;
+            }
             console.log('[Knol Demo] Config loaded from admin API');
         }
     } catch (e) {

@@ -549,7 +549,7 @@ pub async fn logout(
 pub async fn me(
     State(state): State<Arc<TenantAppState>>,
     claims: AppClaims,
-) -> Result<Json<serde_json::Value>, AppError> {
+) -> Result<Response, AppError> {
     let profile = sqlx::query_as::<_, TenantAppUserRow>(
         "SELECT id, email, full_name, role, enabled, last_login_at, created_at, updated_at, email_verified, totp_enabled FROM app_users WHERE id = $1 AND tenant_id = $2",
     )
@@ -569,7 +569,7 @@ pub async fn me(
     .map_err(|e| AppError::Internal(e.to_string()))?
     .ok_or_else(|| AppError::NotFound("Tenant not found".into()))?;
 
-    Ok(Json(serde_json::json!({
+    let mut response = Json(serde_json::json!({
         "user": {
             "id": claims.sub,
             "email": claims.email,
@@ -588,7 +588,12 @@ pub async fn me(
             "usage_limit": tenant.usage_limit,
         },
         "gateway_base_url": std::env::var("GATEWAY_PUBLIC_URL").unwrap_or_else(|_| "https://api.aiknol.com".to_string()),
-    })))
+    }))
+    .into_response();
+    // Refresh CSRF token on every /me call so cross-origin frontends always
+    // have a valid token after page load.
+    append_csrf_cookie(&mut response);
+    Ok(response)
 }
 
 /// Get the current tenant's information.

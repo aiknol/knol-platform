@@ -82,6 +82,7 @@ pub fn build_router(
             .allow_origin(Any)
             .allow_methods(allowed_methods)
             .allow_headers(allowed_headers)
+            .expose_headers([axum::http::header::HeaderName::from_static("x-csrf-token")])
     } else {
         let mut origin_values: Vec<String> = Vec::new();
         for raw in allowed_origin.split(',') {
@@ -126,6 +127,7 @@ pub fn build_router(
             .allow_origin(origins)
             .allow_methods(allowed_methods)
             .allow_headers(allowed_headers)
+            .expose_headers([axum::http::header::HeaderName::from_static("x-csrf-token")])
             .allow_credentials(true)
     };
 

@@ -69,6 +69,7 @@ export function clearAppAuthSession() {
   sessionStorage.removeItem('app_user');
   sessionStorage.removeItem('app_tenant');
   sessionStorage.removeItem('app_initial_api_key');
+  sessionStorage.removeItem('csrf_token');
   localStorage.removeItem('app_token');
   localStorage.removeItem('app_user');
   localStorage.removeItem('app_tenant');

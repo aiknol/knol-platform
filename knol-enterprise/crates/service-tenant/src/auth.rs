@@ -350,12 +350,21 @@ pub fn clear_app_cookie() -> axum::http::HeaderValue {
 }
 
 /// Append a CSRF cookie to the response (non-HttpOnly so JS can read it).
+/// Also sets the `X-CSRF-Token` response header so cross-origin frontends
+/// (e.g. cloud.aiknol.com calling api.aiknol.com) can capture the token
+/// without needing to read a cookie from a different origin.
 pub fn append_csrf_cookie(response: &mut Response) {
     let csrf_token = enterprise_common::csrf::generate_csrf_token();
     let secure = std::env::var("ADMIN_SECURE_COOKIES").unwrap_or_default() != "false";
     let cookie_val = enterprise_common::csrf::csrf_cookie(&csrf_token, secure);
     if let Ok(val) = axum::http::HeaderValue::from_str(&cookie_val) {
         response.headers_mut().append(header::SET_COOKIE, val);
+    }
+    // Expose the CSRF token as a response header for cross-origin frontends.
+    if let Ok(val) = axum::http::HeaderValue::from_str(&csrf_token) {
+        response
+            .headers_mut()
+            .insert(axum::http::HeaderName::from_static("x-csrf-token"), val);
     }
 }
 
