@@ -1,0 +1,154 @@
+[
+  {
+    "channel": "email",
+    "timestamp": "2026-07-01T16:28:32.967Z",
+    "attribution": {
+      "contentType": "email",
+      "templateCategory": "email_weekly",
+      "variantIndex": 0,
+      "variantId": "email_weekly:v0",
+      "enhanced": false,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-newsletter",
+      "utmSource": "email",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-newsletter",
+      "utmContent": "email_weekly:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "data": {
+      "sent": 0,
+      "failed": 0,
+      "errors": []
+    },
+    "contentPreview": "{\"text\":\"{\\\"subject\\\":\\\"This week in Knol: [TOPIC]\\\",\\\"preheader\\\":\\\"New features, community highlights, and engineering deep dives\\\"}\",\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "github",
+    "timestamp": "2026-07-01T16:28:35.972Z",
+    "attribution": {
+      "templateCategory": "github_metadata",
+      "variantId": "github_metadata:v0",
+      "variantIndex": 0,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-github-update",
+      "utmSource": "github",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-github-update",
+      "utmContent": "github_metadata:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "data": [
+      {
+        "success": false,
+        "status": 404,
+        "statusCode": 404,
+        "rateLimited": false,
+        "headers": {
+          "date": "Wed, 01 Jul 2026 16:28:36 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "content-length": "121",
+          "x-github-media-type": "github.v3; format=json",
+          "x-accepted-github-permissions": "administration=write",
+          "x-github-api-version-selected": "2022-11-28",
+          "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+          "access-control-allow-origin": "*",
+          "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+          "x-frame-options": "deny",
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "0",
+          "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+          "content-security-policy": "default-src 'none'",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-request-id": "6C40:185541:15B59D2:4E9B39C:6A454034",
+          "server": "github.com",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4998",
+          "x-ratelimit-reset": "1782926907",
+          "x-ratelimit-used": "2",
+          "x-ratelimit-resource": "core"
+        },
+        "data": {
+          "message": "Not Found",
+          "documentation_url": "https://docs.github.com/rest/repos/repos#update-a-repository",
+          "status": "404"
+        }
+      },
+      {
+        "success": false,
+        "status": 404,
+        "statusCode": 404,
+        "rateLimited": false,
+        "headers": {
+          "date": "Wed, 01 Jul 2026 16:28:36 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "content-length": "131",
+          "x-github-media-type": "github.v3; format=json",
+          "x-accepted-github-permissions": "administration=write",
+          "x-github-api-version-selected": "2022-11-28",
+          "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+          "access-control-allow-origin": "*",
+          "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+          "x-frame-options": "deny",
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "0",
+          "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+          "content-security-policy": "default-src 'none'",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-request-id": "6C40:185541:15B5AC1:4E9B648:6A454034",
+          "server": "github.com",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4997",
+          "x-ratelimit-reset": "1782926907",
+          "x-ratelimit-used": "3",
+          "x-ratelimit-resource": "core"
+        },
+        "data": {
+          "message": "Not Found",
+          "documentation_url": "https://docs.github.com/rest/repos/repos#replace-all-repository-topics",
+          "status": "404"
+        }
+      }
+    ],
+    "success": true,
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "twitter",
+    "timestamp": "2026-07-01T16:28:45.551Z",
+    "attribution": {
+      "contentType": "tweet",
+      "templateCategory": "tweet_launch",
+      "variantIndex": 0,
+      "variantId": "tweet_launch:v0",
+      "enhanced": false,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-thread",
+      "utmSource": "twitter",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-thread",
+      "utmContent": "tweet_launch:v0"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "success": false,
+    "data": [
+      {
+        "success": false,
+        "error": "Missing Twitter credentials"
+      }
+    ],
+    "contentPreview": "{\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  }
+]

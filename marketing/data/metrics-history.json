@@ -84,5 +84,73 @@
       "clicks": 0,
       "signups": 0
     }
+  },
+  {
+    "timestamp": "2026-07-01T16:28:48.624Z",
+    "github": {
+      "stars": 0,
+      "forks": 0,
+      "watchers": 0,
+      "views": 0,
+      "uniqueVisitors": 0,
+      "clones": 0,
+      "openIssues": 0
+    },
+    "content": {
+      "blogPosts": 0,
+      "tweets": 0,
+      "linkedinPosts": 0,
+      "redditPosts": 0,
+      "devtoPosts": 0
+    },
+    "email": {
+      "subscribers": 0,
+      "sent": 0
+    },
+    "engagement": {
+      "hnMentions": 10
+    },
+    "automation": {
+      "deferred": 0,
+      "rateLimited": 0
+    },
+    "attribution": {
+      "trackedLinks": 2,
+      "trackedPosts": 1,
+      "topVariants": [
+        {
+          "variantId": "github_metadata:v0",
+          "attempts": 1,
+          "successRate": 100
+        },
+        {
+          "variantId": "email_weekly:v0",
+          "attempts": 1,
+          "successRate": 0
+        },
+        {
+          "variantId": "tweet_launch:v0",
+          "attempts": 1,
+          "successRate": 0
+        }
+      ],
+      "channelSuccess": {
+        "email": {
+          "attempts": 1,
+          "successRate": 0
+        },
+        "github": {
+          "attempts": 1,
+          "successRate": 100
+        },
+        "twitter": {
+          "attempts": 1,
+          "successRate": 0
+        }
+      },
+      "starsPerDay30d": 0,
+      "clicks": 0,
+      "signups": 0
+    }
   }
 ]

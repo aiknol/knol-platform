@@ -1,4 +1,35 @@
 {
-  "lastRun": {},
-  "history": []
+  "lastRun": {
+    "monthly": "2026-07-01T16:28:48.553Z"
+  },
+  "history": [
+    {
+      "cadence": "monthly",
+      "timestamp": "2026-07-01T16:28:48.553Z",
+      "results": [
+        {
+          "taskId": "monthly-newsletter",
+          "deferred": false
+        },
+        {
+          "taskId": "monthly-github-update",
+          "success": true,
+          "deferred": false
+        },
+        {
+          "taskId": "monthly-hn-monitor",
+          "success": true,
+          "deferred": false
+        },
+        {
+          "taskId": "monthly-thread",
+          "success": false,
+          "deferred": false
+        }
+      ],
+      "successCount": 2,
+      "deferredCount": 0,
+      "failedCount": 2
+    }
+  ]
 }

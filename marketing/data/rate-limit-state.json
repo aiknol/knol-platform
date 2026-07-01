@@ -1,4 +1,28 @@
 {
-  "channels": {},
-  "history": []
+  "channels": {
+    "github": {
+      "day": {
+        "2026-07-01": 1
+      },
+      "month": {
+        "2026-07": 1
+      },
+      "minute": {
+        "2026-07-01T16:28": 1
+      },
+      "hour": {
+        "2026-07-01T16": 1
+      },
+      "lastPostAt": "2026-07-01T16:28:35.973Z",
+      "cooldownUntil": null,
+      "telemetry": {}
+    }
+  },
+  "history": [
+    {
+      "channel": "github",
+      "hash": "33d03bc6bb754b3e435fbf67f56129dfd6cea6dcc825ac00325c539bd88652fb",
+      "timestamp": "2026-07-01T16:28:35.973Z"
+    }
+  ]
 }
