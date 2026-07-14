@@ -150,5 +150,157 @@
       }
     ],
     "contentPreview": "{\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "blog",
+    "timestamp": "2026-07-14T15:24:37.007Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "blog",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "data": {
+      "success": true,
+      "filename": "2026-07-14-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "filepath": "/home/runner/work/knol-platform/knol-platform/marketing/blog/_posts/2026-07-14-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "url": "https://blog.aiknol.com/2026/07/14/bi-temporal-data-for-ai-time-travel-for-llm-memory",
+      "slug": "bi-temporal-data-for-ai-time-travel-for-llm-memory"
+    },
+    "success": true,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "devto",
+    "timestamp": "2026-07-14T15:24:37.009Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "devto",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 3,
+      "utmUrlsApplied": 3
+    },
+    "data": {
+      "success": false,
+      "error": "Missing Dev.to API key",
+      "manual": true,
+      "content": {
+        "title": "Bi-Temporal Data for AI: Time Travel for LLM Memory",
+        "body": "# Bi-Temporal Data for AI: Time Travel for LLM Memory\n\nHow valid_from and valid_to enable point-in-time replay of AI knowledge.\n\nGitHub: https://github.com/aiknol/knol?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1\nDocs: https://aiknol.com/docs?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1",
+        "tags": [
+          "tutorial",
+          "docker",
+          "deployment"
+        ],
+        "canonicalUrl": "https://blog.aiknol.com/2026/07/14/bi-temporal-data-for-ai-time-travel-for-llm-memory?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1"
+      }
+    },
+    "success": false,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":3,\"utmUrlsApplied\":3}"
+  },
+  {
+    "channel": "linkedin",
+    "timestamp": "2026-07-14T15:24:40.014Z",
+    "attribution": {
+      "contentType": "linkedin",
+      "templateCategory": "linkedin_technical",
+      "variantIndex": 0,
+      "variantId": "linkedin_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-linkedin",
+      "utmSource": "linkedin",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-linkedin",
+      "utmContent": "linkedin_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "data": {
+      "success": false,
+      "error": "Missing LinkedIn credentials — saving content for manual posting",
+      "content": "How we achieve sub-10ms memory retrieval in Knol:\n\nMost \"AI memory\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\n\nKnol uses a 5-stage retrieval pipeline:\n\n1. Intent Classification — detect if the query is about preferences, temporal events, relationships, or general knowledge\n2. Parallel Search — vector similarity + BM25 full-text + graph traversal run concurrently\n3. Scope Cascade — search narrows from session → user → agent → organization\n4. RRF Fusion — Reciprocal Rank Fusion with intent-weighted scores combines all signals\n5. Confidence Filtering — results below threshold are excluded\n\nThe key insight: different queries need different retrieval strategies. \"What does Alice prefer?\" needs vector search. \"Who manages Bob?\" needs graph traversal. \"What happened last Tuesday?\" needs temporal + text.\n\nAll written in Rust with Axum, running on PostgreSQL + pgvector.\n\nhttps://github.com/aiknol/knol?utm_source=linkedin&utm_medium=free_promo&utm_campaign=weekly_weekly-linkedin&utm_content=linkedin_technical%3Av0\n\n#Engineering #AI #SystemDesign #Rust",
+      "manual": true
+    },
+    "success": false,
+    "contentPreview": "{\"text\":\"How we achieve sub-10ms memory retrieval in Knol:\\n\\nMost \\\"AI memory\\\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\\n\\nKnol uses a 5-sta"
+  },
+  {
+    "channel": "reddit",
+    "timestamp": "2026-07-14T15:24:43.018Z",
+    "attribution": {
+      "contentType": "reddit",
+      "templateCategory": "reddit_ml",
+      "variantIndex": 0,
+      "variantId": "reddit_ml:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit",
+      "utmSource": "reddit",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit",
+      "utmContent": "reddit_ml:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"text\":\"Most LLM memory solutions are just \\\"stuff vectors in a DB and hope for the best.\\\" That works for simple Q&A but breaks down when you need:\\n\\n- Tracking how knowledge evolves over time\\n- Understanding relationships between entit"
+  },
+  {
+    "channel": "reddit_engagement",
+    "timestamp": "2026-07-14T15:24:46.020Z",
+    "attribution": {
+      "templateCategory": "reddit_engagement",
+      "variantId": "reddit_engagement:v0",
+      "variantIndex": 0,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit-engagement",
+      "utmSource": "reddit_engagement",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit-engagement",
+      "utmContent": "reddit_engagement:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
   }
 ]
