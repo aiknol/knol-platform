@@ -1,6 +1,6 @@
 {
   "lastRun": {
-    "monthly": "2026-07-01T16:28:48.553Z",
+    "monthly": "2026-08-01T16:45:23.509Z",
     "weekly": "2026-07-21T15:45:39.485Z"
   },
   "history": [
@@ -89,6 +89,34 @@
       "successCount": 1,
       "deferredCount": 0,
       "failedCount": 3
+    },
+    {
+      "cadence": "monthly",
+      "timestamp": "2026-08-01T16:45:23.509Z",
+      "results": [
+        {
+          "taskId": "monthly-newsletter",
+          "deferred": false
+        },
+        {
+          "taskId": "monthly-github-update",
+          "success": true,
+          "deferred": false
+        },
+        {
+          "taskId": "monthly-hn-monitor",
+          "success": true,
+          "deferred": false
+        },
+        {
+          "taskId": "monthly-thread",
+          "success": false,
+          "deferred": false
+        }
+      ],
+      "successCount": 2,
+      "deferredCount": 0,
+      "failedCount": 2
     }
   ]
 }
