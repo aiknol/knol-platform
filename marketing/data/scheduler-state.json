@@ -1,7 +1,7 @@
 {
   "lastRun": {
     "monthly": "2026-08-01T16:45:23.509Z",
-    "weekly": "2026-08-18T15:26:37.854Z"
+    "weekly": "2026-08-25T15:37:18.324Z"
   },
   "history": [
     {
@@ -150,6 +150,35 @@
     {
       "cadence": "weekly",
       "timestamp": "2026-08-18T15:26:37.854Z",
+      "results": [
+        {
+          "taskId": "weekly-blog",
+          "success": true,
+          "deferred": false
+        },
+        {
+          "taskId": "weekly-linkedin",
+          "success": false,
+          "deferred": false
+        },
+        {
+          "taskId": "weekly-reddit",
+          "success": false,
+          "deferred": false
+        },
+        {
+          "taskId": "weekly-reddit-engagement",
+          "success": false,
+          "deferred": false
+        }
+      ],
+      "successCount": 1,
+      "deferredCount": 0,
+      "failedCount": 3
+    },
+    {
+      "cadence": "weekly",
+      "timestamp": "2026-08-25T15:37:18.324Z",
       "results": [
         {
           "taskId": "weekly-blog",
