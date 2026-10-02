@@ -101,7 +101,10 @@ pub fn generate(channel: &str, category: &str) -> Result<PublishContent, Marketi
             subject: Some(if category.contains("welcome") {
                 "Welcome to Cortex".to_string()
             } else {
-                format!("This Week at Cortex — {}", chrono::Utc::now().format("%b %d"))
+                format!(
+                    "This Week at Cortex — {}",
+                    chrono::Utc::now().format("%b %d")
+                )
             }),
         },
         "blog" => {
