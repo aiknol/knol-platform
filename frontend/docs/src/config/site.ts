@@ -47,6 +47,6 @@ export const DOCS_SITE = {
 };
 
 export const DOCS_LINKS = {
-  gatewayReadme: `${githubRepoUrl}/blob/main/cortex-oss/README.md`,
-  mcpApiMapping: `${githubRepoUrl}/blob/main/cortex-oss/sdk/mcp/API_MAPPING.md`,
+  gatewayReadme: `${githubRepoUrl}/blob/main/knol-oss/README.md`,
+  mcpApiMapping: `${githubRepoUrl}/blob/main/knol-oss/sdk/mcp/API_MAPPING.md`,
 };
