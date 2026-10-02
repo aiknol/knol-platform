@@ -19,13 +19,13 @@ pub async fn publish(
         })?;
     let smtp_user = credentials.smtp_user.as_deref().unwrap_or("");
     let smtp_pass = credentials.smtp_pass.as_deref().unwrap_or("");
-    let from_addr = "noreply@aiknol.com";
+    let from_addr = "noreply@cortex.doaide.com";
 
     let subject = content
         .subject
         .as_deref()
         .or(content.title.as_deref())
-        .unwrap_or("Knol Newsletter");
+        .unwrap_or("Cortex Newsletter");
 
     let body_html = content.body.as_deref().unwrap_or(&content.text);
 
@@ -35,7 +35,7 @@ pub async fn publish(
             channel: "email".into(),
             message: format!("Invalid from address: {}", e),
         })?)
-        .to("subscribers@aiknol.com"
+        .to("subscribers@cortex.doaide.com"
             .parse()
             .map_err(|e| MarketingError::Channel {
                 channel: "email".into(),

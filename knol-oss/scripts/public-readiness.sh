@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "==> Knol OSS public-readiness checks"
+echo "==> Cortex OSS public-readiness checks"
 
 required_files=(
   "LICENSE"
@@ -52,7 +52,7 @@ if [[ -n "$history_hit" ]]; then
 fi
 
 echo "==> Checking for proprietary coupling references"
-if rg -n "knol-enterprise|aiknol/knol-platform|private monorepo" . \
+if rg -n "knol-enterprise|doaide/cortex-platform|private monorepo" . \
   --glob '!.git' \
   --glob '!target' \
   --glob '!scripts/*.sh'; then

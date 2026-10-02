@@ -1,5 +1,5 @@
 # =============================================================================
-# Knol — Deploy Pipeline
+# Cortex — Deploy Pipeline
 # Triggers on tags (v*) or manual dispatch
 # Builds Docker images → pushes to GHCR → deploys to Hetzner VPS
 # =============================================================================

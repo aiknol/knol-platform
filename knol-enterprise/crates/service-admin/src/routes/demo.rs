@@ -16,7 +16,7 @@ const DEMO_MAX_REQUESTS: u32 = 15;
 /// Demo rate limit window (60 seconds).
 const DEMO_WINDOW_SECS: u64 = 60;
 
-const DEFAULT_GITHUB_URL: &str = "https://github.com/aiknol/knol";
+const DEFAULT_GITHUB_URL: &str = "https://github.com/doaide/cortex";
 const DEFAULT_TAGLINE: &str = "Context engineering for AI applications";
 const DEFAULT_GEMINI_API_URL: &str = "https://generativelanguage.googleapis.com/v1beta";
 const DEFAULT_OPENAI_API_URL: &str = "https://api.openai.com/v1";
@@ -309,7 +309,7 @@ fn build_system_prompt(memory_context: &str) -> String {
     };
 
     format!(
-        r#"You are the AI inside "Knol", a context engineering platform for AI applications. You have access to a memory store of facts, preferences, events, and relationships about the user. Knol uses hybrid retrieval (vector + BM25 + knowledge graph) to surface the most relevant context.
+        r#"You are the AI inside "Cortex", a context engineering platform for AI applications. You have access to a memory store of facts, preferences, events, and relationships about the user. Cortex uses hybrid retrieval (vector + BM25 + knowledge graph) to surface the most relevant context.
 
 CURRENT MEMORY STORE:
 {context}

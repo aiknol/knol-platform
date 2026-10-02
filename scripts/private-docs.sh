@@ -46,7 +46,7 @@ start_private_docs() {
       NEXT_PUBLIC_PRIVATE_DOCS_URL="http://localhost:$PORT" \
       NEXT_PUBLIC_API_BASE_URL="${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3000}" \
       NEXT_PUBLIC_TENANT_SWAGGER_URL="${NEXT_PUBLIC_TENANT_SWAGGER_URL:-http://localhost:3002/docs}" \
-      NEXT_PUBLIC_GITHUB_REPO_URL="${NEXT_PUBLIC_GITHUB_REPO_URL:-https://github.com/aiknol/knol}" \
+      NEXT_PUBLIC_GITHUB_REPO_URL="${NEXT_PUBLIC_GITHUB_REPO_URL:-https://github.com/doaide/cortex}" \
       npm run dev >"$LOG_FILE" 2>&1 &
     echo $! >"$PID_FILE"
   )

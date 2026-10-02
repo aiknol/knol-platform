@@ -6,7 +6,7 @@ If you discover a security vulnerability in Cortex, please report it responsibly
 
 ### How to Report
 
-Email **aiknolcontact@gmail.com** with:
+Email **contact@doaide.com** with:
 
 - A description of the vulnerability
 - Steps to reproduce the issue

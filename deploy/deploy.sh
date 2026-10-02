@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Knol — Production Deploy Script
+# Cortex — Production Deploy Script
 # Run on the VPS to pull latest images and restart services
 # =============================================================================
 # Usage:
@@ -17,7 +17,7 @@ TAG="${1:-}"
 cd "$DEPLOY_DIR"
 
 echo "╔══════════════════════════════════════╗"
-echo "║  Knol Deploy — tag: $TAG"
+echo "║  Cortex Deploy — tag: $TAG"
 echo "╚══════════════════════════════════════╝"
 
 if [ -z "$TAG" ]; then

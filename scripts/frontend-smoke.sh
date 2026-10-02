@@ -109,6 +109,6 @@ assert_http_200 "http://127.0.0.1:3009/"
 assert_contains "http://127.0.0.1:3006/login/" "Sign in to admin"
 assert_contains "http://127.0.0.1:3007/signup/" "Create Your Free Workspace"
 assert_contains "http://127.0.0.1:3008/" "<title>"
-assert_contains "http://127.0.0.1:3009/" "Knol Docs"
+assert_contains "http://127.0.0.1:3009/" "Cortex Docs"
 
 echo "Frontend smoke checks passed."

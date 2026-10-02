@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Knol — Automated Backup Setup
+# Cortex — Automated Backup Setup
 # Sets up daily PostgreSQL backups via cron on the production VPS
 # and uploads backups to off-host object storage (S3-compatible).
 # =============================================================================
@@ -15,7 +15,7 @@ BACKUP_SCRIPT="/opt/knol/db-backup-prod.sh"
 LOG_DIR="/var/log/knol"
 CRON_USER="knol"
 
-echo "=== Knol Backup Setup ==="
+echo "=== Cortex Backup Setup ==="
 
 # Ensure required tools are installed
 NEED_APT_UPDATE=0

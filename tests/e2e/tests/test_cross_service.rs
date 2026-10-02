@@ -142,7 +142,7 @@ async fn cross_webhook_to_graph_pipeline() {
     let body = WebhookPayload {
         source: "integration-test".into(),
         items: vec![WebhookItem {
-            content: "Mark works with Sarah at Knol on the memory infrastructure project.".into(),
+            content: "Mark works with Sarah at Cortex on the memory infrastructure project.".into(),
             user_id: None,
             role: Some("user".into()),
             session_id: None,

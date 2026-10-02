@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "=== Knol Dev Environment Setup ==="
+echo "=== Cortex Dev Environment Setup ==="
 
 # Check prerequisites
 command -v docker >/dev/null 2>&1 || { echo "Docker is required. Install from https://docker.com"; exit 1; }

@@ -1,4 +1,4 @@
-//! Shared utilities for Knol enterprise services.
+//! Shared utilities for Cortex enterprise services.
 //! Extracted from service-admin to avoid duplication between admin and tenant services.
 
 pub mod api_rate_limit;

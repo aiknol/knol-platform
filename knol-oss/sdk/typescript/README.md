@@ -537,4 +537,4 @@ MIT
 
 - Documentation: https://docs.cortex.doaide.com
 - Issues: https://github.com/doaide/cortex-sdk-typescript/issues
-- Email: aiknolcontact@gmail.com
+- Email: contact@doaide.com

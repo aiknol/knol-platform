@@ -1,6 +1,6 @@
 # =============================================================================
-# Knol Docs Website — Cloudflare Pages Configuration
-# Static site deployment for docs.aiknol.com (docs)
+# Cortex Docs Website — Cloudflare Pages Configuration
+# Static site deployment for docs.cortex.doaide.com (docs)
 # =============================================================================
 
 name = "knol-docs"

@@ -1,4 +1,4 @@
-//! Integration test harness for Knol Enterprise
+//! Integration test harness for Cortex Enterprise
 //!
 //! Validates the full write → extract → search → consolidate cycle
 //! using mocked service interactions (no live infrastructure required).

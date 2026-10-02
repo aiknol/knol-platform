@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Knol — Comprehensive Health Check
+# Cortex — Comprehensive Health Check
 # Checks all infrastructure and application services
 # =============================================================================
 # Usage:
@@ -42,7 +42,7 @@ check_docker() {
     fi
 }
 
-echo "=== Knol Health Check ($MODE) ==="
+echo "=== Cortex Health Check ($MODE) ==="
 echo ""
 
 # Infrastructure

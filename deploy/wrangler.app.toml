@@ -1,6 +1,6 @@
 # =============================================================================
-# Knol Cloud Website — Cloudflare Pages Configuration
-# Static site deployment for cloud.aiknol.com (cloud)
+# Cortex Cloud Website — Cloudflare Pages Configuration
+# Static site deployment for cloud.cortex.doaide.com (cloud)
 # =============================================================================
 
 name = "knol-cloud"

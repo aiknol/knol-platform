@@ -12,11 +12,11 @@
 
 [[redirects]]
   from = "/github"
-  to = "https://github.com/aiknol/knol"
+  to = "https://github.com/doaide/cortex"
   status = 301
 
 [[redirects]]
   from = "/"
   to = "/login/"
   status = 302
-  conditions = {Host = ["cloud.aiknol.com"]}
+  conditions = {Host = ["cloud.cortex.doaide.com"]}

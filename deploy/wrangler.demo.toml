@@ -1,6 +1,6 @@
 # =============================================================================
-# Knol Demo UI — Cloudflare Pages Configuration
-# Static site deployment for demo.aiknol.com (demo)
+# Cortex Demo UI — Cloudflare Pages Configuration
+# Static site deployment for demo.cortex.doaide.com (demo)
 # =============================================================================
 
 name = "knol-demo"

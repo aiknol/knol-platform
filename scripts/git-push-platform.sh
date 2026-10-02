@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # git-push-platform.sh — Push the full monorepo to PRIVATE repo
-# Repo: github.com/aiknol/knol-platform  (private)
+# Repo: github.com/doaide/cortex-platform  (private)
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
 MONO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PRIVATE_REMOTE="origin"
-PRIVATE_REPO="git@github.com:aiknol/knol-platform.git"
+PRIVATE_REPO="git@github.com:doaide/cortex-platform.git"
 BRANCH="${1:-main}"
 
 cd "$MONO_ROOT"
@@ -26,4 +26,4 @@ fi
 echo "Pushing full monorepo → $PRIVATE_REMOTE/$BRANCH …"
 git push "$PRIVATE_REMOTE" "$BRANCH"
 
-echo "✓ Platform push complete → github.com/aiknol/knol-platform ($BRANCH)"
+echo "✓ Platform push complete → github.com/doaide/cortex-platform ($BRANCH)"

@@ -14,7 +14,7 @@ export const SITE = {
   docsUrl: resolveDocsUrl(),
   pypi: 'https://pypi.org/project/doaide-cortex/',
   npm: 'https://www.npmjs.com/package/@doaide/cortex-sdk',
-  contactEmail: 'aiknolcontact@gmail.com',
+  contactEmail: 'contact@doaide.com',
   contactPhone: '+14155953988',
   contactPhoneDisplay: '(415) 595-3988',
 } as const;

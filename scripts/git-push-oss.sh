@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # git-push-oss.sh — Push knol-oss subtree to the PUBLIC repo
-# Repo: github.com/aiknol/knol  (public, Apache-2.0)
+# Repo: github.com/doaide/cortex  (public, Apache-2.0)
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
 MONO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OSS_PREFIX="knol-oss"
 PUBLIC_REMOTE="oss-public"
-PUBLIC_REPO="git@github.com:aiknol/knol.git"
+PUBLIC_REPO="git@github.com:doaide/cortex.git"
 BRANCH="${1:-main}"
 
 cd "$MONO_ROOT"
@@ -29,4 +29,4 @@ fi
 echo "Pushing '$OSS_PREFIX/' → $PUBLIC_REMOTE/$BRANCH …"
 git subtree push --prefix="$OSS_PREFIX" "$PUBLIC_REMOTE" "$BRANCH"
 
-echo "✓ OSS push complete → github.com/aiknol/knol ($BRANCH)"
+echo "✓ OSS push complete → github.com/doaide/cortex ($BRANCH)"

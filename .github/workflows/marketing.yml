@@ -134,8 +134,8 @@ jobs:
       - name: Commit blog posts
         if: needs.determine-campaign.outputs.campaign == 'weekly' || needs.determine-campaign.outputs.campaign == 'monthly'
         run: |
-          git config user.name "Knol Marketing Bot"
-          git config user.email "marketing@aiknol.com"
+          git config user.name "Cortex Marketing Bot"
+          git config user.email "marketing@cortex.doaide.com"
           git add marketing/blog/ marketing/data/ || true
           git diff --staged --quiet || git commit -m "marketing: auto-publish content [skip ci]"
           git push || true

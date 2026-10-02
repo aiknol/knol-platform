@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Knol — Hetzner VPS Initial Setup Script
+# Cortex — Hetzner VPS Initial Setup Script
 # Run once on a fresh Hetzner CX32 (Ubuntu 22.04 / Debian 12)
 # =============================================================================
 # Usage:
 #   ssh root@YOUR_VPS_IP
-#   curl -fsSL https://raw.githubusercontent.com/aiknol/knol/main/deploy/setup-vps.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/doaide/cortex/main/deploy/setup-vps.sh | bash
 # =============================================================================
 
 set -euo pipefail
 
 echo "========================================"
-echo " Knol VPS Setup — Starter Tier"
+echo " Cortex VPS Setup — Starter Tier"
 echo "========================================"
 
 # ---------- System updates ----------
@@ -72,7 +72,7 @@ mkdir -p $APP_DIR
 chown knol:knol $APP_DIR
 
 cat > $APP_DIR/README <<'EOF'
-Knol Production Deployment
+Cortex Production Deployment
 ==========================
 
 Directory structure:
@@ -117,6 +117,6 @@ echo "  3. Disable root SSH:  edit /etc/ssh/sshd_config → PermitRootLogin no"
 echo "  4. Copy deploy files: scp deploy/* knol@VPS:/opt/knol/"
 echo "  5. Create .env:       cp .env.production.example .env.production"
 echo "  6. Configure backups: sudo /opt/knol/setup-backups.sh"
-echo "  7. Point DNS:         api.aiknol.com → $(hostname -I | awk '{print $1}')"
+echo "  7. Point DNS:         api.cortex.doaide.com → $(hostname -I | awk '{print $1}')"
 echo "  8. Deploy:            docker compose -f docker-compose.prod.yml --env-file .env.production up -d"
 echo ""

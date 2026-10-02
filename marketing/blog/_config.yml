@@ -1,6 +1,6 @@
-title: Knol Blog
+title: Cortex Blog
 description: Engineering insights on AI memory infrastructure
-url: "https://blog.aiknol.com"
+url: "https://blog.cortex.doaide.com"
 baseurl: ""
 theme: minima
 markdown: kramdown
@@ -10,13 +10,13 @@ plugins:
   - jekyll-sitemap
 
 author:
-  name: Knol Team
-  url: https://aiknol.com
+  name: Cortex Team
+  url: https://cortex.doaide.com
 
 social:
-  name: Knol
+  name: Cortex
   links:
-    - https://github.com/aiknol/knol
+    - https://github.com/doaide/cortex
     - https://twitter.com/knoldev
 
 google_analytics:
@@ -27,4 +27,4 @@ defaults:
       type: "posts"
     values:
       layout: "post"
-      author: "Knol Team"
+      author: "Cortex Team"

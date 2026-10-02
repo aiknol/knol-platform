@@ -587,7 +587,7 @@ pub async fn me(
             "usage_ops_month": tenant.usage_ops_month,
             "usage_limit": tenant.usage_limit,
         },
-        "gateway_base_url": std::env::var("GATEWAY_PUBLIC_URL").unwrap_or_else(|_| "https://api.aiknol.com".to_string()),
+        "gateway_base_url": std::env::var("GATEWAY_PUBLIC_URL").unwrap_or_else(|_| "https://api.cortex.doaide.com".to_string()),
     }))
     .into_response();
     // Refresh CSRF token on every /me call so cross-origin frontends always

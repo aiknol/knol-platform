@@ -2,9 +2,9 @@
 # ─────────────────────────────────────────────────────────────
 # git-init-repos.sh — One-time setup for the dual-repo strategy
 #
-# Creates two GitHub repos under aiknol org:
-#   1. aiknol/knol-platform  (private) — full monorepo
-#   2. aiknol/knol           (public)  — OSS subtree
+# Creates two GitHub repos under doaide org:
+#   1. doaide/cortex-platform  (private) — full monorepo
+#   2. doaide/cortex           (public)  — OSS subtree
 #
 # Prerequisites:
 #   - `gh` CLI authenticated with org write access
@@ -13,11 +13,11 @@
 set -euo pipefail
 
 MONO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ORG="aiknol"
+ORG="doaide"
 cd "$MONO_ROOT"
 
 echo "═══════════════════════════════════════════"
-echo " Knol — Repository initialization"
+echo " Cortex — Repository initialization"
 echo "═══════════════════════════════════════════"
 
 # ── Step 1: Create GitHub repos if they don't exist ────────
@@ -30,7 +30,7 @@ else
   echo "  Creating $ORG/knol-platform (private)…"
   gh repo create "$ORG/knol-platform" \
     --private \
-    --description "Knol platform monorepo — context engineering for LLM applications" \
+    --description "Cortex platform monorepo — context engineering for LLM applications" \
     --confirm
 fi
 
@@ -40,7 +40,7 @@ else
   echo "  Creating $ORG/knol (public)…"
   gh repo create "$ORG/knol" \
     --public \
-    --description "Knol — open-source context engineering platform. Semantic + keyword + graph memory for LLMs." \
+    --description "Cortex — open-source context engineering platform. Semantic + keyword + graph memory for LLMs." \
     --license Apache-2.0 \
     --confirm
 fi
@@ -81,7 +81,7 @@ echo ""
 echo "── Creating initial commit ────────────────"
 
 git add -A
-git commit -m "Initial commit — Knol context engineering platform
+git commit -m "Initial commit — Cortex context engineering platform
 
 Monorepo layout:
   knol-oss/        — open-source core (Apache-2.0)

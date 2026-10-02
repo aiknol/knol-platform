@@ -1,6 +1,6 @@
 # =============================================================================
-# Knol Admin Website — Cloudflare Pages Configuration
-# Static site deployment for admin.aiknol.com (admin)
+# Cortex Admin Website — Cloudflare Pages Configuration
+# Static site deployment for admin.cortex.doaide.com (admin)
 # =============================================================================
 
 name = "knol-admin"

@@ -145,10 +145,10 @@ pub async fn create_checkout(
     let customer_id = ensure_stripe_customer(&state, &tenant, &claims.email).await?;
 
     let success_url = std::env::var("STRIPE_CHECKOUT_SUCCESS_URL").unwrap_or_else(|_| {
-        "https://cloud.aiknol.com/billing?session_id={CHECKOUT_SESSION_ID}".to_string()
+        "https://cloud.cortex.doaide.com/billing?session_id={CHECKOUT_SESSION_ID}".to_string()
     });
     let cancel_url = std::env::var("STRIPE_CHECKOUT_CANCEL_URL")
-        .unwrap_or_else(|_| "https://cloud.aiknol.com/billing?canceled=true".to_string());
+        .unwrap_or_else(|_| "https://cloud.cortex.doaide.com/billing?canceled=true".to_string());
 
     let client = stripe_client(&state.http_client, key);
     let session = client
@@ -209,7 +209,7 @@ pub async fn create_portal(
     })?;
 
     let return_url = std::env::var("STRIPE_PORTAL_RETURN_URL")
-        .unwrap_or_else(|_| "https://cloud.aiknol.com/billing".to_string());
+        .unwrap_or_else(|_| "https://cloud.cortex.doaide.com/billing".to_string());
 
     let client = stripe_client(&state.http_client, key);
     let portal = client

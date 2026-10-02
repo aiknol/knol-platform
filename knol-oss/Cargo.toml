@@ -18,7 +18,7 @@ members = [
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/aiknol/knol"
+repository = "https://github.com/doaide/cortex"
 
 [workspace.dependencies]
 # Async runtime

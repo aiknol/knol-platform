@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # git-push-all.sh — Push to BOTH repos in one command
-#   1. Private monorepo  → aiknol/knol-platform
-#   2. Public OSS subtree → aiknol/knol
+#   1. Private monorepo  → doaide/cortex-platform
+#   2. Public OSS subtree → doaide/cortex
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BRANCH="${1:-main}"
 
 echo "═══════════════════════════════════════════"
-echo " Knol — Dual-repo push ($BRANCH)"
+echo " Cortex — Dual-repo push ($BRANCH)"
 echo "═══════════════════════════════════════════"
 echo ""
 

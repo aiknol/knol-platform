@@ -1,5 +1,5 @@
 #!/bin/sh
-# Database restore script for Knol.
+# Database restore script for Cortex.
 # Restores a compressed pg_dump backup into the database.
 #
 # Usage:
@@ -42,7 +42,7 @@ fi
 
 SIZE=$(du -h "${BACKUP_FILE}" | cut -f1)
 
-echo "=== Knol Database Restore ==="
+echo "=== Cortex Database Restore ==="
 echo "Host:     ${DB_HOST}:${DB_PORT}"
 echo "Database: ${DB_NAME}"
 echo "File:     ${BACKUP_FILE} (${SIZE})"

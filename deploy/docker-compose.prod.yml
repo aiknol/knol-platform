@@ -1,5 +1,5 @@
 # =============================================================================
-# Knol — Production Docker Compose (Starter Tier)
+# Cortex — Production Docker Compose (Starter Tier)
 # Hetzner CX32 (4 vCPU, 8 GB RAM) + Neon Postgres + Upstash Redis
 # =============================================================================
 # Usage:
@@ -47,7 +47,7 @@ services:
   # OSS Services
   # ---------------------------------------------------------------------------
   gateway:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-gateway
     restart: unless-stopped
     stop_grace_period: 30s
@@ -57,7 +57,7 @@ services:
     env_file: .env.production
     environment:
       GATEWAY_PORT: "8080"
-      GATEWAY_CORS_ORIGINS: "https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com"
+      GATEWAY_CORS_ORIGINS: "https://cortex.doaide.com,https://www.cortex.doaide.com,https://cloud.cortex.doaide.com,https://demo.cortex.doaide.com,https://admin.cortex.doaide.com"
       RESILIENCE_SKIP_RATE_LIMIT_ON_REDIS_FAILURE: "true"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health >/dev/null || exit 1"]
@@ -74,7 +74,7 @@ services:
       - knol
 
   write:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-write
     restart: unless-stopped
     mem_limit: 128m
@@ -101,7 +101,7 @@ services:
       - knol
 
   retrieve:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-retrieve
     restart: unless-stopped
     mem_limit: 128m
@@ -125,7 +125,7 @@ services:
       - knol
 
   graph:
-    image: ghcr.io/aiknol/knol-oss:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-graph
     restart: unless-stopped
     mem_limit: 128m
@@ -152,7 +152,7 @@ services:
   # Enterprise Services
   # ---------------------------------------------------------------------------
   admin:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-admin
     restart: unless-stopped
     mem_limit: 96m
@@ -165,7 +165,7 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
-      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com,https://demo.aiknol.com,https://admin.aiknol.com}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-https://cortex.doaide.com,https://www.cortex.doaide.com,https://cloud.cortex.doaide.com,https://demo.cortex.doaide.com,https://admin.cortex.doaide.com}
       MARKETING_SERVICE_URL: http://marketing:8088
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/health >/dev/null || exit 1"]
@@ -182,7 +182,7 @@ services:
       - knol
 
   tenant:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-tenant
     restart: unless-stopped
     mem_limit: 128m
@@ -192,7 +192,7 @@ services:
     environment:
       TENANT_SERVICE_PORT: "8085"
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
-      TENANT_CORS_ORIGIN: ${TENANT_CORS_ORIGIN:-https://aiknol.com,https://www.aiknol.com,https://cloud.aiknol.com}
+      TENANT_CORS_ORIGIN: ${TENANT_CORS_ORIGIN:-https://cortex.doaide.com,https://www.cortex.doaide.com,https://cloud.cortex.doaide.com}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     healthcheck:
@@ -210,7 +210,7 @@ services:
       - knol
 
   jobs:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-jobs
     restart: unless-stopped
     mem_limit: 128m
@@ -237,7 +237,7 @@ services:
       - knol
 
   billing:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-billing
     restart: unless-stopped
     mem_limit: 96m
@@ -261,7 +261,7 @@ services:
       - knol
 
   ingest:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-enterprise-ingest
     restart: unless-stopped
     mem_limit: 128m
@@ -288,7 +288,7 @@ services:
       - knol
 
   marketing:
-    image: ghcr.io/aiknol/knol-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
+    image: ghcr.io/doaide/cortex-enterprise:${IMAGE_TAG:?set IMAGE_TAG}
     container_name: knol-marketing
     restart: unless-stopped
     mem_limit: 96m

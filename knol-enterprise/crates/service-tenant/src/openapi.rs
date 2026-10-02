@@ -8,10 +8,10 @@ use crate::routes::{app, billing, invites, settings};
 #[derive(OpenApi)]
 #[openapi(
     info(
-        title = "Knol Tenant API",
+        title = "Cortex Tenant API",
         version = "1.0.0",
         description = "Self-service API for tenant workspaces: authentication, billing, team management, API keys, and settings.",
-        contact(name = "Knol", url = "https://aiknol.com")
+        contact(name = "DoAide Cortex", url = "https://cortex.doaide.com")
     ),
     paths(
         // Auth

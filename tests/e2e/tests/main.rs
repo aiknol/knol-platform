@@ -1,6 +1,6 @@
 #![allow(dead_code, unused_comparisons)]
 // =============================================================================
-// Knol — End-to-End Test Suite
+// Cortex — End-to-End Test Suite
 // =============================================================================
 //
 // 100% coverage of all 8 services, 39 HTTP endpoints, 1 NATS consumer,

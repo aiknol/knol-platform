@@ -93,15 +93,15 @@ pub fn generate(channel: &str, category: &str) -> Result<PublishContent, Marketi
             subject: None,
         },
         "email" => PublishContent {
-            text: "Knol Newsletter".to_string(),
+            text: "Cortex Newsletter".to_string(),
             title: None,
             body: Some(template.to_string()),
             tags: vec![],
             subreddit: None,
             subject: Some(if category.contains("welcome") {
-                "Welcome to Knol".to_string()
+                "Welcome to Cortex".to_string()
             } else {
-                format!("This Week at Knol — {}", chrono::Utc::now().format("%b %d"))
+                format!("This Week at Cortex — {}", chrono::Utc::now().format("%b %d"))
             }),
         },
         "blog" => {

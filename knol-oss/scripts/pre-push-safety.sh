@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Pre-push safety hook for the Knol monorepo.
+# Pre-push safety hook for the Cortex monorepo.
 #
 # Prevents accidental pushes of the full monorepo (knol-platform) to the
-# public OSS remote (oss-public / aiknol/knol). Only subtree pushes of
+# public OSS remote (oss-public / doaide/cortex). Only subtree pushes of
 # the knol-oss/ directory should go to the public repo.
 #
 # Install:
@@ -15,7 +15,7 @@ remote="$1"
 url="$2"
 
 # Detect if we're pushing to the public OSS repo
-if echo "$url" | grep -qE "aiknol/knol(\.git)?$"; then
+if echo "$url" | grep -qE "doaide/cortex(\.git)?$"; then
     # Allow subtree pushes (git subtree push uses a temporary branch)
     # Block direct branch pushes from the full monorepo
     while read local_ref local_sha remote_ref remote_sha; do

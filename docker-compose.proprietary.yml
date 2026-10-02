@@ -34,7 +34,7 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?set ADMIN_JWT_SECRET in .env (>=32 chars)}
       ADMIN_ENCRYPTION_KEY: ${ADMIN_ENCRYPTION_KEY:?set ADMIN_ENCRYPTION_KEY in .env (base64 32-byte key)}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:?set ADMIN_INITIAL_PASSWORD in .env (>=12 chars)}
-      ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-admin@aiknol.com}
+      ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-admin@cortex.doaide.com}
       ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-http://localhost:3005,http://localhost:3006,http://localhost:3007,http://localhost:3008}
       ADMIN_SECURE_COOKIES: ${ADMIN_SECURE_COOKIES:-false}
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:?set INTERNAL_SERVICE_SECRET in .env}

@@ -496,7 +496,7 @@ pub async fn seed_initial_admin(pool: &sqlx::PgPool) -> anyhow::Result<()> {
 
     // SECURITY: Allow configurable initial admin email via env var.
     let admin_email =
-        std::env::var("ADMIN_INITIAL_EMAIL").unwrap_or_else(|_| "admin@aiknol.com".into());
+        std::env::var("ADMIN_INITIAL_EMAIL").unwrap_or_else(|_| "admin@cortex.doaide.com".into());
 
     sqlx::query(
         "INSERT INTO admin_users (email, password_hash, role, enabled) VALUES ($1, $2, 'super_admin', true)",
