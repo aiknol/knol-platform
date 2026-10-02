@@ -9,9 +9,9 @@ export default function HomePage() {
   return (
     <>
       <section className="hero">
-        <h1>Documentation Hub for Knol</h1>
+        <h1>Documentation Hub for Cortex</h1>
         <p>
-          This site centralizes Knol OSS documentation and complete tenant-service documentation.
+          This site centralizes Cortex OSS documentation and complete tenant-service documentation.
           Use it as the single source across environments at
           <code> {DOCS_SITE.siteUrl}</code>.
         </p>

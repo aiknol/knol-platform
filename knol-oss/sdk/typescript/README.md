@@ -1,6 +1,6 @@
-# Knol Memory Platform SDK
+# Cortex Memory Platform SDK
 
-Official TypeScript/JavaScript SDK for the [Knol memory platform](https://knol.ai). Build intelligent applications with semantic memory, graph traversal, and knowledge extraction.
+Official TypeScript/JavaScript SDK for the [Cortex memory platform](https://cortex.doaide.com). Build intelligent applications with semantic memory, graph traversal, and knowledge extraction.
 
 ## Features
 
@@ -12,28 +12,28 @@ Official TypeScript/JavaScript SDK for the [Knol memory platform](https://knol.a
 - **Webhook Support** - Real-time event notifications for memory and entity changes
 - **Retry Logic** - Automatic exponential backoff for transient failures
 - **Browser & Node.js** - Works in any JavaScript environment with fetch support
-- **Error Handling** - Custom KnolError class with detailed error information
+- **Error Handling** - Custom CortexError class with detailed error information
 
 ## Installation
 
 ```bash
-npm install @knol/sdk
+npm install @doaide/cortex-sdk
 ```
 
 Or with yarn:
 
 ```bash
-yarn add @knol/sdk
+yarn add @doaide/cortex-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { KnolClient } from '@knol/sdk';
+import { CortexClient } from '@doaide/cortex-sdk';
 
 // Initialize client
-const client = new KnolClient({
-  apiKey: process.env.KNOL_API_KEY,
+const client = new CortexClient({
+  apiKey: process.env.CORTEX_API_KEY,
 });
 
 // Write a memory
@@ -59,9 +59,9 @@ const neighbors = await client.getEntityNeighbors('coffee', 'related_to');
 ## Configuration
 
 ```typescript
-const client = new KnolClient({
-  apiKey: process.env.KNOL_API_KEY,        // Required: API key
-  baseUrl: 'https://api.knol.ai',          // Optional: API endpoint (default shown)
+const client = new CortexClient({
+  apiKey: process.env.CORTEX_API_KEY,        // Required: API key
+  baseUrl: 'https://api.cortex.doaide.com',          // Optional: API endpoint (default shown)
   timeout: 30000,                          // Optional: Request timeout in ms (default: 30000)
   retryAttempts: 3,                        // Optional: Number of retry attempts (default: 3)
   retryDelayMs: 1000,                      // Optional: Delay between retries in ms (default: 1000)
@@ -315,7 +315,7 @@ response.webhooks.forEach(webhook => {
 
 ```typescript
 const webhook = await client.createWebhook({
-  url: 'https://your-app.com/webhooks/knol',
+  url: 'https://your-app.com/webhooks/cortex',
   events: ['memory.created', 'memory.updated', 'entity.created'],
   active: true,
 });
@@ -352,12 +352,12 @@ auditResponse.entries.forEach(entry => {
 
 ## Error Handling
 
-The SDK provides a custom `KnolError` class for better error handling:
+The SDK provides a custom `CortexError` class for better error handling:
 
 ```typescript
-import { KnolClient, KnolError } from '@knol/sdk';
+import { CortexClient, CortexError } from '@doaide/cortex-sdk';
 
-const client = new KnolClient({ apiKey: 'sk-...' });
+const client = new CortexClient({ apiKey: 'sk-...' });
 
 try {
   const memory = await client.writeMemory({
@@ -365,7 +365,7 @@ try {
     user_id: 'user-123',
   });
 } catch (error) {
-  if (KnolError.isKnolError(error)) {
+  if (CortexError.isCortexError(error)) {
     console.error(`Error: ${error.message}`);
     console.error(`Status: ${error.statusCode}`);
     console.error(`Request ID: ${error.requestId}`);
@@ -387,8 +387,8 @@ import {
   SearchMemoryRequest,
   Entity,
   SearchMemoryResponse,
-  KnolError,
-} from '@knol/sdk';
+  CortexError,
+} from '@doaide/cortex-sdk';
 
 // Your code will have full autocomplete and type checking
 ```
@@ -398,11 +398,11 @@ import {
 The SDK works in modern browsers that support `fetch`:
 
 ```typescript
-import { KnolClient } from '@knol/sdk';
+import { CortexClient } from '@doaide/cortex-sdk';
 
-const client = new KnolClient({
+const client = new CortexClient({
   apiKey: 'pk_live_...',  // Use public API key in browser
-  baseUrl: 'https://api.knol.ai',
+  baseUrl: 'https://api.cortex.doaide.com',
 });
 
 // Make requests from the browser
@@ -418,10 +418,10 @@ const results = await client.searchMemory({
 The SDK works in Node.js 16+ with no additional setup:
 
 ```typescript
-import { KnolClient } from '@knol/sdk';
+import { CortexClient } from '@doaide/cortex-sdk';
 
-const client = new KnolClient({
-  apiKey: process.env.KNOL_API_KEY,
+const client = new CortexClient({
+  apiKey: process.env.CORTEX_API_KEY,
 });
 
 // Use in server-side applications
@@ -527,7 +527,7 @@ sorted.forEach(memory => {
 
 ## Contributing
 
-Contributions are welcome! Please submit issues and pull requests to the [GitHub repository](https://github.com/aiknol/knol-sdk-typescript).
+Contributions are welcome! Please submit issues and pull requests to the [GitHub repository](https://github.com/doaide/cortex-sdk-typescript).
 
 ## License
 
@@ -535,6 +535,6 @@ MIT
 
 ## Support
 
-- Documentation: https://docs.knol.ai
-- Issues: https://github.com/aiknol/knol-sdk-typescript/issues
+- Documentation: https://docs.cortex.doaide.com
+- Issues: https://github.com/doaide/cortex-sdk-typescript/issues
 - Email: aiknolcontact@gmail.com

@@ -3,17 +3,17 @@
 import { resolveAppSignupUrl, resolveDemoUrl, resolveDocsUrl, resolveSiteUrl } from './urls';
 
 export const SITE = {
-  name: 'Knol',
+  name: 'DoAide Cortex',
   tagline: 'Context Engineering Infrastructure for AI',
   description:
     'Rust-native context engineering platform for LLM applications. One binary, one PostgreSQL database, sub-5ms latency. Hybrid retrieval, knowledge graphs, memory decay, and conflict detection. Deploy in 60 seconds.',
   url: resolveSiteUrl(),
   appUrl: resolveAppSignupUrl(),
   demoUrl: resolveDemoUrl(),
-  github: 'https://github.com/aiknol/knol',
+  github: 'https://github.com/doaide/cortex',
   docsUrl: resolveDocsUrl(),
-  pypi: 'https://pypi.org/project/knol/',
-  npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
+  pypi: 'https://pypi.org/project/doaide-cortex/',
+  npm: 'https://www.npmjs.com/package/@doaide/cortex-sdk',
   contactEmail: 'aiknolcontact@gmail.com',
   contactPhone: '+14155953988',
   contactPhoneDisplay: '(415) 595-3988',

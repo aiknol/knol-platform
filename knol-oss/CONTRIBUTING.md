@@ -1,11 +1,11 @@
-# Contributing to Knol
+# Contributing to Cortex
 
-Thank you for your interest in contributing to Knol!
+Thank you for your interest in contributing to Cortex!
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/knol.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/cortex.git`
 3. Create a feature branch: `git checkout -b feature/my-feature`
 4. Install prerequisites: Rust 1.75+, Docker, Docker Compose
 

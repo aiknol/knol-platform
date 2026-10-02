@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Campaign Scheduler
+// Cortex Marketing — Campaign Scheduler
 // Orchestrates daily/weekly/monthly marketing campaigns autonomously
 // Can run via: cron, GitHub Actions, or `node scheduler.js --run <cadence>`
 // =============================================================================
@@ -62,7 +62,7 @@ const CAMPAIGNS = {
             ? template.body
             : typeof template.text === 'string'
               ? template.text
-              : `# ${template.title || topic.title}\n\n${template.description || topic.description || 'Engineering deep dive from the Knol team.'}\n\nGitHub: https://github.com/aiknol/knol\nDocs: https://aiknol.com/docs`;
+              : `# ${template.title || topic.title}\n\n${template.description || topic.description || 'Engineering deep dive from the Cortex team.'}\n\nGitHub: https://github.com/doaide/cortex\nDocs: https://cortex.doaide.com/docs`;
           return {
             title: template.title || topic.title,
             text: body,
@@ -119,7 +119,7 @@ const CAMPAIGNS = {
           const template = generated.content;
           return {
             subreddit: normalizeSubreddit(template.subreddit || sub),
-            title: template.title || `Knol: Memory layer for AI (${sub})`,
+            title: template.title || `Cortex: Memory layer for AI (${sub})`,
             text: template.body || template.text || template,
             __meta: generated.meta,
           };
@@ -145,7 +145,7 @@ const CAMPAIGNS = {
             limit: 8,
             minScore: 3,
             minComments: 0,
-            commentTemplate: 'Maintainer here. We built an open-source memory stack for this exact problem. Happy to share design tradeoffs if useful: https://github.com/aiknol/knol',
+            commentTemplate: 'Maintainer here. We built an open-source memory stack for this exact problem. Happy to share design tradeoffs if useful: https://github.com/doaide/cortex',
             __meta: { templateCategory: 'reddit_engagement', variantId: 'reddit_engagement:v0', variantIndex: 0 },
           };
         },
@@ -175,14 +175,14 @@ const CAMPAIGNS = {
           const generated = await generateContent('email', 'email_weekly', { withMeta: true });
           const template = generated.content;
           return {
-            subject: template.subject || `Knol Monthly Update`,
+            subject: template.subject || `Cortex Monthly Update`,
             text: template.body || template.text || (typeof template === 'string' ? template : JSON.stringify(template)),
             __meta: generated.meta,
           };
         },
         publish: async (content, creds) => {
           return publishToChannel('email', {
-            subject: content.subject || `Knol Monthly Update — ${new Date().toLocaleDateString('en', { month: 'long', year: 'numeric' })}`,
+            subject: content.subject || `Cortex Monthly Update — ${new Date().toLocaleDateString('en', { month: 'long', year: 'numeric' })}`,
             text: content.text,
             htmlContent: content.text,
             __meta: content.__meta,
@@ -239,7 +239,7 @@ const CAMPAIGNS = {
           const tweets = [
             content.text,
             '🧵 Some highlights from this month:\n\n• Performance improvements\n• New API features\n• Community growth\n\nThread below 👇',
-            'If you\'re building AI agents that need to remember context across sessions, check us out:\n\nhttps://github.com/aiknol/knol\n\nStar ⭐ if you find it useful!',
+            'If you\'re building AI agents that need to remember context across sessions, check us out:\n\nhttps://github.com/doaide/cortex\n\nStar ⭐ if you find it useful!',
           ];
           return publishToChannel('twitter', { tweets, __meta: content.__meta }, creds);
         },
@@ -477,7 +477,7 @@ async function main() {
   const force = args.includes('--force');
 
   if (runIndex === -1) {
-    console.log('Knol Marketing Scheduler');
+    console.log('Cortex Marketing Scheduler');
     console.log('========================');
     console.log('Usage:');
     console.log('  node scheduler.js --run daily     Run daily campaign');

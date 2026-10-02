@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Blog Auto-Publisher
+// Cortex Marketing — Blog Auto-Publisher
 // Generates markdown blog posts → pushes to GitHub Pages (free hosting)
 // Also cross-posts to Dev.to for wider reach
 // =============================================================================
@@ -11,12 +11,12 @@ const { execSync } = require('child_process');
 const CONFIG = {
   BLOG_DIR: path.join(__dirname, '..', 'blog'),
   POSTS_DIR: path.join(__dirname, '..', 'blog', '_posts'),
-  SITE_URL: 'https://blog.aiknol.com',
-  REPO: 'knol-dev/blog',
+  SITE_URL: 'https://blog.cortex.doaide.com',
+  REPO: 'doaide/blog',
 };
 
 // Generate a blog post markdown file
-function createPost(title, content, tags = [], author = 'Knol Team') {
+function createPost(title, content, tags = [], author = 'Cortex Team') {
   const date = new Date().toISOString().split('T')[0];
   const slug = title.toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -60,7 +60,7 @@ function initBlog() {
   dirs.forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
 
   // _config.yml
-  const config = `title: Knol Blog
+  const config = `title: Cortex Blog
 description: Engineering insights on AI memory infrastructure
 url: "${CONFIG.SITE_URL}"
 baseurl: ""
@@ -72,13 +72,13 @@ plugins:
   - jekyll-sitemap
 
 author:
-  name: Knol Team
-  url: https://aiknol.com
+  name: Cortex Team
+  url: https://cortex.doaide.com
 
 social:
-  name: Knol
+  name: Cortex
   links:
-    - https://github.com/aiknol/knol
+    - https://github.com/doaide/cortex
     - https://twitter.com/knoldev
 
 google_analytics:
@@ -89,13 +89,13 @@ defaults:
       type: "posts"
     values:
       layout: "post"
-      author: "Knol Team"
+      author: "Cortex Team"
 `;
 
   // index.md
   const index = `---
 layout: home
-title: Knol Blog
+title: Cortex Blog
 ---
 
 Engineering insights on building memory infrastructure for AI agents.
@@ -109,13 +109,13 @@ title: About
 permalink: /about/
 ---
 
-Knol is an open-source long-term memory layer for AI agents and LLM applications.
+Cortex is an open-source long-term memory layer for AI agents and LLM applications.
 
-Built in Rust with Axum, pgvector, NATS, and Redis, Knol provides persistent,
+Built in Rust with Axum, pgvector, NATS, and Redis, Cortex provides persistent,
 searchable memory with automatic knowledge graph extraction.
 
-- **GitHub**: [github.com/aiknol/knol](https://github.com/aiknol/knol)
-- **Website**: [aiknol.com](https://aiknol.com)
+- **GitHub**: [github.com/doaide/cortex](https://github.com/doaide/cortex)
+- **Website**: [cortex.doaide.com](https://cortex.doaide.com)
 - **License**: Apache 2.0
 `;
 
@@ -179,7 +179,7 @@ function generateTopicIdeas() {
     { title: 'Self-Hosting AI Infrastructure on a $8/month VPS', tags: ['devops', 'self-hosted', 'cost'], priority: 'high' },
     { title: 'NATS JetStream for Event-Driven AI Pipelines', tags: ['nats', 'architecture', 'rust'], priority: 'low' },
     { title: 'Memory Decay: How AI Agents Should Forget', tags: ['ai', 'research', 'memory'], priority: 'medium' },
-    { title: 'From Zero to Production: Deploying Knol with Docker Compose', tags: ['tutorial', 'docker', 'deployment'], priority: 'high' },
+    { title: 'From Zero to Production: Deploying Cortex with Docker Compose', tags: ['tutorial', 'docker', 'deployment'], priority: 'high' },
   ];
 }
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">Knol Platform</h1>
+  <h1 align="center">Cortex Platform</h1>
   <p align="center">
     <strong>Context engineering infrastructure for AI applications</strong>
   </p>
@@ -9,25 +9,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/aiknol/knol-platform/actions"><img src="https://github.com/aiknol/knol-platform/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/doaide/cortex-platform/actions"><img src="https://github.com/doaide/cortex-platform/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
-  <a href="https://github.com/aiknol/knol-platform"><img src="https://img.shields.io/badge/rust-1.77+-orange.svg" alt="Rust"></a>
+  <a href="https://github.com/doaide/cortex-platform"><img src="https://img.shields.io/badge/rust-1.77+-orange.svg" alt="Rust"></a>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> &middot;
-  <a href="#why-knol">Why Knol</a> &middot;
+  <a href="#why-cortex">Why DoAide Cortex</a> &middot;
   <a href="#features">Features</a> &middot;
   <a href="#sdks">SDKs</a> &middot;
   <a href="#architecture">Architecture</a> &middot;
-  <a href="https://docs.aiknol.com">Docs</a>
+  <a href="https://docs.cortex.doaide.com">Docs</a>
 </p>
 
 ---
 
-Knol gives your AI agents **persistent, structured memory** — not just vector search. Every conversation turn is processed through an intelligent extraction pipeline that builds a **knowledge graph** of entities, relationships, and facts alongside traditional semantic embeddings. Memories are grounded with source citations, verified for accuracy, and automatically resolved when they conflict.
+Cortex gives your AI agents **persistent, structured memory** — not just vector search. Every conversation turn is processed through an intelligent extraction pipeline that builds a **knowledge graph** of entities, relationships, and facts alongside traditional semantic embeddings. Memories are grounded with source citations, verified for accuracy, and automatically resolved when they conflict.
 
-> **Looking for the OSS-only repo?** See [github.com/aiknol/knol](https://github.com/aiknol/knol) — a standalone copy of `knol-oss/` that you can run without the enterprise services.
+> **Looking for the OSS-only repo?** See [github.com/doaide/cortex](https://github.com/doaide/cortex) — a standalone copy of `cortex-oss/` that you can run without the enterprise services.
 
 ```python
 from memory_sdk import MemoryClient
@@ -92,9 +92,9 @@ cd frontend && npm install
 | Demo UI           | `http://localhost:3008`       |
 | Documentation     | `http://localhost:3009`       |
 
-## Why Knol
+## Why DoAide Cortex
 
-Most memory solutions offer vector search and call it a day. Knol goes further:
+Most memory solutions offer vector search and call it a day. Cortex goes further:
 
 **Hybrid retrieval** — Queries hit vector similarity, knowledge graph traversal, and temporal scoring simultaneously. The system classifies query intent and routes to the optimal strategy automatically.
 
@@ -156,13 +156,13 @@ async with AsyncMemoryClient(api_key="key") as client:
 ### TypeScript / JavaScript
 
 ```bash
-npm install @knol/sdk
+npm install @doaide/cortex-sdk
 ```
 
 ```typescript
-import { KnolClient } from '@knol/sdk';
+import { CortexClient } from '@doaide/cortex-sdk';
 
-const client = new KnolClient({ apiKey: 'key', baseUrl: 'http://localhost:3000' });
+const client = new CortexClient({ apiKey: 'key', baseUrl: 'http://localhost:3000' });
 
 await client.addMemory({ content: 'User prefers dark mode', userId: 'u1' });
 const results = await client.search({ query: 'preferences', userId: 'u1' });
@@ -172,16 +172,16 @@ const results = await client.search({ query: 'preferences', userId: 'u1' });
 
 **LangChain:**
 ```python
-from memory_sdk.integrations.langchain import KnolMemory, KnolRetriever
+from memory_sdk.integrations.langchain import CortexMemory, CortexRetriever
 
-memory = KnolMemory(api_key="key", user_id="u1")
-retriever = KnolRetriever(api_key="key", user_id="u1")
+memory = CortexMemory(api_key="key", user_id="u1")
+retriever = CortexRetriever(api_key="key", user_id="u1")
 ```
 
 **MCP Server:**
 ```bash
-npm install -g @knol/mcp-server
-KNOL_API_KEY=your-key knol-mcp
+npm install -g @doaide/cortex-mcp-server
+CORTEX_API_KEY=your-key cortex-mcp
 ```
 
 ## Architecture
@@ -220,8 +220,8 @@ KNOL_API_KEY=your-key knol-mcp
 ## Project Structure
 
 ```
-knol-platform/
-├── knol-oss/                  # Open source core (Apache 2.0)
+cortex-platform/
+├── cortex-oss/                  # Open source core (Apache 2.0)
 │   ├── crates/
 │   │   ├── memory-common/     # Shared types, config, webhook definitions
 │   │   ├── memory-db/         # Database pool, migrations, tenant isolation
@@ -235,7 +235,7 @@ knol-platform/
 │   │   ├── service-retrieve/  # Search service (hybrid retrieval)
 │   │   └── service-graph/     # Graph builder (extraction + embedding + webhooks)
 │   └── sdk/                   # Python, TypeScript, MCP SDKs
-├── knol-enterprise/           # Enterprise extensions (source-available)
+├── cortex-enterprise/           # Enterprise extensions (source-available)
 │   └── crates/
 │       ├── service-admin/     # Admin API + demo endpoints
 │       ├── service-tenant/    # Multi-tenant workspace management
@@ -293,13 +293,13 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## License
 
-- **OSS Core** (`knol-oss/`, `frontend/`, `deploy/`, `tests/`, `scripts/`): [Apache License 2.0](LICENSE)
-- **Enterprise** (`knol-enterprise/`): [Source-available](knol-enterprise/LICENSE) — free to read and self-host with a license
+- **OSS Core** (`cortex-oss/`, `frontend/`, `deploy/`, `tests/`, `scripts/`): [Apache License 2.0](LICENSE)
+- **Enterprise** (`cortex-enterprise/`): [Source-available](cortex-enterprise/LICENSE) — free to read and self-host with a license
 
 ## Links
 
-- [Website](https://aiknol.com)
-- [Documentation](https://docs.aiknol.com)
-- [Cloud Dashboard](https://cloud.aiknol.com)
-- [Live Demo](https://demo.aiknol.com)
-- [OSS Core Repo](https://github.com/aiknol/knol)
+- [Website](https://cortex.doaide.com)
+- [Documentation](https://docs.cortex.doaide.com)
+- [Cloud Dashboard](https://cloud.cortex.doaide.com)
+- [Live Demo](https://demo.cortex.doaide.com)
+- [OSS Core Repo](https://github.com/doaide/cortex)

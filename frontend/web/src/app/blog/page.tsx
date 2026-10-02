@@ -5,7 +5,7 @@ import { pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Blog'),
-  description: 'Updates, technical deep dives, and research from the Knol team on AI memory infrastructure.',
+  description: 'Updates, technical deep dives, and research from the Cortex team on AI memory infrastructure.',
 };
 
 export default function BlogPage() {
@@ -14,7 +14,7 @@ export default function BlogPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-dark-50 mb-4">Blog</h1>
         <p className="text-dark-300 text-lg mb-12">
-          Updates, technical deep dives, and research from the Knol team.
+          Updates, technical deep dives, and research from the Cortex team.
         </p>
 
         <div className="space-y-8">

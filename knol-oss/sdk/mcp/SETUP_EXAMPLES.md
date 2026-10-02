@@ -1,11 +1,11 @@
 # Setup Examples for AI Coding Tools
 
-This document provides detailed setup examples for integrating the Knol MCP server with various AI coding tools.
+This document provides detailed setup examples for integrating the Cortex MCP server with various AI coding tools.
 
 ## Prerequisites
 
 1. **Node.js 18+** installed
-2. **Knol API server** running (with access to API key)
+2. **Cortex API server** running (with access to API key)
 3. **MCP server built**:
 
 ```bash
@@ -13,7 +13,7 @@ npm install
 npm run build
 ```
 
-4. **Keep the full path** to the built server: `/path/to/knol-mcp/dist/index.js`
+4. **Keep the full path** to the built server: `/path/to/cortex-mcp/dist/index.js`
 
 ## Claude Code
 
@@ -24,12 +24,12 @@ Edit `~/.config/Claude Code/mcp.json` (or `~/Library/Application Support/Claude 
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_live_your_actual_api_key_here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_live_your_actual_api_key_here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -42,12 +42,12 @@ Edit `~/.config/Claude Code/mcp.json` (or `~/Library/Application Support/Claude 
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "npx",
-      "args": ["@knol/mcp-server"],
+      "args": ["@doaide/cortex-mcp-server"],
       "env": {
-        "KNOL_API_KEY": "sk_live_your_actual_api_key_here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_live_your_actual_api_key_here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -57,14 +57,14 @@ Edit `~/.config/Claude Code/mcp.json` (or `~/Library/Application Support/Claude 
 
 ### Configuration Method 3: Shell Script Wrapper
 
-Create `/usr/local/bin/knol-mcp-wrapper`:
+Create `/usr/local/bin/cortex-mcp-wrapper`:
 
 ```bash
 #!/bin/bash
-export KNOL_API_KEY="sk_live_your_actual_api_key_here"
-export KNOL_API_URL="https://api.knol.io"
+export CORTEX_API_KEY="sk_live_your_actual_api_key_here"
+export CORTEX_API_URL="https://api.cortex.doaide.com"
 export KNOL_USER_ID="your-user-id"
-exec node /absolute/path/to/knol-mcp/dist/index.js
+exec node /absolute/path/to/cortex-mcp/dist/index.js
 ```
 
 Then in `mcp.json`:
@@ -72,8 +72,8 @@ Then in `mcp.json`:
 ```json
 {
   "mcpServers": {
-    "knol": {
-      "command": "/usr/local/bin/knol-mcp-wrapper"
+    "cortex": {
+      "command": "/usr/local/bin/cortex-mcp-wrapper"
     }
   }
 }
@@ -88,12 +88,12 @@ Edit `.cursor/settings.json`:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_live_your_actual_api_key_here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_live_your_actual_api_key_here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -107,12 +107,12 @@ Edit `.cursor/settings.json`:
 2. Go to Settings → Extensions → MCP Servers
 3. Click "Add Server"
 4. Configure:
-   - **Name**: knol
+   - **Name**: cortex
    - **Command**: node
-   - **Args**: `/absolute/path/to/knol-mcp/dist/index.js`
+   - **Args**: `/absolute/path/to/cortex-mcp/dist/index.js`
    - **Environment Variables**:
-     - `KNOL_API_KEY`: Your API key
-     - `KNOL_API_URL`: https://api.knol.io
+     - `CORTEX_API_KEY`: Your API key
+     - `CORTEX_API_URL`: https://api.cortex.doaide.com
      - `KNOL_USER_ID`: your-user-id
 
 ### Configuration Method 3: Workspace Configuration
@@ -122,12 +122,12 @@ Create `.cursor/settings.json` in your workspace:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["${workspaceFolder}/knol-mcp/dist/index.js"],
+      "args": ["${workspaceFolder}/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "${env:KNOL_API_KEY}",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "${env:CORTEX_API_KEY}",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "${env:KNOL_USER_ID}"
       }
     }
@@ -138,7 +138,7 @@ Create `.cursor/settings.json` in your workspace:
 Then set environment variables:
 
 ```bash
-export KNOL_API_KEY="sk_live_your_actual_api_key_here"
+export CORTEX_API_KEY="sk_live_your_actual_api_key_here"
 export KNOL_USER_ID="your-user-id"
 ```
 
@@ -151,12 +151,12 @@ Edit `~/.windsurf/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_live_your_actual_api_key_here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_live_your_actual_api_key_here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -171,12 +171,12 @@ Create `.windsurf/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["./knol-mcp/dist/index.js"],
+      "args": ["./cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_live_your_actual_api_key_here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_live_your_actual_api_key_here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -191,9 +191,9 @@ Create `.windsurf/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"]
     }
   }
 }
@@ -203,8 +203,8 @@ And set environment variables in your shell profile:
 
 ```bash
 # In ~/.bashrc, ~/.zshrc, or equivalent
-export KNOL_API_KEY="sk_live_your_actual_api_key_here"
-export KNOL_API_URL="https://api.knol.io"
+export CORTEX_API_KEY="sk_live_your_actual_api_key_here"
+export CORTEX_API_URL="https://api.cortex.doaide.com"
 export KNOL_USER_ID="your-user-id"
 ```
 
@@ -217,12 +217,12 @@ export KNOL_USER_ID="your-user-id"
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/path/to/knol-mcp/dist/index.js"],
+      "args": ["/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_dev_test_key",
-        "KNOL_API_URL": "http://localhost:8080",
+        "CORTEX_API_KEY": "sk_dev_test_key",
+        "CORTEX_API_URL": "http://localhost:8080",
         "KNOL_USER_ID": "dev-user"
       }
     }
@@ -237,12 +237,12 @@ export KNOL_USER_ID="your-user-id"
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/path/to/knol-mcp/dist/index.js"],
+      "args": ["/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_prod_secure_key",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_prod_secure_key",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "prod-user"
       }
     }
@@ -262,8 +262,8 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy MCP server
-COPY knol-mcp ./knol-mcp
-WORKDIR /app/knol-mcp
+COPY cortex-mcp ./cortex-mcp
+WORKDIR /app/cortex-mcp
 
 # Build
 RUN npm install && npm run build
@@ -278,21 +278,21 @@ ENTRYPOINT ["node", "dist/index.js"]
 version: '3.8'
 
 services:
-  knol-api:
-    image: knol/api:latest
+  cortex-api:
+    image: cortex/api:latest
     ports:
       - "8080:8080"
     environment:
       - DATABASE_URL=postgresql://...
 
   mcp-server:
-    build: ./knol-mcp
+    build: ./cortex-mcp
     environment:
-      - KNOL_API_URL=http://knol-api:8080
-      - KNOL_API_KEY=${KNOL_API_KEY}
+      - CORTEX_API_URL=http://cortex-api:8080
+      - CORTEX_API_KEY=${CORTEX_API_KEY}
       - KNOL_USER_ID=${KNOL_USER_ID}
     depends_on:
-      - knol-api
+      - cortex-api
 ```
 
 ## Troubleshooting
@@ -303,24 +303,24 @@ services:
 
 **Solution**:
 ```bash
-cd /path/to/knol-mcp
+cd /path/to/cortex-mcp
 npm install
 npm run build
 ```
 
 ### API Key Not Working
 
-**Error**: `Knol API error (401): Unauthorized`
+**Error**: `Cortex API error (401): Unauthorized`
 
 **Solution**:
 1. Verify API key is correct
 2. Check API key has correct permissions
-3. Verify KNOL_API_URL is correct
+3. Verify CORTEX_API_URL is correct
 4. Test API key directly:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_KEY" \
-  https://api.knol.io/v1/memory/search \
+  https://api.cortex.doaide.com/v1/memory/search \
   -d '{"query":"test","limit":1}' \
   -H "Content-Type: application/json"
 ```
@@ -330,8 +330,8 @@ curl -H "Authorization: Bearer YOUR_KEY" \
 **Error**: `Failed to connect to localhost:8080`
 
 **Solution**:
-1. Verify Knol API server is running
-2. Check KNOL_API_URL is correct
+1. Verify Cortex API server is running
+2. Check CORTEX_API_URL is correct
 3. Test network connectivity: `curl http://localhost:8080/health`
 
 ### Tools Not Appearing
@@ -342,7 +342,7 @@ curl -H "Authorization: Bearer YOUR_KEY" \
 1. Restart the tool
 2. Check server logs for errors
 3. Verify MCP configuration syntax is correct
-4. Test server directly: `KNOL_API_KEY=test node dist/index.js`
+4. Test server directly: `CORTEX_API_KEY=test node dist/index.js`
 
 ### Environment Variable Not Used
 
@@ -362,7 +362,7 @@ Always use absolute paths to the MCP server:
 
 ```json
 {
-  "args": ["/absolute/path/to/knol-mcp/dist/index.js"]
+  "args": ["/absolute/path/to/cortex-mcp/dist/index.js"]
 }
 ```
 
@@ -370,7 +370,7 @@ Not relative paths:
 
 ```json
 {
-  "args": ["./knol-mcp/dist/index.js"]  // Avoid
+  "args": ["./cortex-mcp/dist/index.js"]  // Avoid
 }
 ```
 
@@ -389,7 +389,7 @@ Use environment variables instead:
 ```json
 {
   "env": {
-    "KNOL_API_KEY": "${env:KNOL_API_KEY}"
+    "CORTEX_API_KEY": "${env:CORTEX_API_KEY}"
   }
 }
 ```
@@ -401,26 +401,26 @@ Keep MCP configuration in version control but exclude secrets:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["${workspaceFolder}/knol-mcp/dist/index.js"],
+      "args": ["${workspaceFolder}/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_URL": "https://api.knol.io"
+        "CORTEX_API_URL": "https://api.cortex.doaide.com"
       }
     }
   }
 }
 ```
 
-Then set `KNOL_API_KEY` and `KNOL_USER_ID` locally.
+Then set `CORTEX_API_KEY` and `KNOL_USER_ID` locally.
 
 ### 4. Test Before Production
 
 Always test in development first:
 
 ```bash
-export KNOL_API_URL="http://localhost:8080"
-export KNOL_API_KEY="test-key"
+export CORTEX_API_URL="http://localhost:8080"
+export CORTEX_API_KEY="test-key"
 npm start
 ```
 
@@ -455,7 +455,7 @@ Claude: Using knol_remember with session_id for context tracking...
 ```
 User: "What was I working on last time?"
 
-Claude: Using knol://recent resource to retrieve recent memories...
+Claude: Using cortex://recent resource to retrieve recent memories...
   Retrieved 10 recent memories about your work
 ```
 

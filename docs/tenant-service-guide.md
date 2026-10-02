@@ -1,6 +1,6 @@
 # Tenant Service Guide
 
-Self-service tenant API and workspace features for `cloud.aiknol.com`.
+Self-service tenant API and workspace features for `cloud.cortex.doaide.com`.
 
 ## Purpose
 
@@ -8,9 +8,9 @@ The tenant service powers signup/login, workspace management, API keys, billing,
 
 ## Base URLs
 
-- API base: `https://api.aiknol.com/app`
-- OpenAPI / Swagger UI: `https://api.aiknol.com/docs`
-- Tenant app website: `https://cloud.aiknol.com`
+- API base: `https://api.cortex.doaide.com/app`
+- OpenAPI / Swagger UI: `https://api.cortex.doaide.com/docs`
+- Tenant app website: `https://cloud.cortex.doaide.com`
 
 ## Authentication Model
 
@@ -90,6 +90,6 @@ API key roles:
 
 ## Reference Sources
 
-- Tenant service code: `knol-enterprise/crates/service-tenant/`
-- OpenAPI definition: `knol-enterprise/crates/service-tenant/src/openapi.rs`
-- Integration tests covering endpoint behavior: `knol-enterprise/crates/service-tenant/tests/tenant_api_test.rs`
+- Tenant service code: `cortex-enterprise/crates/service-tenant/`
+- OpenAPI definition: `cortex-enterprise/crates/service-tenant/src/openapi.rs`
+- Integration tests covering endpoint behavior: `cortex-enterprise/crates/service-tenant/tests/tenant_api_test.rs`

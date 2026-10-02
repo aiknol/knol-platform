@@ -1,11 +1,11 @@
 /**
- * Knol Memory Platform SDK - Client
- * Main client class for interacting with the Knol API
+ * Cortex Memory Platform SDK - Client
+ * Main client class for interacting with the Cortex API
  */
 
 import {
-  KnolClientConfig,
-  KnolError,
+  CortexClientConfig,
+  CortexError,
   Memory,
   MemoryScope,
   MemoryKind,
@@ -119,30 +119,30 @@ class SearchQueryBuilder implements ISearchQueryBuilder {
 
   build(): SearchMemoryRequest {
     if (!this.request.query) {
-      throw new KnolError('Query is required', 400);
+      throw new CortexError('Query is required', 400);
     }
     return { ...this.request };
   }
 }
 
 // ============================================================================
-// Knol Client
+// Cortex Client
 // ============================================================================
 
-export class KnolClient {
+export class CortexClient {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly timeout: number;
   private readonly retryAttempts: number;
   private readonly retryDelayMs: number;
 
-  constructor(config: KnolClientConfig) {
+  constructor(config: CortexClientConfig) {
     if (!config.apiKey) {
-      throw new KnolError('apiKey is required', 400);
+      throw new CortexError('apiKey is required', 400);
     }
 
     this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl || 'https://api.knol.ai';
+    this.baseUrl = config.baseUrl || 'https://api.cortex.doaide.com';
     this.timeout = config.timeout || 30000;
     this.retryAttempts = config.retryAttempts || 3;
     this.retryDelayMs = config.retryDelayMs || 1000;
@@ -438,7 +438,7 @@ export class KnolClient {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
-        if (error instanceof KnolError) {
+        if (error instanceof CortexError) {
           // Retry on 429 (rate limited) — respect Retry-After header if present
           if (error.statusCode === 429) {
             const retryAfter = error.details?.retry_after;
@@ -463,7 +463,7 @@ export class KnolClient {
       }
     }
 
-    throw lastError || new KnolError('Request failed after retries', 500);
+    throw lastError || new CortexError('Request failed after retries', 500);
   }
 
   private async executeRequest<T>(path: string, init: RequestInit): Promise<T> {
@@ -472,7 +472,7 @@ export class KnolClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.apiKey}`,
-      'User-Agent': `knol-sdk/typescript/0.1.0`,
+      'User-Agent': `cortex-sdk/typescript/0.1.0`,
     };
 
     const controller = new AbortController();
@@ -502,7 +502,7 @@ export class KnolClient {
         const errorMessage = data?.message || data?.error || response.statusText;
         const requestId = response.headers.get('x-request-id') || undefined;
 
-        throw new KnolError(
+        throw new CortexError(
           errorMessage || `HTTP ${response.status}`,
           response.status,
           requestId,
@@ -514,19 +514,19 @@ export class KnolClient {
     } catch (error) {
       clearTimeout(timeoutId);
 
-      if (error instanceof KnolError) {
+      if (error instanceof CortexError) {
         throw error;
       }
 
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new KnolError('Network error: Failed to connect to API', 0);
+        throw new CortexError('Network error: Failed to connect to API', 0);
       }
 
       if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new KnolError(`Request timeout after ${this.timeout}ms`, 408);
+        throw new CortexError(`Request timeout after ${this.timeout}ms`, 408);
       }
 
-      throw new KnolError(
+      throw new CortexError(
         error instanceof Error ? error.message : 'Unknown error',
         500
       );

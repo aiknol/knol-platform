@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Hacker News Channel Adapter
+// Cortex Marketing — Hacker News Channel Adapter
 // Submits to HN via Firebase API + generates Show HN / Ask HN posts
 // NOTE: HN has no official post API — this generates content for manual
 // submission and monitors HN for relevant discussions to engage with.
@@ -51,7 +51,7 @@ async function searchDiscussions(query) {
   });
 }
 
-// Search for discussions where Knol could be mentioned
+// Search for discussions where Cortex could be mentioned
 async function findEngagementOpportunities() {
   const queries = [
     'memory layer LLM',
@@ -82,19 +82,19 @@ async function findEngagementOpportunities() {
 // Generate a "Show HN" post (for manual submission)
 function generateShowHN() {
   return {
-    title: 'Show HN: Knol – Open-source long-term memory layer for AI agents (Rust)',
-    url: 'https://github.com/aiknol/knol',
+    title: 'Show HN: Cortex – Open-source long-term memory layer for AI agents (Rust)',
+    url: 'https://github.com/doaide/cortex',
     text: null, // link post, not text post
-    submitUrl: `${CONFIG.SITE_URL}/submitlink?u=${encodeURIComponent('https://github.com/aiknol/knol')}&t=${encodeURIComponent('Show HN: Knol – Open-source long-term memory layer for AI agents (Rust)')}`,
+    submitUrl: `${CONFIG.SITE_URL}/submitlink?u=${encodeURIComponent('https://github.com/doaide/cortex')}&t=${encodeURIComponent('Show HN: Cortex – Open-source long-term memory layer for AI agents (Rust)')}`,
   };
 }
 
 // Generate engagement comment for a relevant discussion
 function generateEngagementComment(story) {
   const templates = [
-    `Interesting discussion! We built Knol (https://github.com/aiknol/knol) to address exactly this — a persistent memory layer for LLM agents using pgvector + knowledge graphs. It's open-source (Rust/Axum) and self-hostable. Would love feedback from this community.`,
-    `This is a problem we've been tackling with Knol — an open-source Rust service that gives AI agents persistent, searchable memory via pgvector and automatic knowledge graph extraction. Happy to share what we've learned.`,
-    `Related: we open-sourced Knol (Rust + pgvector + NATS), which implements long-term memory for AI agents with adaptive retrieval and entity graph extraction. Self-hostable, MIT-friendly. Might be useful for folks in this thread.`,
+    `Interesting discussion! We built Cortex (https://github.com/doaide/cortex) to address exactly this — a persistent memory layer for LLM agents using pgvector + knowledge graphs. It's open-source (Rust/Axum) and self-hostable. Would love feedback from this community.`,
+    `This is a problem we've been tackling with Cortex — an open-source Rust service that gives AI agents persistent, searchable memory via pgvector and automatic knowledge graph extraction. Happy to share what we've learned.`,
+    `Related: we open-sourced Cortex (Rust + pgvector + NATS), which implements long-term memory for AI agents with adaptive retrieval and entity graph extraction. Self-hostable, MIT-friendly. Might be useful for folks in this thread.`,
   ];
 
   return {

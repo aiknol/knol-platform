@@ -5,5 +5,5 @@
   <circle cx="44" cy="16" r="3.5" fill="#6E56CF"/>
   <circle cx="44" cy="48" r="3.5" fill="#6E56CF"/>
   <!-- Wordmark -->
-  <text x="80" y="48" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="52" font-weight="500" letter-spacing="-2" fill="#FAFAFA">knol</text>
+  <text x="80" y="48" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="52" font-weight="500" letter-spacing="-2" fill="#FAFAFA">cortex</text>
 </svg>

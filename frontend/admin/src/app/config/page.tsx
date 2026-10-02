@@ -196,7 +196,7 @@ export default function ConfigPage() {
           <div>
             <h2 className="text-lg font-semibold text-dark-100">Default LLM Provider</h2>
             <p className="text-sm text-dark-400 mt-1">
-              This updates <code>llm.provider</code> used by Knol services.
+              This updates <code>llm.provider</code> used by Cortex services.
             </p>
           </div>
           <div className="flex items-center gap-3">

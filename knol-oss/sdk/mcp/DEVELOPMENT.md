@@ -3,7 +3,7 @@
 ## Project Structure
 
 ```
-knol-mcp/
+cortex-mcp/
 ├── src/
 │   └── index.ts          # Main MCP server implementation
 ├── dist/                 # Compiled JavaScript (generated)
@@ -20,7 +20,7 @@ knol-mcp/
 1. **Clone or download the project**
 
 ```bash
-cd /path/to/knol-mcp
+cd /path/to/cortex-mcp
 ```
 
 2. **Install dependencies**
@@ -49,13 +49,13 @@ This will watch for changes in `src/` and recompile TypeScript files automatical
 
 ### Testing Locally
 
-1. Start a local Knol API server (or use a test server)
+1. Start a local Cortex API server (or use a test server)
 
 2. Set environment variables:
 
 ```bash
-export KNOL_API_KEY="test-key-12345"
-export KNOL_API_URL="http://localhost:8080"
+export CORTEX_API_KEY="test-key-12345"
+export CORTEX_API_URL="http://localhost:8080"
 export KNOL_USER_ID="test-user"
 ```
 
@@ -70,7 +70,7 @@ The server will start on stdin/stdout for MCP communication.
 
 ## MCP Protocol Overview
 
-The Knol MCP server implements the Model Context Protocol specification:
+The Cortex MCP server implements the Model Context Protocol specification:
 
 ### Message Types
 
@@ -143,7 +143,7 @@ To add a new resource:
 
 ```typescript
 {
-  uri: "knol://resource-name",
+  uri: "cortex://resource-name",
   name: "Resource Name",
   description: "What this resource provides",
   mimeType: "application/json"
@@ -153,7 +153,7 @@ To add a new resource:
 2. Add handler in the `resources/read` request handler:
 
 ```typescript
-if (uri === "knol://resource-name") {
+if (uri === "cortex://resource-name") {
   // Fetch and return resource content
   return { contents: [...] };
 }
@@ -169,7 +169,7 @@ The server handles errors by:
 
 Common error scenarios:
 
-- Invalid API key → 401 error from Knol API
+- Invalid API key → 401 error from Cortex API
 - Missing required parameters → Handler error
 - Network issues → Fetch error
 - Malformed requests → Type errors
@@ -203,7 +203,7 @@ ls -la dist/index.js
 4. Test the built version:
 
 ```bash
-KNOL_API_KEY="test" node dist/index.js
+CORTEX_API_KEY="test" node dist/index.js
 ```
 
 ## Publishing to npm
@@ -229,7 +229,7 @@ DEBUG=* node dist/index.js
 
 ### Test Individual Endpoints
 
-Use curl to test the Knol API directly:
+Use curl to test the Cortex API directly:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_KEY" \
@@ -276,8 +276,8 @@ The server respects these environment variables:
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `KNOL_API_KEY` | Bearer token for API auth | Required |
-| `KNOL_API_URL` | Knol API base URL | http://localhost:8080 |
+| `CORTEX_API_KEY` | Bearer token for API auth | Required |
+| `CORTEX_API_URL` | Cortex API base URL | http://localhost:8080 |
 | `KNOL_USER_ID` | Default user for operations | default |
 
 Set them before running the server or in the MCP client configuration.
@@ -293,7 +293,7 @@ Set them before running the server or in the MCP client configuration.
 ### Runtime Errors
 
 1. Verify environment variables are set correctly
-2. Check Knol API is running and accessible
+2. Check Cortex API is running and accessible
 3. Verify API key has correct permissions
 4. Check API response in error message
 
@@ -316,7 +316,7 @@ The server is designed to be lightweight:
 
 For high-volume use, consider:
 
-- Connection pooling to Knol API
+- Connection pooling to Cortex API
 - Response caching
 - Request batching
 - Connection limits
@@ -326,14 +326,14 @@ For high-volume use, consider:
 - API keys are passed via environment variables
 - Never log sensitive information (API keys, user IDs, etc.)
 - All HTTP requests use HTTPS in production
-- Input validation is performed by the Knol API
+- Input validation is performed by the Cortex API
 - The server acts as a simple proxy to the API
 
 ## Future Enhancements
 
 Potential improvements:
 
-- Support for Knol API pagination
+- Support for Cortex API pagination
 - Batch operations for multiple memories
 - Streaming responses for large result sets
 - Local caching layer

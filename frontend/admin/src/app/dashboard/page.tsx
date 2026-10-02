@@ -29,7 +29,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Dashboard" description="Knol operational control plane — context engineering infrastructure" />
+      <PageHeader title="Dashboard" description="Cortex operational control plane — context engineering infrastructure" />
 
       {error && <ErrorBanner message={error} onRetry={() => {
         refetchStatus();
@@ -48,7 +48,7 @@ export default function DashboardPage() {
 
       {/* Platform Overview */}
       <AdminCard>
-        <h2 className="text-xl font-semibold text-dark-50 mb-3">Knol Enterprise Control Plane</h2>
+        <h2 className="text-xl font-semibold text-dark-50 mb-3">Cortex Enterprise Control Plane</h2>
         <p className="text-sm text-dark-300 mb-4">
           The context engineering engine is open source (Apache 2.0). This admin surface provides the managed operational layer
           for reliability, security, compliance, and governance.

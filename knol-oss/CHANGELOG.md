@@ -39,4 +39,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI pipeline** — GitHub Actions with cargo check, test, clippy, and format verification.
 - **Docker support** — Multi-stage Dockerfile and docker-compose for local development.
 
-[0.1.0]: https://github.com/aiknol/knol/releases/tag/v0.1.0
+[0.1.0]: https://github.com/doaide/cortex/releases/tag/v0.1.0

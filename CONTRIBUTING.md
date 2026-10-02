@@ -1,18 +1,18 @@
-# Contributing to Knol
+# Contributing to Cortex
 
-Thank you for your interest in contributing to Knol!
+Thank you for your interest in contributing to Cortex!
 
 ## License
 
-- Contributions to `knol-oss/`, `frontend/`, `deploy/`, `tests/`, and `scripts/` are licensed under [Apache 2.0](LICENSE).
-- Contributions to `knol-enterprise/` are licensed under the [Knol Enterprise License](knol-enterprise/LICENSE).
+- Contributions to `cortex-oss/`, `frontend/`, `deploy/`, `tests/`, and `scripts/` are licensed under [Apache 2.0](LICENSE).
+- Contributions to `cortex-enterprise/` are licensed under the [Cortex Enterprise License](cortex-enterprise/LICENSE).
 
 By submitting a pull request, you agree to license your contribution under the applicable license.
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/knol-platform.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/cortex-platform.git`
 3. Create a feature branch: `git checkout -b feature/my-feature`
 4. Install prerequisites: Rust 1.77+, Node.js 20+, Docker, Docker Compose
 
@@ -26,14 +26,14 @@ docker compose -f docker-compose.oss.yml up -d
 cp .env.example .env
 
 # Build OSS services
-cd knol-oss && cargo build --workspace
+cd cortex-oss && cargo build --workspace
 
 # Build Enterprise services
-cd knol-enterprise && cargo build --workspace
+cd cortex-enterprise && cargo build --workspace
 
 # Run tests
-cd knol-oss && cargo test --workspace --lib
-cd knol-enterprise && cargo test --workspace --lib
+cd cortex-oss && cargo test --workspace --lib
+cd cortex-enterprise && cargo test --workspace --lib
 
 # Run frontend
 cd frontend && npm install && npm run dev:web
@@ -41,7 +41,7 @@ cd frontend && npm install && npm run dev:web
 
 ## Pull Request Process
 
-1. Ensure all tests pass: `cargo test --workspace --lib` in both `knol-oss/` and `knol-enterprise/`
+1. Ensure all tests pass: `cargo test --workspace --lib` in both `cortex-oss/` and `cortex-enterprise/`
 2. Run clippy: `cargo clippy --workspace -- -D warnings`
 3. Format code: `cargo fmt --all`
 4. Update documentation if needed
@@ -76,4 +76,4 @@ Please use GitHub Issues with:
 
 ## Security
 
-If you discover a security vulnerability, please report it responsibly. See [SECURITY.md](knol-oss/SECURITY.md) for details.
+If you discover a security vulnerability, please report it responsibly. See [SECURITY.md](cortex-oss/SECURITY.md) for details.

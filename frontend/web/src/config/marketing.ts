@@ -95,34 +95,34 @@ export const COMPARISON_FEATURES = [
 
 export const BLOG_POSTS: BlogPost[] = [
   {
-    title: 'Introducing Knol: Context Engineering for AI Applications',
-    slug: 'introducing-knol',
+    title: 'Introducing DoAide Cortex: Context Engineering for AI Applications',
+    slug: 'introducing-cortex',
     date: 'February 15, 2026',
     tag: 'Launch',
     description:
-      'Today we\'re open-sourcing Knol — a Rust-native context engineering platform that gives LLM applications persistent memory with sub-5ms latency, powered by a single PostgreSQL database.',
-    href: '/blog/introducing-knol',
+      'Today we\'re open-sourcing Cortex — a Rust-native context engineering platform that gives LLM applications persistent memory with sub-5ms latency, powered by a single PostgreSQL database.',
+    href: '/blog/introducing-cortex',
     body: `## The Context Engineering Revolution
 
 For years, the AI community has used the term "memory" to describe how applications retain information about users and past interactions. But memory is the wrong mental model. What AI applications actually need is **context engineering** — the ability to assemble precisely the right information at the right moment to ground LLM responses.
 
-Knol is built from the ground up for context engineering. Instead of a simplistic "memory store," it provides a multi-layered system of episodic, semantic, working, and procedural memories that work together to create rich, contextual understanding. Each layer serves a specific purpose, and they integrate seamlessly.
+Cortex is built from the ground up for context engineering. Instead of a simplistic "memory store," it provides a multi-layered system of episodic, semantic, working, and procedural memories that work together to create rich, contextual understanding. Each layer serves a specific purpose, and they integrate seamlessly.
 
 ## Why PostgreSQL + Rust Changes Everything
 
-We made two critical architectural choices: Rust for performance and PostgreSQL for simplicity. While other memory systems spread data across multiple databases (Neo4j for graphs, Qdrant for vectors, Redis for cache), Knol runs on a single PostgreSQL instance with pgvector extension.
+We made two critical architectural choices: Rust for performance and PostgreSQL for simplicity. While other memory systems spread data across multiple databases (Neo4j for graphs, Qdrant for vectors, Redis for cache), Cortex runs on a single PostgreSQL instance with pgvector extension.
 
 This means no operational complexity, no vendor lock-in, and no cross-database consistency headaches. Your data lives in one place. Your backups, permissions, and disaster recovery procedures already exist.
 
 \`\`\`rust
-// Deploy Knol with a single Helm chart
+// Deploy Cortex with a single Helm chart
 // All data in PostgreSQL with native vector support
 // Sub-5ms P95 latency on retrieval operations
 \`\`\`
 
 ## The Four Memory Layers
 
-Knol's architecture mirrors human cognition, giving applications the same contextual depth that makes human conversations coherent:
+Cortex's architecture mirrors human cognition, giving applications the same contextual depth that makes human conversations coherent:
 
 - **Episodic Memory**: Raw conversation events with full context and metadata. The foundation of everything.
 - **Semantic Memory**: Distilled facts, preferences, and knowledge extracted from conversations via LLM analysis.
@@ -133,7 +133,7 @@ Together, these layers create applications that truly understand their users.
 
 ## What's Next
 
-Knol is open-source and available today on GitHub. We've included Python and TypeScript SDKs, integrations with LangChain and CrewAI, and comprehensive documentation. Self-hosting is fully supported.
+Cortex is open-source and available today on GitHub. We've included Python and TypeScript SDKs, integrations with LangChain and CrewAI, and comprehensive documentation. Self-hosting is fully supported.
 
 The future of AI isn't better models — it's smarter context. And context engineering is how you build it.`,
   },
@@ -143,7 +143,7 @@ The future of AI isn't better models — it's smarter context. And context engin
     date: 'February 18, 2026',
     tag: 'Strategy',
     description:
-      'The industry is shifting from simple memory to context engineering — assembling the right information at the right time. Here\'s why this matters and how Knol is built for it.',
+      'The industry is shifting from simple memory to context engineering — assembling the right information at the right time. Here\'s why this matters and how Cortex is built for it.',
     href: '/blog/context-engineering',
     body: `## The Memory Metaphor is Broken
 
@@ -153,17 +153,17 @@ That's context engineering. And it's fundamentally different from building a mem
 
 ## Three Paradigm Shifts
 
-**From Storage to Retrieval**: The bottleneck isn't storing information; it's retrieving the *right* information when you need it. A chatbot with 10,000 conversation turns can't afford to include all of them in the context window. Knol's hybrid retrieval engine uses vector similarity, full-text search, and knowledge graph traversal to surface the 5-10 most relevant facts in under 5ms.
+**From Storage to Retrieval**: The bottleneck isn't storing information; it's retrieving the *right* information when you need it. A chatbot with 10,000 conversation turns can't afford to include all of them in the context window. Cortex's hybrid retrieval engine uses vector similarity, full-text search, and knowledge graph traversal to surface the 5-10 most relevant facts in under 5ms.
 
 **From Flat to Structured**: Raw conversation logs are low-signal. Context engineering extracts structured facts, relationships, preferences, and patterns from conversations. This makes retrieval faster, cheaper, and more meaningful.
 
-**From Static to Temporal**: Facts change. People move, get promoted, change their minds. Knol models validity periods and conflict detection at the memory layer, so your applications stay accurate as context evolves.
+**From Static to Temporal**: Facts change. People move, get promoted, change their minds. Cortex models validity periods and conflict detection at the memory layer, so your applications stay accurate as context evolves.
 
 ## The Economics of Context
 
 Better context directly reduces LLM costs. When your prompts contain the specific information the model needs, you spend fewer tokens on irrelevant context. Fewer tokens means cheaper API calls and faster response times.
 
-Knol's 7-layer optimization pipeline — prompt caching, intent classification, batch processing, model routing, and deduplication — combines better context engineering with smarter LLM invocation to achieve 75% cost reduction.
+Cortex's 7-layer optimization pipeline — prompt caching, intent classification, batch processing, model routing, and deduplication — combines better context engineering with smarter LLM invocation to achieve 75% cost reduction.
 
 \`\`\`
 Average cost per interaction:
@@ -174,7 +174,7 @@ Average cost per interaction:
 
 ## Building for Context
 
-Knol gives you the tools to practice context engineering at scale. The SDKs are designed around context assembly, not information storage. The database schema models temporal relationships and conflict resolution. The retrieval engine fuses multiple signals. The webhook system lets you react to contextual changes in real-time.
+Cortex gives you the tools to practice context engineering at scale. The SDKs are designed around context assembly, not information storage. The database schema models temporal relationships and conflict resolution. The retrieval engine fuses multiple signals. The webhook system lets you react to contextual changes in real-time.
 
 This is the future of AI applications: smarter context, not just bigger models.`,
   },
@@ -184,11 +184,11 @@ This is the future of AI applications: smarter context, not just bigger models.`
     date: 'February 22, 2026',
     tag: 'Technical',
     description:
-      'A deep dive into Knol\'s adaptive retrieval engine: intent classification, Reciprocal Rank Fusion, and how we combine three search signals for sub-5ms results.',
+      'A deep dive into Cortex\'s adaptive retrieval engine: intent classification, Reciprocal Rank Fusion, and how we combine three search signals for sub-5ms results.',
     href: '/blog/hybrid-retrieval',
     body: `## Three Retrieval Signals
 
-Knol's retrieval engine doesn't rely on a single search signal. Instead, it fuses three complementary approaches:
+Cortex's retrieval engine doesn't rely on a single search signal. Instead, it fuses three complementary approaches:
 
 **Vector Similarity**: Captures semantic meaning. If a user asks "What was John's favorite food?" and a past message mentioned "John loves sushi," vector similarity finds it even without exact keyword matching.
 
@@ -198,7 +198,7 @@ Knol's retrieval engine doesn't rely on a single search signal. Instead, it fuse
 
 ## Intent Classification
 
-Before retrieval, Knol classifies the incoming query into one of several intents:
+Before retrieval, Cortex classifies the incoming query into one of several intents:
 
 \`\`\`
 - Fact lookup (high precision BM25 weight)
@@ -213,7 +213,7 @@ This classification happens in real-time using a lightweight classifier. It's fa
 
 Once you have results from three different retrieval methods, how do you combine them? Simple averaging of scores doesn't work — the scales are different. Vector similarity is 0-1, BM25 scores can be arbitrarily large.
 
-Knol uses Reciprocal Rank Fusion to combine results:
+Cortex uses Reciprocal Rank Fusion to combine results:
 
 \`\`\`
 score = 1/(k + rank_in_vector_results) +
@@ -240,15 +240,15 @@ The result: context assembly that feels instantaneous to the application.`,
     date: 'March 1, 2026',
     tag: 'Technical',
     description:
-      'How Knol\'s extraction pipeline uses prompt caching, batching, model routing, and deduplication to cut LLM costs by 75% without sacrificing quality.',
+      'How Cortex\'s extraction pipeline uses prompt caching, batching, model routing, and deduplication to cut LLM costs by 75% without sacrificing quality.',
     href: '/blog/llm-cost-optimization',
     body: `## The Seven Layers
 
-Knol's cost optimization isn't a single technique — it's a orchestrated pipeline of seven complementary strategies:
+Cortex's cost optimization isn't a single technique — it's a orchestrated pipeline of seven complementary strategies:
 
 ## 1. Semantic Deduplication
 
-When multiple sources convey the same fact, why extract it multiple times? Knol hashes semantic content to identify duplicates before sending to the LLM.
+When multiple sources convey the same fact, why extract it multiple times? Cortex hashes semantic content to identify duplicates before sending to the LLM.
 
 \`\`\`
 Conversation 1: "I live in San Francisco"
@@ -260,7 +260,7 @@ Conversation 2: "My city is SF"
 
 ## 2. Prompt Caching with API Providers
 
-OpenAI, Anthropic, and others offer prompt caching. System prompts and extraction instructions don't change between calls — they should be cached. Knol automatically batches extractions to maximize cache hits.
+OpenAI, Anthropic, and others offer prompt caching. System prompts and extraction instructions don't change between calls — they should be cached. Cortex automatically batches extractions to maximize cache hits.
 
 **Savings**: 25% on token costs (50% cheaper for cached tokens)
 
@@ -272,7 +272,7 @@ Not all extraction tasks need GPT-4. Simple fact extraction from recent conversa
 
 ## 4. Batch Processing
 
-Instead of extracting facts one-at-a-time, Knol batches 50-100 conversation turns per API call. This amortizes overhead and enables dynamic model routing based on batch characteristics.
+Instead of extracting facts one-at-a-time, Cortex batches 50-100 conversation turns per API call. This amortizes overhead and enables dynamic model routing based on batch characteristics.
 
 **Savings**: 10-15% through batching efficiency
 
@@ -284,13 +284,13 @@ For queries in the current session, bypass extraction entirely. The working memo
 
 ## 6. Conflict Resolution Caching
 
-When Knol detects conflicting facts, it caches resolution decisions. "User prefers Postgres over MySQL" doesn't get re-extracted every time a new database preference is mentioned.
+When Cortex detects conflicting facts, it caches resolution decisions. "User prefers Postgres over MySQL" doesn't get re-extracted every time a new database preference is mentioned.
 
 **Savings**: 5-10% for repeat patterns
 
 ## 7. Cross-Tenant Extraction Pooling
 
-In multi-tenant deployments, Knol pools similar extraction tasks across customers and deduplicates at the semantic level. This requires privacy-preserving anonymization but can save 10-20% in shared deployments.
+In multi-tenant deployments, Cortex pools similar extraction tasks across customers and deduplicates at the semantic level. This requires privacy-preserving anonymization but can save 10-20% in shared deployments.
 
 **Combined Savings**: 75% on total LLM invocation costs
 
@@ -309,11 +309,11 @@ And the extracted memories are actually *better*, because deduplication, conflic
     date: 'March 8, 2026',
     tag: 'Research',
     description:
-      'Why we modeled Knol\'s memory system after human cognition — with decay scoring, conflict resolution, and bi-temporal knowledge graphs.',
+      'Why we modeled Cortex\'s memory system after human cognition — with decay scoring, conflict resolution, and bi-temporal knowledge graphs.',
     href: '/blog/memory-intelligence',
     body: `## The Forgetting Curve is a Feature
 
-Human memory isn't permanent. Old facts fade. This isn't a bug — it's how we stay grounded in the present while maintaining historical context. Knol implements memory decay.
+Human memory isn't permanent. Old facts fade. This isn't a bug — it's how we stay grounded in the present while maintaining historical context. Cortex implements memory decay.
 
 Each fact stored in semantic memory has an age-based decay score. Recent information is weighted heavily. Information older than 90 days gets exponentially lower weight. This prevents ancient preferences from drowning out current reality.
 
@@ -331,7 +331,7 @@ Applications can customize decay rates. Some facts (like "customer is in Japan")
 
 People change their minds. A user says "I prefer red" then six months later says "I prefer blue." Which is true? Both are, at different times.
 
-Knol detects conflicts when new facts contradict stored facts with high confidence scores. Instead of overwriting, it marks both as valid with temporal validity windows.
+Cortex detects conflicts when new facts contradict stored facts with high confidence scores. Instead of overwriting, it marks both as valid with temporal validity windows.
 
 \`\`\`
 Fact A: "Prefers red" (confidence: 0.92, valid: 2025-01-01 to 2025-07-01)
@@ -342,7 +342,7 @@ The retrieval engine understands temporal context. If the current date is in the
 
 ## Bi-Temporal Knowledge Graphs
 
-Facts in Knol's knowledge graph have two timestamps:
+Facts in Cortex's knowledge graph have two timestamps:
 
 **Valid Time**: When the fact was true in the real world (user moved to NYC in 2023)
 **Transaction Time**: When we learned or updated the fact (we extracted this yesterday)
@@ -373,16 +373,16 @@ These techniques solve real problems:
 The result is a memory system that's both grounded in present reality and respectful of history. It works the way human memory actually works.`,
   },
   {
-    title: 'From Mem0 to Knol: A Migration Guide',
+    title: 'From Mem0 to Cortex: A Migration Guide',
     slug: 'migration-guide',
     date: 'March 15, 2026',
     tag: 'Guide',
     description:
-      'Step-by-step guide for teams migrating from Mem0 or Zep to Knol. Same API patterns, better performance, no vendor lock-in.',
+      'Step-by-step guide for teams migrating from Mem0 or Zep to Cortex. Same API patterns, better performance, no vendor lock-in.',
     href: '/blog/migration-guide',
-    body: `## Why Teams Migrate to Knol
+    body: `## Why Teams Migrate to Cortex
 
-Knol was designed with migration in mind. The API patterns are familiar to Mem0 and Zep users, but the performance, flexibility, and costs are dramatically better.
+Cortex was designed with migration in mind. The API patterns are familiar to Mem0 and Zep users, but the performance, flexibility, and costs are dramatically better.
 
 **Performance**: Sub-5ms retrieval latency vs 50-200ms
 **Cost**: 75% reduction in LLM invocation costs
@@ -391,7 +391,7 @@ Knol was designed with migration in mind. The API patterns are familiar to Mem0 
 
 ## Step 1: Export Existing Data
 
-Both Mem0 and Zep provide export functionality. Data formats differ slightly, but both can be converted to Knol's import schema.
+Both Mem0 and Zep provide export functionality. Data formats differ slightly, but both can be converted to Cortex's import schema.
 
 \`\`\`bash
 # Export from Mem0
@@ -400,18 +400,18 @@ mem0 export --format=jsonl > mem0_export.jsonl
 # Export from Zep
 zep export --format=jsonl > zep_export.jsonl
 
-# Convert to Knol schema
-knol convert --source=mem0 mem0_export.jsonl > knol_import.jsonl
+# Convert to Cortex schema
+cortex convert --source=mem0 mem0_export.jsonl > knol_import.jsonl
 \`\`\`
 
-## Step 2: Set Up Knol Infrastructure
+## Step 2: Set Up Cortex Infrastructure
 
-Knol's infrastructure is minimal: one PostgreSQL instance with pgvector.
+Cortex's infrastructure is minimal: one PostgreSQL instance with pgvector.
 
 \`\`\`bash
-# Using Knol's Helm chart
-helm repo add knol https://charts.aiknol.com
-helm install knol knol/knol --namespace knol --create-namespace
+# Using Cortex's Helm chart
+helm repo add cortex https://charts.cortex.doaide.com
+helm install cortex cortex/cortex --namespace cortex --create-namespace
 
 # Or Docker Compose for development
 docker-compose up -d
@@ -419,7 +419,7 @@ docker-compose up -d
 
 ## Step 3: Migrate API Calls
 
-The migration is straightforward because Knol maintains API compatibility:
+The migration is straightforward because Cortex maintains API compatibility:
 
 \`\`\`python
 # Before (Mem0)
@@ -427,28 +427,28 @@ from mem0 import Memory
 memory = Memory.from_config(config={"llm": {...}})
 memory.add("User details", user_id="user_1")
 
-# After (Knol) - minimal changes
-from knol import KnolClient
-client = KnolClient(api_key="your_key")
+# After (Cortex) - minimal changes
+from cortex import CortexClient
+client = CortexClient(api_key="your_key")
 client.episodic.add("User details", user_id="user_1")
 
 # If using LangChain, just swap the import
-from knol.langchain import KnolMemory
-memory = KnolMemory(client=client)
+from cortex.langchain import CortexMemory
+memory = CortexMemory(client=client)
 \`\`\`
 
 ## Step 4: Import Historical Data
 
-Knol provides bulk import tools optimized for large data sets:
+Cortex provides bulk import tools optimized for large data sets:
 
 \`\`\`bash
-knol import --source=knol_import.jsonl --batch-size=1000
+cortex import --source=knol_import.jsonl --batch-size=1000
 \`\`\`
 
 Import happens asynchronously. You can monitor progress:
 
 \`\`\`bash
-knol import status --job-id=job_123
+cortex import status --job-id=job_123
 \`\`\`
 
 ## Step 5: Run Dual Writes (Optional)
@@ -460,7 +460,7 @@ For zero-downtime migration, run dual writes for a period:
 client.episodic.add(text, user_id=user_id)
 mem0_client.add(text, user_id=user_id)  # temporary
 
-# Query from Knol, fallback to Mem0 if needed
+# Query from Cortex, fallback to Mem0 if needed
 try:
     result = knol_client.retrieve(query, user_id=user_id)
 except Exception:
@@ -469,29 +469,29 @@ except Exception:
 
 ## Step 6: Update LLM Extraction Pipelines
 
-If you have custom extraction prompts, they should work unchanged in Knol. But you might want to take advantage of Knol's structured extraction:
+If you have custom extraction prompts, they should work unchanged in Cortex. But you might want to take advantage of Cortex's structured extraction:
 
 \`\`\`python
-# Knol provides extraction types for common patterns
+# Cortex provides extraction types for common patterns
 result = client.semantic.extract(
     conversation_turn=turn,
-    extraction_type="preferences",  # Knol knows what facts to extract
+    extraction_type="preferences",  # Cortex knows what facts to extract
     user_id=user_id
 )
 \`\`\`
 
 ## Rollback Plan
 
-If issues arise, you have a complete snapshot of the old system. Knol's import is non-destructive — your original data still exists. You can:
+If issues arise, you have a complete snapshot of the old system. Cortex's import is non-destructive — your original data still exists. You can:
 
 1. Keep both systems running during a transition period
-2. Query Knol as primary, fall back to Mem0 if needed
+2. Query Cortex as primary, fall back to Mem0 if needed
 3. Compare retrieval results between systems
-4. Gradually route 100% of traffic to Knol
+4. Gradually route 100% of traffic to Cortex
 
 ## Common Issues and Solutions
 
-**Query results differ slightly**: Knol's hybrid retrieval returns different results than Mem0's pure vector approach. This is usually better, but you can adjust weights in configuration.
+**Query results differ slightly**: Cortex's hybrid retrieval returns different results than Mem0's pure vector approach. This is usually better, but you can adjust weights in configuration.
 
 **LLM costs increased during import**: Bulk extraction to populate semantic memory is expensive. But day-to-day operations will be 75% cheaper.
 
@@ -510,30 +510,30 @@ Typical migration timeline:
 The process is straightforward, and our team can assist at any stage.`,
   },
   {
-    title: 'Give Claude Persistent Memory with Knol MCP Server',
+    title: 'Give Claude Persistent Memory with Cortex MCP Server',
     slug: 'claude-persistent-memory-mcp',
     date: 'March 22, 2026',
     tag: 'Tutorial',
     description:
-      'Step-by-step guide to setting up Knol as an MCP server for Claude Desktop. Your AI assistant will remember users, preferences, and context across every session.',
+      'Step-by-step guide to setting up Cortex as an MCP server for Claude Desktop. Your AI assistant will remember users, preferences, and context across every session.',
     href: '/blog/claude-persistent-memory-mcp',
     body: `## Why Claude Needs Persistent Memory
 
 Every time you start a new Claude conversation, you start from scratch. Claude doesn't remember your name, your projects, your coding preferences, or the debugging session you had yesterday. You have to re-explain context every single time.
 
-Knol's MCP server fixes this. Once connected, Claude can store and retrieve memories across sessions — facts, preferences, project context, and relationships. It's like giving Claude a brain that persists.
+Cortex's MCP server fixes this. Once connected, Claude can store and retrieve memories across sessions — facts, preferences, project context, and relationships. It's like giving Claude a brain that persists.
 
-## Setting Up Knol (60 Seconds)
+## Setting Up Cortex (60 Seconds)
 
-First, get Knol running locally:
+First, get Cortex running locally:
 
 \`\`\`bash
-git clone https://github.com/aiknol/knol.git
-cd knol
+git clone https://github.com/doaide/cortex.git
+cd cortex
 docker compose up -d
 \`\`\`
 
-That's it. Knol is now running on localhost:3000 with PostgreSQL, vector search, knowledge graphs, and the full context engineering stack.
+That's it. Cortex is now running on localhost:3000 with PostgreSQL, vector search, knowledge graphs, and the full context engineering stack.
 
 ## Connecting to Claude Desktop
 
@@ -547,28 +547,28 @@ code ~/Library/Application\\ Support/Claude/claude_desktop_config.json
 code %APPDATA%/Claude/claude_desktop_config.json
 \`\`\`
 
-Add the Knol MCP server:
+Add the Cortex MCP server:
 
 \`\`\`json
 {
   "mcpServers": {
-    "knol-memory": {
+    "cortex-memory": {
       "command": "npx",
-      "args": ["@aiknol/knol-mcp-server"],
+      "args": ["@doaide/cortex-mcp-server"],
       "env": {
-        "KNOL_API_URL": "http://localhost:3000",
-        "KNOL_API_KEY": "your-api-key"
+        "CORTEX_API_URL": "http://localhost:3000",
+        "CORTEX_API_KEY": "your-api-key"
       }
     }
   }
 }
 \`\`\`
 
-Restart Claude Desktop. You should see the MCP tools icon appear, indicating Knol is connected.
+Restart Claude Desktop. You should see the MCP tools icon appear, indicating Cortex is connected.
 
 ## What Claude Can Do Now
 
-With Knol connected, Claude has access to six memory tools:
+With Cortex connected, Claude has access to six memory tools:
 
 **knol_store_memory** — Claude can save important facts from your conversation. "User prefers TypeScript over JavaScript" or "Working on a React dashboard for project Atlas."
 
@@ -603,21 +603,21 @@ The same MCP server works with Cursor, Windsurf, and any MCP-compatible tool. Yo
 
 ## Privacy and Self-Hosting
 
-All memory stays on your machine. Knol runs locally, your data never leaves your infrastructure. For teams, deploy Knol on your own servers with multi-tenant isolation, encryption at rest, and full audit logging.
+All memory stays on your machine. Cortex runs locally, your data never leaves your infrastructure. For teams, deploy Cortex on your own servers with multi-tenant isolation, encryption at rest, and full audit logging.
 
 The MCP server is open-source. Star us on GitHub to follow development.`,
   },
   {
-    title: 'Knol vs Mem0: A Technical Comparison for AI Memory',
-    slug: 'knol-vs-mem0-comparison',
+    title: 'Cortex vs Mem0: A Technical Comparison for AI Memory',
+    slug: 'cortex-vs-mem0-comparison',
     date: 'March 29, 2026',
     tag: 'Comparison',
     description:
-      'An honest technical comparison between Knol and Mem0 covering architecture, performance, features, and total cost of ownership for production AI memory.',
-    href: '/blog/knol-vs-mem0-comparison',
+      'An honest technical comparison between Cortex and Mem0 covering architecture, performance, features, and total cost of ownership for production AI memory.',
+    href: '/blog/cortex-vs-mem0-comparison',
     body: `## Two Different Approaches to AI Memory
 
-Mem0 and Knol both solve the same problem: giving AI applications persistent memory. But they take fundamentally different architectural approaches, and those differences matter at scale.
+Mem0 and Cortex both solve the same problem: giving AI applications persistent memory. But they take fundamentally different architectural approaches, and those differences matter at scale.
 
 This is an honest comparison. Both tools have strengths. The right choice depends on your requirements.
 
@@ -625,21 +625,21 @@ This is an honest comparison. Both tools have strengths. The right choice depend
 
 **Mem0** is a Python SDK that coordinates multiple backend services. In a typical production deployment, you need: Qdrant or Pinecone for vector search, Neo4j for knowledge graphs, Redis for caching, and a primary database for metadata. That is 4+ services to deploy, monitor, and maintain.
 
-**Knol** is a single Rust binary backed by PostgreSQL with pgvector. Vector search, knowledge graphs, full-text search, and caching all run on one database. One service to deploy, one backup strategy, one set of credentials.
+**Cortex** is a single Rust binary backed by PostgreSQL with pgvector. Vector search, knowledge graphs, full-text search, and caching all run on one database. One service to deploy, one backup strategy, one set of credentials.
 
 \`\`\`
 Mem0 Production Stack:
   Python App -> Qdrant + Neo4j + Redis + PostgreSQL
   4 services, 3 languages, 2GB+ RAM minimum
 
-Knol Production Stack:
+Cortex Production Stack:
   Rust Binary -> PostgreSQL (with pgvector)
   1 service, 50MB binary, 256MB RAM
 \`\`\`
 
 ## Performance
 
-Knol's Rust implementation delivers sub-5ms P95 latency on memory retrieval. Mem0's Python coordination layer adds overhead from cross-service communication, typically resulting in 50-200ms retrieval times depending on deployment.
+Cortex's Rust implementation delivers sub-5ms P95 latency on memory retrieval. Mem0's Python coordination layer adds overhead from cross-service communication, typically resulting in 50-200ms retrieval times depending on deployment.
 
 For real-time applications like chatbots, that difference is noticeable to users. For batch processing, it means higher throughput per dollar.
 
@@ -647,7 +647,7 @@ For real-time applications like chatbots, that difference is noticeable to users
 
 Both platforms support core memory operations: store, search, and retrieve. The differences are in advanced features.
 
-Knol has memory decay (realistic forgetting), conflict detection (contradictory facts), bi-temporal modeling (valid time vs transaction time), and hybrid retrieval (vector + BM25 + graph fusion in a single query). These are built into the core engine.
+Cortex has memory decay (realistic forgetting), conflict detection (contradictory facts), bi-temporal modeling (valid time vs transaction time), and hybrid retrieval (vector + BM25 + graph fusion in a single query). These are built into the core engine.
 
 Mem0 has a simpler model focused on vector-based memory with graph relationships. It is easier to get started with but has fewer knobs to tune for production workloads.
 
@@ -655,13 +655,13 @@ Mem0 has a simpler model focused on vector-based memory with graph relationships
 
 The total cost of ownership differs significantly. Mem0's multi-service architecture means paying for Qdrant Cloud (or self-hosting), Neo4j Aura (or self-hosting), Redis, and your primary database. Each service has its own scaling curve.
 
-Knol runs on PostgreSQL, which you probably already have. If you use Neon, Supabase, or AWS RDS, you are adding memory capability to an existing service rather than standing up new infrastructure.
+Cortex runs on PostgreSQL, which you probably already have. If you use Neon, Supabase, or AWS RDS, you are adding memory capability to an existing service rather than standing up new infrastructure.
 
 ## When to Choose Each
 
 Choose Mem0 if you are already invested in the Qdrant/Neo4j ecosystem, your team is Python-first, or you need Mem0's managed cloud offering.
 
-Choose Knol if you want minimal infrastructure (PostgreSQL only), sub-10ms latency, multi-tenant isolation, advanced features like memory decay and conflict detection, or you prefer self-hosting with open-source software.`,
+Choose Cortex if you want minimal infrastructure (PostgreSQL only), sub-10ms latency, multi-tenant isolation, advanced features like memory decay and conflict detection, or you prefer self-hosting with open-source software.`,
   },
   {
     title: 'Deploy AI Memory on PostgreSQL in 60 Seconds',
@@ -676,8 +676,8 @@ Choose Knol if you want minimal infrastructure (PostgreSQL only), sub-10ms laten
 Stop reading blog posts about complex AI memory architectures. Here is a working memory system in 60 seconds:
 
 \`\`\`bash
-git clone https://github.com/aiknol/knol.git
-cd knol
+git clone https://github.com/doaide/cortex.git
+cd cortex
 docker compose up -d
 \`\`\`
 
@@ -695,7 +695,7 @@ curl -X POST http://localhost:3000/v1/memory \\
   }'
 \`\`\`
 
-Knol automatically extracts structured facts from the content, generates vector embeddings, and updates the knowledge graph. All in one API call.
+Cortex automatically extracts structured facts from the content, generates vector embeddings, and updates the knowledge graph. All in one API call.
 
 ## Search Memories
 
@@ -714,9 +714,9 @@ The search uses hybrid retrieval — vector similarity, BM25 keyword matching, a
 ## Connect Your AI Application
 
 \`\`\`python
-from knol import KnolClient
+from cortex import CortexClient
 
-client = KnolClient(
+client = CortexClient(
     api_url="http://localhost:3000",
     api_key="your-api-key"
 )
@@ -738,7 +738,7 @@ context = client.retrieve(
 
 Most AI memory systems require you to deploy 3-4 separate databases: one for vectors (Qdrant, Pinecone), one for graphs (Neo4j), one for search (Elasticsearch), and one for metadata (PostgreSQL). That is a lot of infrastructure for storing user preferences.
 
-Knol uses PostgreSQL with the pgvector extension. Vectors, graphs, full-text search, and relational data all live in one database. One backup strategy, one set of credentials, one connection pool.
+Cortex uses PostgreSQL with the pgvector extension. Vectors, graphs, full-text search, and relational data all live in one database. One backup strategy, one set of credentials, one connection pool.
 
 ## What You Get Out of the Box
 
@@ -750,16 +750,16 @@ Total memory footprint: under 512MB. Compare that to running Qdrant + Neo4j + Re
 
 Once you have memories flowing, explore LangChain integration, the MCP server for Claude Desktop, knowledge graph queries, memory decay for automatic relevance scoring, and the admin dashboard for monitoring.
 
-All documentation is at docs.aiknol.com. The project is open-source on GitHub.`,
+All documentation is at docs.cortex.doaide.com. The project is open-source on GitHub.`,
   },
 ];
 
 
 export const SDK_ECOSYSTEM = [
-  { name: 'Python SDK', pkg: 'pip install knol', icon: '🐍' },
-  { name: 'Async Python', pkg: 'from knol import AsyncKnolClient', icon: '⚡' },
-  { name: 'TypeScript SDK', pkg: 'npm install @knol/sdk', icon: '📘' },
-  { name: 'LangChain', pkg: 'from knol.langchain import KnolMemory', icon: '🦜' },
-  { name: 'CrewAI', pkg: 'from knol.crewai import KnolMemory', icon: '🚢' },
-  { name: 'MCP Server', pkg: 'npx @aiknol/knol-mcp-server', icon: '🔌' },
+  { name: 'Python SDK', pkg: 'pip install doaide-cortex', icon: '🐍' },
+  { name: 'Async Python', pkg: 'from cortex import AsyncCortexClient', icon: '⚡' },
+  { name: 'TypeScript SDK', pkg: 'npm install @doaide/cortex-sdk', icon: '📘' },
+  { name: 'LangChain', pkg: 'from cortex.langchain import CortexMemory', icon: '🦜' },
+  { name: 'CrewAI', pkg: 'from cortex.crewai import CortexMemory', icon: '🚢' },
+  { name: 'MCP Server', pkg: 'npx @doaide/cortex-mcp-server', icon: '🔌' },
 ] as const;

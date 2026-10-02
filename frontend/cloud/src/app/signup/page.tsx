@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { appAuthAPI } from '@/features/app/api';
-import KnolLogo from '@/components/KnolLogo';
+import CortexLogo from '@/components/CortexLogo';
 
 export default function AppSignupPage() {
   const router = useRouter();
@@ -55,9 +55,9 @@ export default function AppSignupPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-lg card">
         <div className="mb-6 flex items-center gap-3">
-          <KnolLogo className="w-11 h-11" label="Knol logo" />
+          <CortexLogo className="w-11 h-11" label="Cortex logo" />
           <div>
-            <p className="text-xs uppercase tracking-[0.12em] text-dark-500">Knol Cloud</p>
+            <p className="text-xs uppercase tracking-[0.12em] text-dark-500">Cortex Cloud</p>
             <p className="text-sm text-dark-300">Tenant Workspace</p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 # demo
 
-Next.js TypeScript demo site deployed as `demo.aiknol.com`.
+Next.js TypeScript demo site deployed as `demo.cortex.doaide.com`.
 
 ## Run
 

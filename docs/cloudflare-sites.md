@@ -6,11 +6,11 @@ Deploy each frontend from its own directory as an independent Cloudflare Pages p
 
 | Cloudflare Pages Project | Repository Directory | Custom Domain |
 |---|---|---|
-| `knol-web` | `frontend/web/` | `aiknol.com` |
-| `knol-admin` | `frontend/admin/` | `admin.aiknol.com` |
-| `knol-cloud` | `frontend/cloud/` | `cloud.aiknol.com` |
-| `knol-demo` | `frontend/demo/` | `demo.aiknol.com` |
-| `knol-docs` | `frontend/docs/` | `docs.aiknol.com` |
+| `knol-web` | `frontend/web/` | `cortex.doaide.com` |
+| `knol-admin` | `frontend/admin/` | `admin.cortex.doaide.com` |
+| `knol-cloud` | `frontend/cloud/` | `cloud.cortex.doaide.com` |
+| `knol-demo` | `frontend/demo/` | `demo.cortex.doaide.com` |
+| `cortex-docs` | `frontend/docs/` | `docs.cortex.doaide.com` |
 
 ## Build Commands
 
@@ -34,11 +34,11 @@ Deploy each frontend from its own directory as an independent Cloudflare Pages p
 - `frontend/web/`, `frontend/admin/`, `frontend/cloud/`, `frontend/demo/`, and `frontend/docs/` are standalone Next.js apps.
 - `private/docs/` is local-only documentation and is intentionally excluded from Cloudflare deployment.
 - Set domain env vars per project at build time:
-  - `NEXT_PUBLIC_BASE_DOMAIN=aiknol.com`
+  - `NEXT_PUBLIC_BASE_DOMAIN=cortex.doaide.com`
   - `NEXT_PUBLIC_URL_SCHEME=https`
 - Docs site server URL env vars:
-  - `NEXT_PUBLIC_DOCS_URL=https://docs.aiknol.com`
-  - `NEXT_PUBLIC_API_BASE_URL=https://api.aiknol.com`
-  - `NEXT_PUBLIC_TENANT_SWAGGER_URL=https://api.aiknol.com/docs`
+  - `NEXT_PUBLIC_DOCS_URL=https://docs.cortex.doaide.com`
+  - `NEXT_PUBLIC_API_BASE_URL=https://api.cortex.doaide.com`
+  - `NEXT_PUBLIC_TENANT_SWAGGER_URL=https://api.cortex.doaide.com/docs`
 - Run local frontend smoke checks with `./scripts/frontend-smoke.sh`.
-- For server-side access control on static deployments, enforce Cloudflare Access policy on `admin.aiknol.com` and `cloud.aiknol.com`.
+- For server-side access control on static deployments, enforce Cloudflare Access policy on `admin.cortex.doaide.com` and `cloud.cortex.doaide.com`.

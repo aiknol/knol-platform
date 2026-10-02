@@ -3,7 +3,7 @@ import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Terms of Service'),
-  description: 'Terms of Service for Knol — agreement governing use of our platform.',
+  description: 'Terms of Service for DoAide Cortex — agreement governing use of our platform.',
 };
 
 export default function TermsPage() {
@@ -16,7 +16,7 @@ export default function TermsPage() {
         {/* Introduction */}
         <section className="mb-12">
           <p className="text-dark-300 text-lg leading-relaxed">
-            These Terms of Service (&quot;Terms&quot;) govern your access to and use of Knol&apos;s website, API, SDKs, and services
+            These Terms of Service (&quot;Terms&quot;) govern your access to and use of DoAide Cortex&apos;s website, API, SDKs, and services
             (collectively, the &quot;Service&quot;). By accessing or using the Service, you agree to be bound by these Terms.
             If you do not agree to these Terms, you may not use the Service.
           </p>
@@ -37,7 +37,7 @@ export default function TermsPage() {
           <h2 className="text-2xl font-bold text-dark-50 mb-4">2. Description of Services</h2>
           <div className="space-y-4 text-dark-300">
             <p>
-              Knol is a context engineering platform that enables you to:
+              Cortex is a context engineering platform that enables you to:
             </p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li>Store, manage, and search persistent memories for AI applications</li>
@@ -79,7 +79,7 @@ export default function TermsPage() {
           <h2 className="text-2xl font-bold text-dark-50 mb-4">4. API Usage and Rate Limiting</h2>
           <div className="space-y-4 text-dark-300">
             <p>
-              When using the Knol API, you agree to:
+              When using the Cortex API, you agree to:
             </p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li>Not exceed the rate limits specified for your subscription plan</li>
@@ -99,9 +99,9 @@ export default function TermsPage() {
           <h2 className="text-2xl font-bold text-dark-50 mb-4">5. Intellectual Property Rights</h2>
           <div className="space-y-4 text-dark-300">
             <div>
-              <h3 className="text-lg font-semibold text-dark-100 mb-2">5.1 Knol IP</h3>
+              <h3 className="text-lg font-semibold text-dark-100 mb-2">5.1 Cortex IP</h3>
               <p>
-                The Service, including all software, documentation, designs, and content created by Knol, is protected
+                The Service, including all software, documentation, designs, and content created by DoAide Cortex, is protected
                 by copyright, trademark, and other intellectual property laws. You are granted a limited, non-exclusive,
                 non-transferable license to use the Service in accordance with these Terms. You may not modify, copy,
                 distribute, or sublicense any portion of the Service.
@@ -119,8 +119,8 @@ export default function TermsPage() {
             <div>
               <h3 className="text-lg font-semibold text-dark-100 mb-2">5.3 Open Source</h3>
               <p>
-                Knol is open source and available under the License specified in the repository. Your use of
-                Knol as an open-source project is governed by the applicable open-source license, not these Terms.
+                Cortex is open source and available under the License specified in the repository. Your use of
+                Cortex as an open-source project is governed by the applicable open-source license, not these Terms.
               </p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function TermsPage() {
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-dark-50 mb-4">7. Indemnification</h2>
           <p className="text-dark-300">
-            You agree to indemnify, defend, and hold harmless Knol and its officers, directors, employees, and agents
+            You agree to indemnify, defend, and hold harmless DoAide Cortex and its officers, directors, employees, and agents
             from any claims, damages, losses, or expenses (including reasonable attorneys&apos; fees) arising from or related to:
             (a) your use of the Service; (b) your data or content uploaded to the Service; (c) your violation of these Terms;
             or (d) your infringement of any third-party rights.
@@ -240,10 +240,10 @@ export default function TermsPage() {
             If you have questions about these Terms of Service, please contact us at:
           </p>
           <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 text-dark-300">
-            <p className="font-semibold text-dark-100 mb-2">Knol</p>
+            <p className="font-semibold text-dark-100 mb-2">DoAide Cortex</p>
             <p className="mb-1">Email: <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a></p>
             <p className="mb-1">Phone: <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a></p>
-            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
+            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/doaide/cortex</a></p>
           </div>
         </section>
       </div>

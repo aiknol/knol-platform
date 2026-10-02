@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knol — System Architecture</title>
+<title>DoAide Cortex — System Architecture</title>
 <style>
   :root {
     --bg: #0f1117; --bg2: #181b24; --bg3: #1e2230;
@@ -105,7 +105,7 @@
 
 <!-- ─── HERO ─── -->
 <header class="hero">
-  <h1>Knol — System Architecture</h1>
+  <h1>Cortex — System Architecture</h1>
   <p class="subtitle">Production-grade long-term memory infrastructure for LLM applications</p>
   <div class="badges">
     <span class="badge badge-purple">Rust + Axum</span>
@@ -140,7 +140,7 @@
 <!-- ═══════════ 1. OVERVIEW ═══════════ -->
 <section id="overview">
   <h2>1. System Overview</h2>
-  <p>Knol is an <strong>event-driven microservice platform</strong> that gives LLM applications persistent, structured long-term memory. Messages are ingested asynchronously, extracted into a knowledge graph by an LLM, stored with vector embeddings, and retrieved via adaptive hybrid search.</p>
+  <p>Cortex is an <strong>event-driven microservice platform</strong> that gives LLM applications persistent, structured long-term memory. Messages are ingested asynchronously, extracted into a knowledge graph by an LLM, stored with vector embeddings, and retrieved via adaptive hybrid search.</p>
 
   <div class="stat-grid">
     <div class="stat"><div class="stat-value purple">4</div><div class="stat-label">Sub-projects</div></div>
@@ -182,12 +182,12 @@
   <h2>2. Monorepo Structure</h2>
   <div class="card-grid">
     <div class="card">
-      <div class="card-title"><span class="icon">📦</span> knol-oss/</div>
+      <div class="card-title"><span class="icon">📦</span> cortex-oss/</div>
       <div class="card-desc">Open-source core (Apache 2.0). Contains 11 Rust crates — 7 libraries + 4 services. Handles memory ingestion, LLM extraction, vector/graph storage, and hybrid retrieval.</div>
       <div class="card-meta"><span class="badge badge-green">11 crates</span><span class="badge badge-purple">Rust</span></div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="icon">🏢</span> knol-enterprise/</div>
+      <div class="card-title"><span class="icon">🏢</span> cortex-enterprise/</div>
       <div class="card-desc">Commercial features (proprietary). Adds admin panel API, background jobs (consolidation, decay, conflict resolution), billing, marketing automation, and ingestion connectors.</div>
       <div class="card-meta"><span class="badge badge-amber">6 crates</span><span class="badge badge-purple">Rust</span></div>
     </div>
@@ -724,7 +724,7 @@ docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d
 
 <!-- ─── FOOTER ─── -->
 <footer>
-  <p>Knol Architecture Document — Generated February 2026</p>
+  <p>Cortex Architecture Document — Generated February 2026</p>
   <p style="margin-top:.25rem;">15 Rust crates · 8 microservices · PostgreSQL + pgvector · NATS JetStream · Redis · Next.js 14</p>
 </footer>
 

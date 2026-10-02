@@ -1,10 +1,10 @@
-# Knol OSS vs Commercial Boundary
+# Cortex OSS vs Commercial Boundary
 
 This document defines what stays open source and what is monetized in managed and enterprise offerings.
 
 ## Strategy Summary
 
-Knol follows an open-core model:
+Cortex follows an open-core model:
 
 - Keep core memory infrastructure open for trust, adoption, and developer-led growth.
 - Monetize managed operations and enterprise risk reduction.
@@ -27,18 +27,18 @@ Knol follows an open-core model:
 
 ### OSS
 
-- `knol-gateway-1`
-- `knol-write-service-1`
-- `knol-retrieve-service-1`
-- `knol-graph-service-1`
+- `cortex-gateway-1`
+- `cortex-write-service-1`
+- `cortex-retrieve-service-1`
+- `cortex-graph-service-1`
 - SDKs and public docs
 - Core schema and migrations
 
 ### Commercial
 
-- `knol-admin-service-1` as managed governance plane
-- `knol-jobs-service-1` as managed reliability/quality plane
-- `knol-billing-service-1` for commercial metering and enforcement
+- `cortex-admin-service-1` as managed governance plane
+- `cortex-jobs-service-1` as managed reliability/quality plane
+- `cortex-billing-service-1` for commercial metering and enforcement
 - Hosted ops stack for SLA, compliance, and support
 
 ## Product Packaging

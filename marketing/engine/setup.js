@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Initial Setup
+// Cortex Marketing — Initial Setup
 // Validates credentials, initializes blog, creates data directories
 // =============================================================================
 
@@ -25,7 +25,7 @@ function checkEnvVar(name, required = false) {
 }
 
 async function main() {
-  console.log('Knol Marketing — Setup\n');
+  console.log('Cortex Marketing — Setup\n');
 
   // 1. Create directories
   console.log('1. Creating directories...');

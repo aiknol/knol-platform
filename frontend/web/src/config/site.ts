@@ -3,17 +3,19 @@
 import { resolveAppSignupUrl, resolveDemoUrl, resolveDocsUrl, resolveSiteUrl } from './urls';
 
 export const SITE = {
-  name: 'Knol',
+  name: 'DoAide Cortex',
   tagline: 'Context Engineering Infrastructure for AI',
   description:
     'Rust-native context engineering platform for LLM applications. One binary, one PostgreSQL database, sub-5ms latency. Hybrid retrieval, knowledge graphs, memory decay, and conflict detection. Deploy in 60 seconds.',
   url: resolveSiteUrl(),
   appUrl: resolveAppSignupUrl(),
   demoUrl: resolveDemoUrl(),
-  github: 'https://github.com/aiknol/knol',
+  github: 'https://github.com/doaide/cortex-platform',
+  githubOss: 'https://github.com/doaide/cortex',
+  githubLocal: 'https://github.com/doaide/cortex-local',
   docsUrl: resolveDocsUrl(),
-  pypi: 'https://pypi.org/project/knol/',
-  npm: 'https://www.npmjs.com/package/@knol-dev/sdk',
+  pypi: 'https://pypi.org/project/doaide-cortex/',
+  npm: 'https://www.npmjs.com/package/@doaide/cortex-sdk',
   contactEmail: 'aiknolcontact@gmail.com',
   contactPhone: '+14155953988',
   contactPhoneDisplay: '(415) 595-3988',
@@ -35,12 +37,16 @@ export const NAV_LINKS: NavItem[] = [
   { href: SITE.demoUrl, label: 'Demo' },
   { href: SITE.docsUrl, label: 'Docs' },
   { href: '/mcp/', label: 'MCP' },
-  { href: '/knol-local/', label: 'knol-local' },
   { href: '/comparison', label: 'Compare' },
   { href: '/pricing/', label: 'Pricing' },
   { href: '/blog/', label: 'Blog' },
   { href: `mailto:${SITE.contactEmail}`, label: 'Contact' },
-  { href: SITE.github, label: 'GitHub', external: true },
+];
+
+export const PRODUCT_LINKS: NavItem[] = [
+  { href: '/cortex-platform/', label: 'Cortex Platform' },
+  { href: '/cortex-oss/', label: 'Cortex OSS' },
+  { href: '/cortex-local/', label: 'Cortex Local' },
 ];
 
 // ── Footer ──────────────────────────────────────────────────────
@@ -62,8 +68,10 @@ export const FOOTER_SECTIONS = [
       { label: 'Documentation', href: SITE.docsUrl },
       { label: 'API Reference', href: SITE.docsUrl },
       { label: 'MCP Server', href: '/mcp/' },
-      { label: 'knol-local', href: '/knol-local/' },
-      { label: 'GitHub', href: SITE.github, external: true },
+      { label: 'cortex-local', href: '/cortex-local/' },
+      { label: 'Cortex Platform (GitHub)', href: SITE.github, external: true },
+      { label: 'Cortex OSS (GitHub)', href: SITE.githubOss, external: true },
+      { label: 'Cortex Local (GitHub)', href: SITE.githubLocal, external: true },
       { label: 'PyPI', href: SITE.pypi, external: true },
       { label: 'npm', href: SITE.npm, external: true },
     ],

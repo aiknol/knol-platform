@@ -11,7 +11,7 @@ import {
   getAppAuthUser,
   getAppTenant,
 } from '@/features/app/api';
-import KnolLogo from '@/components/KnolLogo';
+import CortexLogo from '@/components/CortexLogo';
 import { APP_NAV_ITEMS } from '@/config/site';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -21,18 +21,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [tenant, setTenant] = useState<TenantProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isPublicPage =
+  const isAuthPage =
     pathname === '/login' ||
     pathname === '/login/' ||
     pathname === '/signup' ||
-    pathname === '/signup/' ||
-    pathname === '/playground' ||
-    pathname === '/playground/';
+    pathname === '/signup/';
+
+  // Playground is accessible without login, but should show the nav when logged in.
+  const isPlayground =
+    pathname === '/playground' || pathname === '/playground/';
 
   const canManage = user?.role === 'owner' || user?.role === 'admin';
 
   useEffect(() => {
-    if (isPublicPage) {
+    if (isAuthPage) {
       setLoading(false);
       return;
     }
@@ -50,15 +52,28 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         setLoading(false);
       } catch {
         clearAppAuthSession();
-        router.push('/login');
+        if (isPlayground) {
+          // Playground is accessible without login — just clear the user and stop loading.
+          setUser(null);
+          setTenant(null);
+          setLoading(false);
+        } else {
+          router.push('/login');
+        }
       }
     };
 
     check().catch(() => {
       clearAppAuthSession();
-      router.push('/login');
+      if (isPlayground) {
+        setUser(null);
+        setTenant(null);
+        setLoading(false);
+      } else {
+        router.push('/login');
+      }
     });
-  }, [isPublicPage, router]);
+  }, [isAuthPage, isPlayground, router]);
 
   const onLogout = async () => {
     try {
@@ -70,11 +85,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  if (isPublicPage) {
+  // Auth pages (login/signup) never show the nav shell.
+  if (isAuthPage) {
     return <>{children}</>;
   }
 
-  if (loading) {
+  // Playground: show the full shell if the user is logged in, otherwise render standalone.
+  if (isPlayground && !user) {
+    return <>{children}</>;
+  }
+
+  // For the playground, don't block rendering while verifying auth — show the
+  // shell immediately with whatever cached user data we have. For all other
+  // protected pages, keep the loading gate so we don't flash content.
+  if (loading && !isPlayground) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-dark-300">Loading workspace...</p>
@@ -88,9 +112,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <header className="border-b border-dark-600/40 bg-dark-900/70 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <KnolLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0" label="Knol logo" />
+            <CortexLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0" label="Cortex logo" />
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-dark-400">Knol Cloud</p>
+              <p className="text-xs sm:text-sm text-dark-400">Cortex Cloud</p>
               <h1 className="text-base sm:text-lg font-semibold text-dark-100 truncate">{tenant?.name || 'Workspace'}</h1>
             </div>
           </div>

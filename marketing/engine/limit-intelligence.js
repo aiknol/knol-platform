@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Limit Intelligence + Policy Engine
+// Cortex Marketing — Limit Intelligence + Policy Engine
 // Stateful guardrails to avoid crossing channel limits and posting spam-like content
 // =============================================================================
 

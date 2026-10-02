@@ -1,7 +1,7 @@
 {
-  "name": "@knol/sdk",
+  "name": "@doaide/cortex-sdk",
   "version": "0.1.0",
-  "description": "Official TypeScript/JavaScript SDK for the Knol memory platform",
+  "description": "Official TypeScript/JavaScript SDK for the Cortex memory platform",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -27,7 +27,7 @@
     "test": "vitest run"
   },
   "keywords": [
-    "knol",
+    "cortex",
     "memory",
     "sdk",
     "typescript",
@@ -40,13 +40,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/aiknol/knol-sdk-typescript.git"
+    "url": "https://github.com/doaide/cortex-sdk-typescript.git"
   },
-  "homepage": "https://github.com/aiknol/knol-sdk-typescript",
+  "homepage": "https://github.com/doaide/cortex-sdk-typescript",
   "bugs": {
-    "url": "https://github.com/aiknol/knol-sdk-typescript/issues"
+    "url": "https://github.com/doaide/cortex-sdk-typescript/issues"
   },
-  "author": "Knol AI",
+  "author": "Cortex AI",
   "devDependencies": {
     "typescript": "^5.3.0",
     "vitest": "^2.0.0"

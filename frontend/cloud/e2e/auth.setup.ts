@@ -6,14 +6,14 @@
  * authenticated.
  *
  * Required env vars (with defaults for local dev):
- *   E2E_USER_EMAIL     – defaults to e2e-test@knol-e2e.local
+ *   E2E_USER_EMAIL     – defaults to e2e-test@cortex-e2e.local
  *   E2E_USER_PASSWORD  – defaults to E2eTestPass1234!
  *   E2E_COMPANY_NAME   – defaults to E2E Test Workspace
  *   E2E_USER_FULLNAME  – defaults to E2E Tester
  */
 import { test as setup, expect } from '@playwright/test';
 
-const EMAIL = process.env.E2E_USER_EMAIL || 'e2e-test@knol-e2e.local';
+const EMAIL = process.env.E2E_USER_EMAIL || 'e2e-test@cortex-e2e.local';
 const PASSWORD = process.env.E2E_USER_PASSWORD || 'E2eTestPass1234!';
 const COMPANY = process.env.E2E_COMPANY_NAME || 'E2E Test Workspace';
 const FULL_NAME = process.env.E2E_USER_FULLNAME || 'E2E Tester';

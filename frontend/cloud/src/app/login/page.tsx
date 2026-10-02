@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { appAuthAPI } from '@/features/app/api';
-import KnolLogo from '@/components/KnolLogo';
+import CortexLogo from '@/components/CortexLogo';
 
 export default function AppLoginPage() {
   const router = useRouter();
@@ -31,13 +31,13 @@ export default function AppLoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md card">
         <div className="mb-6 flex items-center gap-3">
-          <KnolLogo className="w-11 h-11" label="Knol logo" />
+          <CortexLogo className="w-11 h-11" label="Cortex logo" />
           <div>
-            <p className="text-xs uppercase tracking-[0.12em] text-dark-500">Knol Cloud</p>
+            <p className="text-xs uppercase tracking-[0.12em] text-dark-500">Cortex Cloud</p>
             <p className="text-sm text-dark-300">Tenant Workspace</p>
           </div>
         </div>
-        <h2 className="text-2xl font-semibold text-dark-50 mb-2">Sign in to Knol Cloud</h2>
+        <h2 className="text-2xl font-semibold text-dark-50 mb-2">Sign in to Cortex Cloud</h2>
         <p className="text-sm text-dark-400 mb-6">Use your workspace credentials to access memory services.</p>
 
         {error && (

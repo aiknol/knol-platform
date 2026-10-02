@@ -1,4 +1,4 @@
-# Knol Docs
+# Cortex Docs
 
 ## Core
 
@@ -10,13 +10,13 @@
 - `automated-marketing-strategy.md`: Compliance-first automation strategy for multi-channel posting, rate-limit-safe scheduling, and full-funnel marketing workflows.
 - `ARCHITECTURE.html`: Platform architecture overview.
 - `COMPETITIVE_STRATEGY.html`: Competitive strategy analysis.
-- `Knol-Deployment-Guide.html`: Deployment guide.
-- `Knol-Zero-Cost-Marketing-Plan.md`: Marketing execution plan.
-- `knol-docs/`: Interactive static docs bundle (`architecture.html`, `business.html`, `dataflow.html`, `deployment.html`, `technical.html`).
+- `Cortex-Deployment-Guide.html`: Deployment guide.
+- `Cortex-Zero-Cost-Marketing-Plan.md`: Marketing execution plan.
+- `cortex-docs/`: Interactive static docs bundle (`architecture.html`, `business.html`, `dataflow.html`, `deployment.html`, `technical.html`).
 
 ## Notes
 
-- Product name is **Knol**.
+- Product name is **Cortex**.
 - Some long-form architecture/strategy docs preserve historical `memory-*` service naming for conceptual context.
 - Runtime separation:
   - OSS: `docker-compose.oss.yml`

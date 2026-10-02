@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { authAPI, getAuthUser, clearAuthSession, setAuthUser } from '@/features/admin/api';
 import { ADMIN_NAV_ITEMS, SITE } from '@/config';
 import { GlobalSearch } from '@/features/admin/global-search';
-import KnolLogo from '@/components/KnolLogo';
+import CortexLogo from '@/components/CortexLogo';
 
 interface AdminUser {
   email: string;
@@ -107,13 +107,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className={`p-6 border-b border-dark-600/30 ${sidebarOpen ? '' : 'flex justify-center'}`}>
           {sidebarOpen ? (
             <div className="flex items-center gap-3">
-              <KnolLogo className="w-8 h-8" label={`${SITE.name} logo`} />
+              <CortexLogo className="w-8 h-8" label={`${SITE.name} logo`} />
               <h1 className="font-bold bg-clip-text text-transparent bg-gradient-brand">
                 {`${SITE.name} Admin`}
               </h1>
             </div>
           ) : (
-            <KnolLogo className="w-8 h-8" label={`${SITE.name} logo`} />
+            <CortexLogo className="w-8 h-8" label={`${SITE.name} logo`} />
           )}
         </div>
 
@@ -166,8 +166,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </button>
 
           <div className="flex items-center gap-3 min-w-0">
-            <KnolLogo className="w-7 h-7 shrink-0 hidden sm:block" label={`${SITE.name} logo`} />
-            <h2 className="text-lg sm:text-xl font-semibold text-dark-100 truncate">Knol Control Plane</h2>
+            <CortexLogo className="w-7 h-7 shrink-0 hidden sm:block" label={`${SITE.name} logo`} />
+            <h2 className="text-lg sm:text-xl font-semibold text-dark-100 truncate">Cortex Control Plane</h2>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <div className="hidden sm:block">

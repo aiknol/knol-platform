@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Reddit Channel Adapter
+// Cortex Marketing — Reddit Channel Adapter
 // Posts to subreddits via Reddit API (free tier: 60 req/min, 100 posts/day)
 // =============================================================================
 
@@ -29,7 +29,7 @@ function getJson(path, token) {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'User-Agent': 'knol-marketing/0.1.0',
+        'User-Agent': 'cortex-marketing/0.1.0',
       },
     }, (res) => {
       let data = '';
@@ -75,7 +75,7 @@ async function authenticate(credentials) {
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'knol-marketing/0.1.0',
+        'User-Agent': 'cortex-marketing/0.1.0',
         'Content-Length': Buffer.byteLength(body),
       },
     }, (res) => {
@@ -132,7 +132,7 @@ async function submitPost(subreddit, title, content, token, kind = 'self') {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'knol-marketing/0.1.0',
+        'User-Agent': 'cortex-marketing/0.1.0',
         'Content-Length': Buffer.byteLength(body),
       },
     }, (res) => {
@@ -186,7 +186,7 @@ async function postComment(thingId, text, token) {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'knol-marketing/0.1.0',
+        'User-Agent': 'cortex-marketing/0.1.0',
         'Content-Length': Buffer.byteLength(body),
       },
     }, (res) => {

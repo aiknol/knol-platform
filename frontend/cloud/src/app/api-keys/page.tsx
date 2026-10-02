@@ -121,7 +121,7 @@ export default function ApiKeysPage() {
 
         <article className="card">
           <h3 className="text-lg font-semibold text-dark-50 mb-4">Quick Integration</h3>
-          <p className="text-sm text-dark-300 mb-3">Use your key against the Knol gateway:</p>
+          <p className="text-sm text-dark-300 mb-3">Use your key against the Cortex gateway:</p>
           <pre className="code-block text-xs">{`curl -X POST ${gatewayBaseUrl || '<GATEWAY_URL>'}/v1/memory \\
   -H "Authorization: Bearer <YOUR_API_KEY>" \\
   -H "Content-Type: application/json" \\

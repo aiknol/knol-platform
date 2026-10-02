@@ -1,10 +1,10 @@
 /**
- * Tests for KnolClient
+ * Tests for CortexClient
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { KnolClient } from '../client.js';
-import { KnolError } from '../types.js';
+import { CortexClient } from '../client.js';
+import { CortexError } from '../types.js';
 
 // Mock global fetch
 const mockFetch = vi.fn();
@@ -32,12 +32,12 @@ function emptyResponse(status = 204) {
   });
 }
 
-describe('KnolClient', () => {
-  let client: KnolClient;
+describe('CortexClient', () => {
+  let client: CortexClient;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    client = new KnolClient({
+    client = new CortexClient({
       apiKey: 'test-api-key',
       baseUrl: 'https://api.test.com',
       retryAttempts: 1,
@@ -46,11 +46,11 @@ describe('KnolClient', () => {
 
   describe('constructor', () => {
     it('should throw if apiKey is missing', () => {
-      expect(() => new KnolClient({ apiKey: '' })).toThrow(KnolError);
+      expect(() => new CortexClient({ apiKey: '' })).toThrow(CortexError);
     });
 
     it('should set defaults', () => {
-      const c = new KnolClient({ apiKey: 'key' });
+      const c = new CortexClient({ apiKey: 'key' });
       expect(c).toBeDefined();
     });
   });
@@ -171,7 +171,7 @@ describe('KnolClient', () => {
     });
 
     it('should throw if query is empty', () => {
-      expect(() => client.searchBuilder().build()).toThrow(KnolError);
+      expect(() => client.searchBuilder().build()).toThrow(CortexError);
     });
   });
 
@@ -211,16 +211,16 @@ describe('KnolClient', () => {
   });
 
   describe('error handling', () => {
-    it('should throw KnolError on 4xx', async () => {
+    it('should throw CortexError on 4xx', async () => {
       mockFetch.mockReturnValue(
         jsonResponse({ error: 'Not Found', message: 'Memory not found' }, 404)
       );
 
-      await expect(client.getMemory('bad-id')).rejects.toThrow(KnolError);
+      await expect(client.getMemory('bad-id')).rejects.toThrow(CortexError);
     });
 
     it('should not retry on 4xx', async () => {
-      const retryClient = new KnolClient({
+      const retryClient = new CortexClient({
         apiKey: 'key',
         baseUrl: 'https://api.test.com',
         retryAttempts: 3,
@@ -230,12 +230,12 @@ describe('KnolClient', () => {
         jsonResponse({ message: 'bad request' }, 400)
       );
 
-      await expect(retryClient.getMemory('bad')).rejects.toThrow(KnolError);
+      await expect(retryClient.getMemory('bad')).rejects.toThrow(CortexError);
       expect(mockFetch).toHaveBeenCalledOnce();
     });
 
     it('should retry on 5xx', async () => {
-      const retryClient = new KnolClient({
+      const retryClient = new CortexClient({
         apiKey: 'key',
         baseUrl: 'https://api.test.com',
         retryAttempts: 2,

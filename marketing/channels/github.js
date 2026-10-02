@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — GitHub Presence Automation
+// Cortex Marketing — GitHub Presence Automation
 // Manages releases, README badges, discussion engagement, star campaigns
 // Uses GitHub API (free tier: 5,000 req/hr authenticated)
 // =============================================================================
@@ -8,7 +8,7 @@ const https = require('https');
 
 const CONFIG = {
   API_BASE: 'https://api.github.com',
-  REPO: 'knol-dev/knol',
+  REPO: 'doaide/cortex',
   RATE_LIMIT: { perHour: 5000 },
 };
 
@@ -21,7 +21,7 @@ function ghRequest(method, path, token, body = null) {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
-        'User-Agent': 'knol-marketing/0.1.0',
+        'User-Agent': 'cortex-marketing/0.1.0',
         'X-GitHub-Api-Version': '2022-11-28',
       },
     };
@@ -71,7 +71,7 @@ async function createRelease(tag, name, body, credentials) {
 
   return ghRequest('POST', `/repos/${CONFIG.REPO}/releases`, token, {
     tag_name: tag,
-    name: name || `Knol ${tag}`,
+    name: name || `Cortex ${tag}`,
     body,
     draft: false,
     prerelease: tag.includes('alpha') || tag.includes('beta'),
@@ -102,7 +102,7 @@ async function updateRepoMetadata(description, topics, credentials) {
   if (description) {
     results.push(await ghRequest('PATCH', `/repos/${CONFIG.REPO}`, token, {
       description,
-      homepage: 'https://aiknol.com',
+      homepage: 'https://cortex.doaide.com',
     }));
   }
 
@@ -146,7 +146,7 @@ function generateBadges() {
     `[![GitHub stars](https://img.shields.io/github/stars/${repo}?style=flat-square)](https://github.com/${repo}/stargazers)`,
     `[![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)`,
     `[![Rust](https://img.shields.io/badge/rust-1.75+-orange?style=flat-square)](https://www.rust-lang.org/)`,
-    `[![Docker](https://img.shields.io/badge/docker-ready-blue?style=flat-square)](https://github.com/${repo}/pkgs/container/knol-oss)`,
+    `[![Docker](https://img.shields.io/badge/docker-ready-blue?style=flat-square)](https://github.com/${repo}/pkgs/container/cortex-oss)`,
     `[![CI](https://img.shields.io/github/actions/workflow/status/${repo}/ci.yml?style=flat-square)](https://github.com/${repo}/actions)`,
   ].join('\n');
 }

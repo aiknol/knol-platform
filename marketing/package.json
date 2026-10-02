@@ -1,8 +1,8 @@
 {
-  "name": "knol-marketing",
+  "name": "cortex-marketing",
   "version": "0.1.0",
   "private": true,
-  "description": "Autonomous marketing service for Knol — $0/mo budget, all free-tier tools",
+  "description": "Autonomous marketing service for Cortex — $0/mo budget, all free-tier tools",
   "scripts": {
     "generate": "node engine/generate.js",
     "publish": "node engine/publish.js",

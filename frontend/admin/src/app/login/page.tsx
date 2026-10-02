@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/features/admin/api';
 import { SITE } from '@/config';
-import KnolLogo from '@/components/KnolLogo';
+import CortexLogo from '@/components/CortexLogo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="mb-4 inline-flex items-center justify-center">
-            <KnolLogo className="w-14 h-14" label={`${SITE.name} logo`} />
+            <CortexLogo className="w-14 h-14" label={`${SITE.name} logo`} />
           </div>
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-brand mb-2">
             {SITE.name}
@@ -46,7 +46,7 @@ export default function LoginPage() {
         <div className="bg-dark-800/40 backdrop-blur-sm border border-dark-600/30 rounded-2xl p-8">
           <h2 className="text-2xl font-bold text-dark-50 mb-6">Sign in to admin</h2>
           <p className="text-sm text-dark-400 mb-6">
-            Operate Knol&apos;s commercial layer: security, governance, credentials, and production runtime controls.
+            Operate Cortex&apos;s commercial layer: security, governance, credentials, and production runtime controls.
           </p>
 
           {error && (

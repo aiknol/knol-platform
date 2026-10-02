@@ -1,21 +1,21 @@
 <p align="center">
-  <h1 align="center">Knol OSS</h1>
+  <h1 align="center">Cortex OSS</h1>
   <p align="center">Open-source memory infrastructure for AI applications.<br/>Give your agents persistent, searchable, context-aware memory.</p>
 </p>
 
 <p align="center">
-  <a href="https://github.com/aiknol/knol/actions"><img src="https://github.com/aiknol/knol/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/doaide/cortex/actions"><img src="https://github.com/doaide/cortex/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
-  <a href="https://github.com/aiknol/knol"><img src="https://img.shields.io/badge/rust-1.77+-orange.svg" alt="Rust"></a>
+  <a href="https://github.com/doaide/cortex"><img src="https://img.shields.io/badge/rust-1.77+-orange.svg" alt="Rust"></a>
 </p>
 
 ---
 
-## What is Knol?
+## What is DoAide Cortex?
 
-Knol is a memory layer for AI agents and LLM-powered applications. Instead of losing context between conversations, your agents can **remember**, **search**, and **reason** over past interactions.
+Cortex is a memory layer for AI agents and LLM-powered applications. Instead of losing context between conversations, your agents can **remember**, **search**, and **reason** over past interactions.
 
-Write a memory in plain text. Knol automatically extracts entities, builds a knowledge graph, detects conflicts with existing memories, and makes everything searchable via vector + full-text hybrid retrieval.
+Write a memory in plain text. Cortex automatically extracts entities, builds a knowledge graph, detects conflicts with existing memories, and makes everything searchable via vector + full-text hybrid retrieval.
 
 ### Key Features
 
@@ -34,7 +34,7 @@ Write a memory in plain text. Knol automatically extracts entities, builds a kno
 
 ## Architecture
 
-Knol is a set of microservices written in Rust, connected via NATS JetStream for async processing:
+Cortex is a set of microservices written in Rust, connected via NATS JetStream for async processing:
 
 ```
 ┌─────────────┐     ┌───────────────┐     ┌──────────────────┐
@@ -80,8 +80,8 @@ Infrastructure: PostgreSQL (pgvector) · Redis · NATS JetStream · MinIO
 ### 1. Clone and start infrastructure
 
 ```bash
-git clone https://github.com/aiknol/knol.git
-cd knol/knol-oss
+git clone https://github.com/doaide/cortex.git
+cd knol/cortex-oss
 
 # Start PostgreSQL, Redis, NATS, and MinIO
 docker compose up -d
@@ -99,8 +99,8 @@ cp .env.example .env
 **With Docker (recommended):**
 
 ```bash
-docker build -t knol-oss .
-docker run --env-file .env --network host knol-oss
+docker build -t cortex-oss .
+docker run --env-file .env --network host cortex-oss
 ```
 
 **From source (for development):**
@@ -115,7 +115,7 @@ cargo run --bin service-gateway
 
 ```bash
 curl -X POST http://localhost:8080/v1/memory \
-  -H "Authorization: Bearer $KNOL_API_KEY" \
+  -H "Authorization: Bearer $CORTEX_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"content": "User prefers dark mode and uses VS Code", "role": "user"}'
 ```
@@ -124,7 +124,7 @@ curl -X POST http://localhost:8080/v1/memory \
 
 ```bash
 curl -X POST http://localhost:8080/v1/memory/search \
-  -H "Authorization: Bearer $KNOL_API_KEY" \
+  -H "Authorization: Bearer $CORTEX_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"query": "What editor does the user prefer?"}'
 ```
@@ -140,13 +140,13 @@ curl -X POST http://localhost:8080/v1/memory/search \
 ### TypeScript Example
 
 ```typescript
-import { KnolClient } from '@knol/sdk';
+import { CortexClient } from '@doaide/cortex-sdk';
 
-const knol = new KnolClient({ apiKey: 'your_api_key' });
+const cortex = new CortexClient({ apiKey: 'your_api_key' });
 
-await knol.memory.write({ content: 'User likes hiking and photography' });
+await cortex.memory.write({ content: 'User likes hiking and photography' });
 
-const results = await knol.memory.search({ query: 'hobbies' });
+const results = await cortex.memory.search({ query: 'hobbies' });
 ```
 
 ### Python Example
@@ -216,7 +216,7 @@ results = client.search("programming language preferences")
 
 ## Configuration
 
-Knol uses a three-tier configuration system: database (`system_config` table) > environment variables > compiled defaults. See [`.env.example`](.env.example) for all available options.
+Cortex uses a three-tier configuration system: database (`system_config` table) > environment variables > compiled defaults. See [`.env.example`](.env.example) for all available options.
 
 ## Public Release Check
 

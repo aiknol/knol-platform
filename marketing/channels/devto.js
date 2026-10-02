@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Dev.to Channel Adapter
+// Cortex Marketing — Dev.to Channel Adapter
 // Publishes articles via Dev.to API (free, 30 articles/day)
 // =============================================================================
 

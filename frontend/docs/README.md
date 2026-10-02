@@ -1,10 +1,10 @@
-# Knol Public Docs Site
+# Cortex Public Docs Site
 
-Public docs website for `docs.aiknol.com`.
+Public docs website for `docs.cortex.doaide.com`.
 
 Scope of this site:
 
-- Knol OSS documentation
+- Cortex OSS documentation
 - Full tenant service documentation for cloud users
 
 Platform-internal documentation is intentionally excluded from this public site and is available in `private/docs` for local usage.

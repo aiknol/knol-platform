@@ -2,33 +2,33 @@ import { Metadata } from 'next';
 import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: pageTitle('About Knol'),
-  description: 'Learn about Knol — an open-source context engineering platform for building AI applications with persistent memory.',
+  title: pageTitle('About DoAide Cortex'),
+  description: 'Learn about DoAide Cortex — an open-source context engineering platform for building AI applications with persistent memory.',
 };
 
 export default function AboutPage() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-16">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold text-dark-50 mb-4">About Knol</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-dark-50 mb-4">About DoAide Cortex</h1>
 
         {/* Mission */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-4">Our Mission</h2>
           <p className="text-dark-300 text-lg leading-relaxed">
-            Knol is an open-source context engineering platform built to give AI applications persistent memory, understanding, and reasoning.
+            Cortex is an open-source context engineering platform built to give AI applications persistent memory, understanding, and reasoning.
             We believe that AI systems should be able to learn, remember, and build knowledge over time — not just process information in isolation.
             Our mission is to make it simple for developers to integrate intelligent memory systems into their applications with minimal
             infrastructure overhead and maximum performance.
           </p>
         </section>
 
-        {/* What is Knol */}
+        {/* What is DoAide Cortex */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-dark-50 mb-4">What is Knol?</h2>
+          <h2 className="text-2xl font-bold text-dark-50 mb-4">What is DoAide Cortex?</h2>
           <div className="space-y-4 text-dark-300">
             <p>
-              Knol is a Rust-native context engineering infrastructure that provides:
+              Cortex is a Rust-native context engineering infrastructure that provides:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-2">
               <li><span className="font-semibold text-dark-100">Persistent Memory</span> — Store, search, and retrieve user memories with sub-5ms latency</li>
@@ -39,20 +39,20 @@ export default function AboutPage() {
               <li><span className="font-semibold text-dark-100">Async Processing</span> — Extract and embed at scale without blocking your application</li>
             </ul>
             <p className="mt-4">
-              Deploy Knol as a single binary with one PostgreSQL database, or integrate it into your existing stack.
+              Deploy Cortex as a single binary with one PostgreSQL database, or integrate it into your existing stack.
               It&apos;s designed for developers who want intelligent memory without managing complex infrastructure.
             </p>
           </div>
         </section>
 
-        {/* Why Knol */}
+        {/* Why DoAide Cortex */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-dark-50 mb-4">Why Knol?</h2>
+          <h2 className="text-2xl font-bold text-dark-50 mb-4">Why DoAide Cortex?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-brand-400 mb-2">Open Source</h3>
               <p className="text-dark-300 text-sm">
-                Knol is fully open source. Review the code, contribute, and deploy on your own infrastructure
+                Cortex is fully open source. Review the code, contribute, and deploy on your own infrastructure
                 without vendor lock-in or proprietary restrictions.
               </p>
             </div>
@@ -126,7 +126,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-dark-50 mb-4">Technology Stack</h2>
           <div className="space-y-4 text-dark-300">
             <p>
-              Knol is built with cutting-edge technologies designed for scale, reliability, and performance:
+              Cortex is built with cutting-edge technologies designed for scale, reliability, and performance:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-2">
               <li><span className="font-semibold text-dark-100">Rust</span> — Memory safety, performance, and low overhead</li>
@@ -142,7 +142,7 @@ export default function AboutPage() {
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-4">Get Involved</h2>
           <p className="text-dark-300 mb-6">
-            Knol is an open-source project and we welcome contributions, feedback, and ideas from the community.
+            Cortex is an open-source project and we welcome contributions, feedback, and ideas from the community.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a
@@ -196,7 +196,7 @@ export default function AboutPage() {
               className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 hover:border-brand-500/50 transition text-center"
             >
               <h3 className="text-lg font-semibold text-dark-100 mb-2">Live Demo</h3>
-              <p className="text-dark-400 text-sm">Try Knol in your browser</p>
+              <p className="text-dark-400 text-sm">Try Cortex in your browser</p>
             </a>
 
             <a
@@ -221,7 +221,7 @@ export default function AboutPage() {
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-dark-50 mb-1">Subhendu Das</h3>
               <p className="text-dark-400 text-sm mb-3">
-                Builder of Knol and knol-local. Passionate about making AI tools smarter through persistent, local-first memory.
+                Builder of Cortex and cortex-local. Passionate about making AI tools smarter through persistent, local-first memory.
               </p>
               <a
                 href="https://www.linkedin.com/in/sumaninster/"
@@ -247,7 +247,7 @@ export default function AboutPage() {
           <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 text-dark-300">
             <p className="mb-2">Email: <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a></p>
             <p className="mb-2">Phone: <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a></p>
-            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
+            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/doaide/cortex</a></p>
           </div>
         </section>
       </div>

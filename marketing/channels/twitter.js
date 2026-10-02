@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Twitter/X Channel Adapter
+// Cortex Marketing — Twitter/X Channel Adapter
 // Posts tweets via Twitter API v2 (Free tier: 1,500 tweets/mo, 50 per 24h)
 // =============================================================================
 

@@ -21,7 +21,7 @@ export default function ComparisonTable() {
             <th className="text-left py-3 px-4 text-dark-300 font-medium">Feature</th>
             <th className="text-center py-3 px-4 text-dark-300 font-medium w-24">Mem0</th>
             <th className="text-center py-3 px-4 text-dark-300 font-medium w-24">Zep</th>
-            <th className="text-center py-3 px-4 font-semibold text-brand-400 w-24">Knol</th>
+            <th className="text-center py-3 px-4 font-semibold text-brand-400 w-24">Cortex</th>
           </tr>
         </thead>
         <tbody>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knol — Complete Project Documentation</title>
+<title>DoAide Cortex — Complete Project Documentation</title>
 <style>
   :root {
     --bg: #0f1117; --bg2: #181b24; --bg3: #1e2230;
@@ -167,7 +167,7 @@
 <!-- ═══════ SIDEBAR ═══════ -->
 <nav class="sidebar">
   <div class="sidebar-header">
-    <h1>Knol Docs</h1>
+    <h1>Cortex Docs</h1>
     <p>v0.1.0 &middot; Memory Infrastructure for AI</p>
   </div>
 
@@ -252,7 +252,7 @@
 
 <!-- ─── HERO ─── -->
 <header class="hero" id="top">
-  <h1>Knol</h1>
+  <h1>Cortex</h1>
   <p class="subtitle">Long-term memory infrastructure for LLM applications</p>
   <p style="color:var(--muted); font-size:0.88rem; margin-top:0.25rem;">Built in Rust. Open core. Self-hostable.</p>
   <div class="badges">
@@ -271,7 +271,7 @@
 <!-- ═══════════════════════════════════════════════ -->
 <section id="overview">
   <h2>Overview</h2>
-  <p>Knol gives AI agents <strong>persistent, structured memory</strong> &mdash; not just vector search. Every conversation turn is processed through an intelligent extraction pipeline that builds a <strong>knowledge graph</strong> of entities, relationships, and facts alongside traditional semantic embeddings. Memories are grounded with source citations, verified for accuracy, and automatically resolved when they conflict.</p>
+  <p>Cortex gives AI agents <strong>persistent, structured memory</strong> &mdash; not just vector search. Every conversation turn is processed through an intelligent extraction pipeline that builds a <strong>knowledge graph</strong> of entities, relationships, and facts alongside traditional semantic embeddings. Memories are grounded with source citations, verified for accuracy, and automatically resolved when they conflict.</p>
 
   <div class="stat-grid">
     <div class="stat"><div class="stat-value purple">4</div><div class="stat-label">Microservices (OSS)</div></div>
@@ -280,7 +280,7 @@
     <div class="stat"><div class="stat-value amber">5</div><div class="stat-label">Frontend Apps</div></div>
   </div>
 
-  <h3>Why Knol?</h3>
+  <h3>Why DoAide Cortex?</h3>
   <p><strong>Hybrid retrieval</strong> &mdash; Queries hit vector similarity, knowledge graph traversal, BM25 full-text, and scope cascade simultaneously. The system classifies query intent and routes to the optimal strategy automatically using Reciprocal Rank Fusion (RRF).</p>
   <p><strong>Knowledge graph, not just vectors</strong> &mdash; Every extraction builds entities, relationships, and edges. Ask "who does Sarah work with?" and get graph-traversed answers, not just keyword matches.</p>
   <p><strong>Write-time intelligence</strong> &mdash; Embeddings are generated at write time (not query time). Conflicts are detected automatically. Duplicate memories are deduplicated. Outdated facts are superseded.</p>
@@ -398,7 +398,7 @@ docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d
 <section id="monorepo">
   <h2>Monorepo Layout</h2>
   <pre><code>memorylayer/
-├── knol-oss/                    # Open source (Apache 2.0)
+├── cortex-oss/                    # Open source (Apache 2.0)
 │   ├── crates/                  # 11 Rust crates (7 libs + 4 services)
 │   │   ├── memory-common/       # Shared types, config, webhook definitions
 │   │   ├── memory-db/           # Database pool, migrations, tenant isolation
@@ -417,15 +417,15 @@ docker compose -f docker-compose.oss.yml -f docker-compose.proprietary.yml up -d
 │   │   └── mcp/                 # Model Context Protocol server
 │   └── migrations/              # PostgreSQL migrations (12 files)
 │
-├── knol-enterprise/             # Commercial features (proprietary)
+├── cortex-enterprise/             # Commercial features (proprietary)
 │   └── crates/                  # 9 crates (admin, billing, jobs, marketing, etc.)
 │
 ├── frontend/                    # Next.js monorepo (npm workspaces)
-│   ├── web/                     # Marketing site → aiknol.com
-│   ├── admin/                   # Admin panel → admin.aiknol.com
-│   ├── cloud/                   # Tenant app → cloud.aiknol.com
-│   ├── demo/                    # Interactive demo → demo.aiknol.com
-│   └── docs/                    # Public docs → docs.aiknol.com
+│   ├── web/                     # Marketing site → cortex.doaide.com
+│   ├── admin/                   # Admin panel → admin.cortex.doaide.com
+│   ├── cloud/                   # Tenant app → cloud.cortex.doaide.com
+│   ├── demo/                    # Interactive demo → demo.cortex.doaide.com
+│   └── docs/                    # Public docs → docs.cortex.doaide.com
 │
 ├── deploy/                      # Production deployment configs
 │   ├── docker-compose.prod.yml  # Hetzner production stack
@@ -543,11 +543,11 @@ service-graph ───┬─ memory-common
   <table>
     <thead><tr><th>App</th><th>Directory</th><th>Production URL</th><th>Local Port</th><th>Purpose</th></tr></thead>
     <tbody>
-      <tr><td><strong>web</strong></td><td><code>frontend/web/</code></td><td>aiknol.com</td><td>3005</td><td>Marketing website</td></tr>
-      <tr><td><strong>admin</strong></td><td><code>frontend/admin/</code></td><td>admin.aiknol.com</td><td>3006</td><td>Admin control panel</td></tr>
-      <tr><td><strong>cloud</strong></td><td><code>frontend/cloud/</code></td><td>cloud.aiknol.com</td><td>3007</td><td>Tenant application</td></tr>
-      <tr><td><strong>demo</strong></td><td><code>frontend/demo/</code></td><td>demo.aiknol.com</td><td>3008</td><td>Interactive demo UI</td></tr>
-      <tr><td><strong>docs</strong></td><td><code>frontend/docs/</code></td><td>docs.aiknol.com</td><td>3009</td><td>API documentation</td></tr>
+      <tr><td><strong>web</strong></td><td><code>frontend/web/</code></td><td>cortex.doaide.com</td><td>3005</td><td>Marketing website</td></tr>
+      <tr><td><strong>admin</strong></td><td><code>frontend/admin/</code></td><td>admin.cortex.doaide.com</td><td>3006</td><td>Admin control panel</td></tr>
+      <tr><td><strong>cloud</strong></td><td><code>frontend/cloud/</code></td><td>cloud.cortex.doaide.com</td><td>3007</td><td>Tenant application</td></tr>
+      <tr><td><strong>demo</strong></td><td><code>frontend/demo/</code></td><td>demo.cortex.doaide.com</td><td>3008</td><td>Interactive demo UI</td></tr>
+      <tr><td><strong>docs</strong></td><td><code>frontend/docs/</code></td><td>docs.cortex.doaide.com</td><td>3009</td><td>API documentation</td></tr>
     </tbody>
   </table>
   </div>
@@ -1333,12 +1333,12 @@ async with AsyncMemoryClient(api_key="key") as client:
   <h2>TypeScript SDK</h2>
 
   <h3>Installation</h3>
-  <pre><code>npm install @knol/sdk</code></pre>
+  <pre><code>npm install @doaide/cortex-sdk</code></pre>
 
   <h3>Usage</h3>
-  <pre><code>import { KnolClient } from '@knol/sdk';
+  <pre><code>import { CortexClient } from '@doaide/cortex-sdk';
 
-const client = new KnolClient({
+const client = new CortexClient({
   apiKey: 'your-key',
   baseUrl: 'http://localhost:3000'
 });
@@ -1391,8 +1391,8 @@ interface SearchMemoryResponse {
   <p>Model Context Protocol server for integration with Claude, Cursor, Windsurf, and other MCP-compatible AI tools.</p>
 
   <h3>Installation</h3>
-  <pre><code>npm install -g @knol/mcp-server
-KNOL_API_KEY=your-key knol-mcp</code></pre>
+  <pre><code>npm install -g @doaide/cortex-mcp-server
+CORTEX_API_KEY=your-key cortex-mcp</code></pre>
 </section>
 
 
@@ -1403,15 +1403,15 @@ KNOL_API_KEY=your-key knol-mcp</code></pre>
   <h2>Framework Integrations</h2>
 
   <h3>LangChain</h3>
-  <pre><code>from memory_sdk.integrations.langchain import KnolMemory, KnolRetriever
+  <pre><code>from memory_sdk.integrations.langchain import CortexMemory, CortexRetriever
 
-memory = KnolMemory(api_key="key", user_id="u1")
-retriever = KnolRetriever(api_key="key", user_id="u1")</code></pre>
+memory = CortexMemory(api_key="key", user_id="u1")
+retriever = CortexRetriever(api_key="key", user_id="u1")</code></pre>
 
   <h3>CrewAI</h3>
-  <pre><code>from memory_sdk.integrations.crewai import KnolCrewMemory
+  <pre><code>from memory_sdk.integrations.crewai import CortexCrewMemory
 
-memory = KnolCrewMemory(api_key="key", user_id="u1")</code></pre>
+memory = CortexCrewMemory(api_key="key", user_id="u1")</code></pre>
 </section>
 
 
@@ -1849,8 +1849,8 @@ docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.producti
 ./scripts/install-git-hooks.sh
 
 # Checks run before push:
-# - cargo fmt --all -- --check  (knol-oss + knol-enterprise)
-# - cargo clippy --workspace    (knol-oss + knol-enterprise)</code></pre>
+# - cargo fmt --all -- --check  (cortex-oss + cortex-enterprise)
+# - cargo clippy --workspace    (cortex-oss + cortex-enterprise)</code></pre>
 </section>
 
 
@@ -1894,19 +1894,19 @@ docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.producti
   <table>
     <thead><tr><th>Component</th><th>License</th></tr></thead>
     <tbody>
-      <tr><td><code>knol-oss/</code></td><td>Apache License 2.0</td></tr>
-      <tr><td><code>knol-enterprise/</code></td><td>Commercial License</td></tr>
+      <tr><td><code>cortex-oss/</code></td><td>Apache License 2.0</td></tr>
+      <tr><td><code>cortex-enterprise/</code></td><td>Commercial License</td></tr>
       <tr><td><code>frontend/*</code></td><td>All Rights Reserved</td></tr>
     </tbody>
   </table>
   </div>
-  <p>Contributions to <code>knol-oss/</code> are welcome under the Apache 2.0 license. Please open an issue to discuss significant changes before submitting a PR.</p>
+  <p>Contributions to <code>cortex-oss/</code> are welcome under the Apache 2.0 license. Please open an issue to discuss significant changes before submitting a PR.</p>
 </section>
 
 
 <!-- ─── FOOTER ─── -->
 <footer>
-  <p><strong>Knol</strong> &mdash; Complete Project Documentation</p>
+  <p><strong>Cortex</strong> &mdash; Complete Project Documentation</p>
   <p style="margin-top:.25rem;">v0.1.0 &middot; 11 Rust Crates &middot; 4 Microservices &middot; PostgreSQL + pgvector &middot; NATS JetStream &middot; Redis &middot; Next.js 14</p>
   <p style="margin-top:.5rem;">Generated March 2026</p>
 </footer>

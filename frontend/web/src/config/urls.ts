@@ -125,7 +125,7 @@ const ADMIN_API_ORIGIN = resolveOrigin(
 );
 
 export function resolveSiteUrl(): string {
-  return SITE_ORIGIN || 'https://aiknol.com';
+  return SITE_ORIGIN || 'https://cortex.doaide.com';
 }
 
 export function resolveAppSignupUrl(): string {
@@ -136,7 +136,7 @@ export function resolveAppSignupUrl(): string {
   if (explicitApp) return ensureSignupUrl(explicitApp);
 
   if (APP_ORIGIN) return `${APP_ORIGIN}/signup/`;
-  return 'https://cloud.aiknol.com/signup/';
+  return 'https://cloud.cortex.doaide.com/signup/';
 }
 
 export function resolveAppLoginUrl(): string {
@@ -147,19 +147,19 @@ export function resolveAppLoginUrl(): string {
   if (explicitApp) return `${stripTrailingSlash(explicitApp)}/login/`;
 
   if (APP_ORIGIN) return `${APP_ORIGIN}/login/`;
-  return 'https://cloud.aiknol.com/login/';
+  return 'https://cloud.cortex.doaide.com/login/';
 }
 
 export function resolveDemoUrl(): string {
   const explicit = readEnv('NEXT_PUBLIC_DEMO_URL');
   if (explicit) return ensureTrailingSlash(explicit);
   if (DEMO_ORIGIN) return `${DEMO_ORIGIN}/`;
-  return IS_DEV ? '/demo/' : 'https://demo.aiknol.com/';
+  return IS_DEV ? '/demo/' : 'https://demo.cortex.doaide.com/';
 }
 
 export function resolveDocsUrl(): string {
   if (DOCS_ORIGIN) return `${DOCS_ORIGIN}/`;
-  return 'https://docs.aiknol.com/';
+  return 'https://docs.cortex.doaide.com/';
 }
 
 function inferApiOriginFromLocation(): string | null {
@@ -186,7 +186,7 @@ function resolveApiFallbackOrigin(): string {
   const inferred = inferApiOriginFromLocation();
   if (inferred) return stripTrailingSlash(inferred);
 
-  return IS_DEV ? 'http://localhost:3001' : 'https://api.aiknol.com';
+  return IS_DEV ? 'http://localhost:3001' : 'https://api.cortex.doaide.com';
 }
 
 export function resolveAdminApiUrl(): string {

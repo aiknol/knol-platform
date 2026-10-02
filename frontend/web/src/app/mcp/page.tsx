@@ -5,7 +5,7 @@ import { pageTitle, SITE } from '@/config/site';
 export const metadata: Metadata = {
   title: pageTitle('MCP Server — Give Claude Persistent Memory'),
   description:
-    'Use Knol as an MCP server to give Claude, Cursor, and any MCP-compatible AI tool persistent memory. Install in one command, no configuration required.',
+    'Use Cortex as an MCP server to give Claude, Cursor, and any MCP-compatible AI tool persistent memory. Install in one command, no configuration required.',
   keywords: ['MCP', 'Model Context Protocol', 'Claude memory', 'Cursor memory', 'AI memory', 'MCP server', 'persistent memory'],
 };
 
@@ -22,7 +22,7 @@ export default function MCPPage() {
             Give Claude Persistent Memory
           </h1>
           <p className="text-lg md:text-xl text-dark-300 max-w-2xl mx-auto mb-8">
-            Knol&apos;s MCP server lets Claude Desktop, Cursor, Windsurf, and any MCP-compatible tool
+            Cortex&apos;s MCP server lets Claude Desktop, Cursor, Windsurf, and any MCP-compatible tool
             remember users, learn preferences, and build knowledge across sessions.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -45,7 +45,7 @@ export default function MCPPage() {
           <h2 className="text-2xl font-bold text-dark-50 mb-6 text-center">Install in One Command</h2>
           <div className="bg-dark-800 border border-dark-700 rounded-lg p-6 overflow-x-auto">
             <code className="text-sm text-brand-400 font-mono">
-              npx @aiknol/knol-mcp-server
+              npx @doaide/cortex-mcp-server
             </code>
           </div>
           <p className="text-dark-400 text-sm mt-3 text-center">
@@ -61,15 +61,15 @@ export default function MCPPage() {
               <div className="text-3xl mb-3">1</div>
               <h3 className="text-lg font-semibold text-dark-100 mb-2">Install the MCP Server</h3>
               <p className="text-dark-300 text-sm">
-                Run the npx command or add Knol to your Claude Desktop MCP config. The server starts
-                automatically and connects to your local Knol instance.
+                Run the npx command or add Cortex to your Claude Desktop MCP config. The server starts
+                automatically and connects to your local Cortex instance.
               </p>
             </div>
             <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6">
               <div className="text-3xl mb-3">2</div>
               <h3 className="text-lg font-semibold text-dark-100 mb-2">Claude Learns From Conversations</h3>
               <p className="text-dark-300 text-sm">
-                As you chat, Knol automatically extracts facts, preferences, and relationships.
+                As you chat, Cortex automatically extracts facts, preferences, and relationships.
                 These are stored as structured memories with temporal context.
               </p>
             </div>
@@ -93,12 +93,12 @@ export default function MCPPage() {
           <div className="bg-dark-800 border border-dark-700 rounded-lg p-6 overflow-x-auto mb-4">
             <pre className="text-sm text-dark-200 font-mono">{`{
   "mcpServers": {
-    "knol-memory": {
+    "cortex-memory": {
       "command": "npx",
-      "args": ["@aiknol/knol-mcp-server"],
+      "args": ["@doaide/cortex-mcp-server"],
       "env": {
-        "KNOL_API_URL": "http://localhost:3000",
-        "KNOL_API_KEY": "your-api-key"
+        "CORTEX_API_URL": "http://localhost:3000",
+        "CORTEX_API_KEY": "your-api-key"
       }
     }
   }
@@ -168,13 +168,13 @@ export default function MCPPage() {
           </div>
         </section>
 
-        {/* Why Knol for MCP */}
+        {/* Why DoAide Cortex for MCP */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-dark-50 mb-6">Why Knol for MCP</h2>
+          <h2 className="text-2xl font-bold text-dark-50 mb-6">Why DoAide Cortex for MCP</h2>
           <div className="space-y-4 text-dark-300">
             <p>
               Most MCP memory servers store flat key-value pairs or simple text blobs.
-              Knol is a full context engineering platform with hybrid retrieval, knowledge graphs,
+              Cortex is a full context engineering platform with hybrid retrieval, knowledge graphs,
               memory decay, and conflict detection — all exposed through MCP tools.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -200,7 +200,7 @@ export default function MCPPage() {
             Ready to Give Your AI Persistent Memory?
           </h2>
           <p className="text-dark-300 mb-6 max-w-xl mx-auto">
-            Knol is open-source and self-hostable. Deploy on your infrastructure,
+            Cortex is open-source and self-hostable. Deploy on your infrastructure,
             keep your data private, and give every AI tool you use persistent memory.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">

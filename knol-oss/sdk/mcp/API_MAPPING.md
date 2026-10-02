@@ -1,6 +1,6 @@
-# Knol API Mapping
+# Cortex API Mapping
 
-This document maps MCP tools to the underlying Knol REST API endpoints.
+This document maps MCP tools to the underlying Cortex REST API endpoints.
 
 ## Architecture
 
@@ -9,18 +9,18 @@ AI Coding Tool (Claude Code, Cursor, Windsurf)
          ↓
     MCP Protocol
          ↓
-   Knol MCP Server (this project)
+   Cortex MCP Server (this project)
          ↓
    HTTP Client (fetch)
          ↓
-   Knol REST API
+   Cortex REST API
 ```
 
 ## Tool to API Endpoint Mapping
 
 ### knol_remember → POST /v1/memory
 
-Stores a new memory in Knol.
+Stores a new memory in Cortex.
 
 **MCP Request:**
 ```json
@@ -40,7 +40,7 @@ Stores a new memory in Knol.
 **HTTP Request:**
 ```bash
 POST /v1/memory HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 Content-Type: application/json
 
 {
@@ -53,7 +53,7 @@ Content-Type: application/json
 }
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "id": "mem_abc123xyz",
@@ -99,7 +99,7 @@ Searches memories with semantic matching.
 **HTTP Request:**
 ```bash
 POST /v1/memory/search HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 Content-Type: application/json
 
 {
@@ -111,7 +111,7 @@ Content-Type: application/json
 }
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "memories": [
@@ -159,10 +159,10 @@ Retrieves a specific memory by ID.
 **HTTP Request:**
 ```bash
 GET /v1/memory/mem_abc123xyz HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "id": "mem_abc123xyz",
@@ -208,7 +208,7 @@ Updates an existing memory.
 **HTTP Request:**
 ```bash
 PUT /v1/memory/mem_abc123xyz HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 Content-Type: application/json
 
 {
@@ -217,7 +217,7 @@ Content-Type: application/json
 }
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "id": "mem_abc123xyz",
@@ -259,10 +259,10 @@ Deletes a memory.
 **HTTP Request:**
 ```bash
 DELETE /v1/memory/mem_abc123xyz HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "success": true,
@@ -303,10 +303,10 @@ Lists knowledge graph entities.
 **HTTP Request:**
 ```bash
 GET /v1/graph/entities?entity_type=technology&limit=20 HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "entities": [
@@ -358,10 +358,10 @@ Gets related entities.
 **HTTP Request:**
 ```bash
 GET /v1/graph/entities/ent_typescript/neighbors?limit=10 HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "entity_id": "ent_typescript",
@@ -402,16 +402,16 @@ Authorization: Bearer {KNOL_API_KEY}
 
 ## Resource to API Mapping
 
-### knol://recent → POST /v1/memory/search
+### cortex://recent → POST /v1/memory/search
 
-The `knol://recent` resource uses the search endpoint with wildcard query.
+The `cortex://recent` resource uses the search endpoint with wildcard query.
 
 **Resource Read Request:**
 ```json
 {
   "method": "resources/read",
   "params": {
-    "uri": "knol://recent"
+    "uri": "cortex://recent"
   }
 }
 ```
@@ -419,7 +419,7 @@ The `knol://recent` resource uses the search endpoint with wildcard query.
 **HTTP Request (Behind the Scenes):**
 ```bash
 POST /v1/memory/search HTTP/1.1
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 Content-Type: application/json
 
 {
@@ -429,7 +429,7 @@ Content-Type: application/json
 }
 ```
 
-**Knol API Response:**
+**Cortex API Response:**
 ```json
 {
   "memories": [
@@ -449,7 +449,7 @@ Content-Type: application/json
 {
   "contents": [
     {
-      "uri": "knol://recent",
+      "uri": "cortex://recent",
       "mimeType": "application/json",
       "text": "{...formatted memories...}"
     }
@@ -464,11 +464,11 @@ Content-Type: application/json
 All requests include Bearer token authentication:
 
 ```http
-Authorization: Bearer {KNOL_API_KEY}
+Authorization: Bearer {CORTEX_API_KEY}
 Content-Type: application/json
 ```
 
-The `KNOL_API_KEY` is set via the `KNOL_API_KEY` environment variable.
+The `CORTEX_API_KEY` is set via the `CORTEX_API_KEY` environment variable.
 
 ---
 
@@ -504,7 +504,7 @@ The `KNOL_API_KEY` is set via the `KNOL_API_KEY` environment variable.
   "content": [
     {
       "type": "text",
-      "text": "Error: Knol API error (401): Unauthorized"
+      "text": "Error: Cortex API error (401): Unauthorized"
     }
   ],
   "isError": true
@@ -546,7 +546,7 @@ The `KNOL_API_KEY` is set via the `KNOL_API_KEY` environment variable.
 
 ## API Rate Limiting
 
-The Knol API may implement rate limiting. Key considerations:
+The Cortex API may implement rate limiting. Key considerations:
 
 - **Rate Limit Header**: `X-RateLimit-Remaining`
 - **Reset Time**: `X-RateLimit-Reset`
@@ -572,7 +572,7 @@ There's currently no offset-based pagination; use semantic search with refined q
 
 ### Memory Fields
 
-| Knol API Field | MCP Parameter | Type | Required |
+| Cortex API Field | MCP Parameter | Type | Required |
 |---|---|---|---|
 | `content` | `content` | string | Yes (for storage) |
 | `user_id` | `user_id` | string | No (uses default) |
@@ -588,7 +588,7 @@ There's currently no offset-based pagination; use semantic search with refined q
 
 ### Entity Fields
 
-| Knol API Field | MCP Parameter | Type |
+| Cortex API Field | MCP Parameter | Type |
 |---|---|---|
 | `id` | `entity_id` | string |
 | `name` | (read-only) | string |
@@ -612,13 +612,13 @@ The server uses:
 
 ## Backwards Compatibility
 
-This implementation maps to Knol API v1:
+This implementation maps to Cortex API v1:
 
 - Endpoint prefix: `/v1/`
 - Version stability: Stable
 - Deprecation policy: 6-month notice period
 
-If the Knol API updates (e.g., to v2), the MCP server will need updates to the endpoint paths.
+If the Cortex API updates (e.g., to v2), the MCP server will need updates to the endpoint paths.
 
 ---
 
@@ -628,7 +628,7 @@ If the Knol API updates (e.g., to v2), the MCP server will need updates to the e
 
 - HTTP overhead: ~50-100ms per request
 - MCP serialization: ~1-5ms
-- Knol API processing: Varies (typically 100-500ms)
+- Cortex API processing: Varies (typically 100-500ms)
 
 Total latency per operation: Typically 200-600ms
 

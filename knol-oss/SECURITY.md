@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Knol, please report it responsibly. **Do not open a public GitHub issue for security vulnerabilities.**
+If you discover a security vulnerability in Cortex, please report it responsibly. **Do not open a public GitHub issue for security vulnerabilities.**
 
 ### How to Report
 
@@ -39,7 +39,7 @@ The following are in scope for security reports:
 
 ## Security Best Practices
 
-When deploying Knol in production:
+When deploying Cortex in production:
 
 - **Never use default credentials.** Change the default PostgreSQL, Redis, and MinIO passwords in your environment configuration.
 - **Rotate API keys** regularly and use the RBAC system to grant minimum necessary permissions.

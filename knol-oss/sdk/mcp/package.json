@@ -1,11 +1,11 @@
 {
-  "name": "@aiknol/knol-mcp-server",
+  "name": "@doaide/cortex-mcp-server",
   "version": "0.1.0",
-  "description": "MCP server for Knol memory platform integration with AI coding tools",
+  "description": "MCP server for Cortex memory platform integration with AI coding tools",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "knol-mcp": "./dist/index.js"
+    "cortex-mcp": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -16,13 +16,13 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
-    "knol",
+    "cortex",
     "memory",
     "knowledge-graph",
     "ai",
     "claude"
   ],
-  "author": "Knol Contributors",
+  "author": "DoAide Contributors",
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
@@ -36,6 +36,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aiknol/knol-mcp-server.git"
+    "url": "https://github.com/doaide/cortex-mcp-server.git"
   }
 }

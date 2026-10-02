@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: pageTitle('Context Engineering Platform Comparison - Knol vs Competitors'),
+  title: pageTitle('Context Engineering Platform Comparison - Cortex vs Competitors'),
   description:
-    'Comprehensive comparison of Knol, Mem0, Zep, and Letta across context engineering, retrieval, temporal modeling, and operational architecture.',
+    'Comprehensive comparison of Cortex, Mem0, Zep, and Letta across context engineering, retrieval, temporal modeling, and operational architecture.',
 };
 
 const Yes = () => <span className="text-emerald-400 font-bold text-base">✓</span>;
@@ -13,7 +13,7 @@ const No = () => <span className="text-red-400 font-bold text-base">✗</span>;
 export default function ComparisonPage() {
   return (
     <section className="max-w-[1200px] mx-auto px-4 sm:px-5 py-7 pb-12">
-      <h1 className="text-2xl md:text-4xl font-bold mb-2">Context Engineering Platforms: Knol vs Competitors</h1>
+      <h1 className="text-2xl md:text-4xl font-bold mb-2">Context Engineering Platforms: Cortex vs Competitors</h1>
       <p className="text-dark-400 mb-5 text-sm sm:text-base">
         Strategic comparison for engineering teams building agentic systems with memory. Based on official documentation
         and confirmed capabilities. Updated February 2026.
@@ -27,7 +27,7 @@ export default function ComparisonPage() {
           <span className="text-[#8b73e6] font-bold">Zep</span>: temporal knowledge graph memory engine
         </span>
         <span className="border border-brand-500/20 rounded-full px-3 py-1.5 text-sm text-dark-400 bg-white/[0.02]">
-          <span className="text-brand-500 font-bold">Knol</span>: context engineering platform (semantic + keyword + graph + write-time optimization)
+          <span className="text-brand-500 font-bold">Cortex</span>: context engineering platform (semantic + keyword + graph + write-time optimization)
         </span>
         <span className="border border-brand-500/20 rounded-full px-3 py-1.5 text-sm text-dark-400 bg-white/[0.02]">
           <span className="text-amber-400 font-bold">Letta</span>: agent-first framework with integrated memory ($10M seed)
@@ -48,7 +48,7 @@ export default function ComparisonPage() {
                   <span className="text-[#8b73e6] font-bold">Zep</span>
                 </th>
                 <th className="text-left px-3.5 py-3 border-b border-brand-500/20">
-                  <span className="text-brand-500 font-bold">Knol</span>
+                  <span className="text-brand-500 font-bold">Cortex</span>
                 </th>
                 <th className="text-left px-3.5 py-3 border-b border-brand-500/20">
                   <span className="text-amber-400 font-bold">Letta</span>
@@ -103,7 +103,7 @@ export default function ComparisonPage() {
                 <span className="text-[#8b73e6] font-bold">Zep</span>
               </th>
               <th className="text-left px-3.5 py-3 border-b border-brand-500/20">
-                <span className="text-brand-500 font-bold">Knol</span>
+                <span className="text-brand-500 font-bold">Cortex</span>
               </th>
               <th className="text-left px-3.5 py-3 border-b border-brand-500/20">
                 <span className="text-amber-400 font-bold">Letta</span>
@@ -189,9 +189,9 @@ export default function ComparisonPage() {
       </div>
 
       <div className="border border-brand-500/20 rounded-xl bg-dark-800/50 p-4 mt-5">
-        <h2 className="text-lg font-semibold mb-2">Practical Notes for Knol</h2>
+        <h2 className="text-lg font-semibold mb-2">Practical Notes for Cortex</h2>
         <ul className="list-disc ml-5 space-y-1.5 text-sm text-dark-200">
-          <li>Knol already exposes graph entities/edges and async graph-building through NATS write events.</li>
+          <li>Cortex already exposes graph entities/edges and async graph-building through NATS write events.</li>
           <li>Hybrid retrieval is implemented in <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">service-retrieve</code> with intent-aware weighting and RRF.</li>
           <li>Keyword retrieval uses PostgreSQL text search (<code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">plainto_tsquery</code> + <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">ts_rank_cd</code>).</li>
           <li>Tenant isolation is implemented with RLS context helpers and tenant-scoped policies.</li>
@@ -199,7 +199,7 @@ export default function ComparisonPage() {
       </div>
 
       <div className="border border-brand-500/20 rounded-xl bg-dark-800/50 p-4 mt-5">
-        <h2 className="text-lg font-semibold mb-2">Knol OSS vs Paid Boundary</h2>
+        <h2 className="text-lg font-semibold mb-2">Cortex OSS vs Paid Boundary</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-dark-200">
           <div>
             <p className="font-semibold text-dark-100 mb-1">OSS (self-host)</p>

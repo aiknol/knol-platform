@@ -22,11 +22,11 @@ function defaultUrl(devUrl: string, prodUrl: string): string {
 }
 
 const docsUrl = ensureTrailingSlash(
-  readEnv('NEXT_PUBLIC_DOCS_URL') || defaultUrl('http://localhost:3009', 'https://docs.aiknol.com'),
+  readEnv('NEXT_PUBLIC_DOCS_URL') || defaultUrl('http://localhost:3009', 'https://docs.cortex.doaide.com'),
 );
 
 const apiBaseUrl = stripTrailingSlash(
-  readEnv('NEXT_PUBLIC_API_BASE_URL') || defaultUrl('http://localhost:3000', 'https://api.aiknol.com'),
+  readEnv('NEXT_PUBLIC_API_BASE_URL') || defaultUrl('http://localhost:3000', 'https://api.cortex.doaide.com'),
 );
 
 const tenantSwaggerUrl = ensureTrailingSlash(
@@ -34,11 +34,11 @@ const tenantSwaggerUrl = ensureTrailingSlash(
 );
 
 const githubRepoUrl = stripTrailingSlash(
-  readEnv('NEXT_PUBLIC_GITHUB_REPO_URL') || 'https://github.com/aiknol/knol',
+  readEnv('NEXT_PUBLIC_GITHUB_REPO_URL') || 'https://github.com/doaide/cortex',
 );
 
 export const DOCS_SITE = {
-  name: 'Knol Docs',
+  name: 'Cortex Docs',
   tagline: 'Tenant + OSS Documentation',
   siteUrl: docsUrl,
   apiBaseUrl,
@@ -47,6 +47,6 @@ export const DOCS_SITE = {
 };
 
 export const DOCS_LINKS = {
-  gatewayReadme: `${githubRepoUrl}/blob/main/knol-oss/README.md`,
-  mcpApiMapping: `${githubRepoUrl}/blob/main/knol-oss/sdk/mcp/API_MAPPING.md`,
+  gatewayReadme: `${githubRepoUrl}/blob/main/cortex-oss/README.md`,
+  mcpApiMapping: `${githubRepoUrl}/blob/main/cortex-oss/sdk/mcp/API_MAPPING.md`,
 };

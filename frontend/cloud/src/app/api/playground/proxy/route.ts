@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Server-side proxy for Playground gateway requests.
  *
- * The Playground needs to call the tenant gateway (e.g. https://api.aiknol.com)
+ * The Playground needs to call the tenant gateway (e.g. https://api.cortex.doaide.com)
  * with a Bearer token.  Browsers block these cross-origin requests when the
  * gateway doesn't return Access-Control-Allow-Origin.  By routing through this
  * Next.js API route the request happens server-side where CORS doesn't apply.

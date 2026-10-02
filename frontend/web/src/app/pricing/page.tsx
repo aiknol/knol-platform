@@ -5,7 +5,7 @@ import { pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Pricing'),
-  description: 'Competitive, transparent pricing for Knol. Open source at the core, predictable plans for production growth.',
+  description: 'Competitive, transparent pricing for Cortex. Open source at the core, predictable plans for production growth.',
 };
 
 export default function PricingPage() {
@@ -50,7 +50,7 @@ export default function PricingPage() {
         <div className="card mt-10">
           <h2 className="text-xl font-semibold text-dark-100 mb-3">Simple Billing: One Unit</h2>
           <p className="text-sm text-dark-300 mb-3">
-            Knol bills cloud usage using one metric: <strong>operations (ops)</strong>.
+            Cortex bills cloud usage using one metric: <strong>operations (ops)</strong>.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-dark-200">
             <div><strong>1 write</strong> (<code>memory.add</code>) = 1 op</div>
@@ -124,7 +124,7 @@ export default function PricingPage() {
           <h2 className="text-2xl font-bold text-dark-50 text-center mb-8">Migrate from Mem0 or Zep</h2>
           <div className="card max-w-4xl mx-auto">
             <p className="text-dark-300 text-sm mb-4">
-              Knol includes migration tooling and API-compatible patterns to reduce switching risk.
+              Cortex includes migration tooling and API-compatible patterns to reduce switching risk.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-dark-200">
               <div>Schema + payload mapping checks</div>
@@ -151,15 +151,15 @@ export default function PricingPage() {
             {[
               {
                 q: 'What is context engineering?',
-                a: 'Context engineering is the practice of structuring and managing relevant information to optimize language model outputs. Knol enables this through semantic search, knowledge graphs, and intelligent memory management—reducing hallucinations and token usage while improving reasoning accuracy.',
+                a: 'Context engineering is the practice of structuring and managing relevant information to optimize language model outputs. Cortex enables this through semantic search, knowledge graphs, and intelligent memory management—reducing hallucinations and token usage while improving reasoning accuracy.',
               },
               {
                 q: 'Can I self-host everything?',
-                a: 'Yes. Knol keeps core memory APIs, core services, SDKs, and self-host deployment open source.',
+                a: 'Yes. Cortex keeps core memory APIs, core services, SDKs, and self-host deployment open source.',
               },
               {
                 q: 'How do I migrate from Mem0 or Zep?',
-                a: 'Knol provides migration tooling, mapping checks, replay utilities, and validation reports for both Mem0 and Zep workflows. Growth and Enterprise plans include migration assistance.',
+                a: 'Cortex provides migration tooling, mapping checks, replay utilities, and validation reports for both Mem0 and Zep workflows. Growth and Enterprise plans include migration assistance.',
               },
               {
                 q: 'What happens if I exceed my plan limits?',
@@ -171,7 +171,7 @@ export default function PricingPage() {
               },
               {
                 q: 'What LLM is used for extraction?',
-                a: 'The default LLM provider is configurable from the admin UI. Knol supports Gemini, Anthropic, and OpenAI-compatible providers for extraction and reasoning workflows.',
+                a: 'The default LLM provider is configurable from the admin UI. Cortex supports Gemini, Anthropic, and OpenAI-compatible providers for extraction and reasoning workflows.',
               },
               {
                 q: 'Why PostgreSQL-only architecture?',

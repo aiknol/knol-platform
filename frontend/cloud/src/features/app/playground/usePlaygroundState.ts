@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ApiKeyItem,
+  apiFetch,
   appAuthAPI,
   appApiKeysAPI,
   clearAppAuthSession,
@@ -31,7 +32,7 @@ function inferDefaultGatewayBaseUrl(): string {
   if (host === 'localhost' || host === '127.0.0.1') {
     return 'http://localhost:3000';
   }
-  return 'https://api.aiknol.com';
+  return 'https://api.cortex.doaide.com';
 }
 
 function isLocalFrontend(): boolean {
@@ -171,6 +172,14 @@ export function usePlaygroundState() {
     status: number;
     body: string;
     duration: number;
+    /** The request URL that produced this response. */
+    requestUrl?: string;
+    /** The HTTP method used. */
+    requestMethod?: string;
+    /** The request body sent (if any). */
+    requestBody?: string;
+    /** Whether this was a mutation (write/update/delete) that triggers auto-refresh. */
+    isMutation?: boolean;
   } | null>(null);
   const [responseError, setResponseError] = useState('');
 
@@ -184,6 +193,9 @@ export function usePlaygroundState() {
 
   /** Tracks the AbortController for the in-flight fetchSampleData request. */
   const fetchAbortRef = useRef<AbortController | null>(null);
+
+  /** Tracks pending auto-refresh timers so they can be cleared on unmount. */
+  const refreshTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const selectedOperation: OperationDef =
     OPERATIONS.find((op) => op.id === selectedOperationId) || OPERATIONS[0];
@@ -217,7 +229,15 @@ export function usePlaygroundState() {
         const cachedUser = getAppAuthUser();
         if (!cachedUser) return;
 
-        const [me, keyList] = await Promise.all([appAuthAPI.me(), appApiKeysAPI.list()]);
+        // Use skipRedirect on list() so the playground doesn't hard-redirect
+        // to /login when the session has expired.
+        const [me, keyList] = await Promise.all([
+          appAuthAPI.me(),
+          apiFetch<{ data: ApiKeyItem[] }>('/app/api-keys', {
+            method: 'GET',
+            skipRedirect: true,
+          }).then((r) => r.data),
+        ]);
         setWorkspaceMode(true);
         // Always use the local gateway in local dev.
         if (!isLocalFrontend() && me?.gateway_base_url) {
@@ -435,7 +455,25 @@ export function usePlaygroundState() {
           setResponseError(`Request failed (HTTP ${result.status}).`);
         }
       }
-      setResponse({ status: result.status, body: formatted, duration });
+      // POST operations that are read-only (search, export) should NOT trigger refresh.
+      const READ_ONLY_POST_IDS = new Set(['search-memory', 'export-memories']);
+      const isMutation = selectedOperation.method !== 'GET' && !READ_ONLY_POST_IDS.has(selectedOperation.id);
+
+      setResponse({ status: result.status, body: formatted, duration, requestUrl: url, requestMethod: selectedOperation.method, requestBody: body, isMutation });
+
+      // After a successful mutation (POST/PUT/DELETE), auto-refresh sample data
+      // so dropdowns immediately reflect the new/updated/deleted items.
+      // Memory writes are async (status: "accepted"), so we do a two-stage refresh:
+      //   1) Quick refresh after 2s — catches fast operations like delete/update.
+      //   2) Slower retry at 6s — catches async ingestion pipelines.
+      if (isMutation && result.status >= 200 && result.status < 300) {
+        // Clear any previous pending refresh timers.
+        for (const t of refreshTimersRef.current) clearTimeout(t);
+        refreshTimersRef.current = [
+          setTimeout(() => fetchSampleData(), 2000),
+          setTimeout(() => fetchSampleData(), 6000),
+        ];
+      }
     } catch (err) {
       setResponseError(err instanceof Error ? err.message : 'Request failed');
     } finally {
@@ -603,13 +641,19 @@ export function usePlaygroundState() {
   }, [apiKey, gatewayBaseUrl]);
 
   const prevInputsRef = useRef<{ apiKey: string; gatewayBaseUrl: string }>({ apiKey: '', gatewayBaseUrl: '' });
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cancel any in-flight sample-data request on unmount.
+  // Cancel any in-flight sample-data request, debounce, and refresh timers on unmount.
   useEffect(() => {
-    return () => { fetchAbortRef.current?.abort(); };
+    return () => {
+      fetchAbortRef.current?.abort();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      for (const t of refreshTimersRef.current) clearTimeout(t);
+    };
   }, []);
 
   // Clear + refetch sample data when connection inputs change.
+  // Debounce to avoid hammering the gateway while the user types an API key.
   useEffect(() => {
     const apiKeyTrimmed = apiKey.trim();
     const gw = normalizeGatewayBaseUrl(gatewayBaseUrl);
@@ -619,8 +663,13 @@ export function usePlaygroundState() {
       prevInputsRef.current = { apiKey: apiKeyTrimmed, gatewayBaseUrl: gw };
       setSampleData(null);
       setSampleError('');
+
+      // Cancel any pending debounce
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+
       if (apiKeyTrimmed && gw) {
-        fetchSampleData();
+        // Debounce 800ms so we don't fire on every keystroke
+        debounceRef.current = setTimeout(() => fetchSampleData(), 800);
       }
     }
   }, [apiKey, gatewayBaseUrl, fetchSampleData]);

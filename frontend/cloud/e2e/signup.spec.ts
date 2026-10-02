@@ -51,7 +51,7 @@ test.describe('Signup page', () => {
   });
 
   test('shows error for duplicate email', async ({ page }) => {
-    const email = process.env.E2E_USER_EMAIL || 'e2e-test@knol-e2e.local';
+    const email = process.env.E2E_USER_EMAIL || 'e2e-test@cortex-e2e.local';
     const password = process.env.E2E_USER_PASSWORD || 'E2eTestPass1234!';
 
     await page.getByLabel('Company name').fill('Duplicate Test Corp');

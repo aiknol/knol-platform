@@ -10,17 +10,17 @@ import {
 } from "@modelcontextprotocol/sdk";
 
 // Configuration from environment
-const KNOL_API_URL = process.env.KNOL_API_URL || "http://localhost:8080";
-const KNOL_API_KEY = process.env.KNOL_API_KEY;
+const CORTEX_API_URL = process.env.CORTEX_API_URL || "http://localhost:8080";
+const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
 const KNOL_USER_ID = process.env.KNOL_USER_ID || "default";
 
-if (!KNOL_API_KEY) {
-  console.error("Error: KNOL_API_KEY environment variable is required");
+if (!CORTEX_API_KEY) {
+  console.error("Error: CORTEX_API_KEY environment variable is required");
   process.exit(1);
 }
 
 // Type definitions
-interface KnolMemory {
+interface CortexMemory {
   id: string;
   content: string;
   user_id: string;
@@ -35,7 +35,7 @@ interface KnolMemory {
   confidence?: number;
 }
 
-interface KnolEntity {
+interface CortexEntity {
   id: string;
   name: string;
   type: string;
@@ -44,8 +44,8 @@ interface KnolEntity {
   updated_at?: string;
 }
 
-interface KnolSearchResult {
-  memories: KnolMemory[];
+interface CortexSearchResult {
+  memories: CortexMemory[];
   total: number;
   query: string;
 }
@@ -56,10 +56,10 @@ async function makeRequest(
   endpoint: string,
   body?: unknown
 ): Promise<unknown> {
-  const url = `${KNOL_API_URL}${endpoint}`;
+  const url = `${CORTEX_API_URL}${endpoint}`;
   const headers: HeadersInit = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${KNOL_API_KEY}`,
+    Authorization: `Bearer ${CORTEX_API_KEY}`,
   };
 
   // AbortController with 30s timeout to prevent hung requests
@@ -85,7 +85,7 @@ async function makeRequest(
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Knol API error (${response.status}): ${error}`);
+    throw new Error(`Cortex API error (${response.status}): ${error}`);
   }
 
   const contentType = response.headers.get("content-type");
@@ -98,7 +98,7 @@ async function makeRequest(
 
 // Initialize MCP Server
 const server = new Server({
-  name: "knol-mcp",
+  name: "cortex-mcp",
   version: "0.1.0",
 });
 
@@ -107,7 +107,7 @@ const tools: Tool[] = [
   {
     name: "knol_remember",
     description:
-      "Store a memory in Knol. Memories are searchable, taggable, and can be connected to knowledge graph entities.",
+      "Store a memory in Cortex. Memories are searchable, taggable, and can be connected to knowledge graph entities.",
     inputSchema: {
       type: "object",
       properties: {
@@ -134,7 +134,7 @@ const tools: Tool[] = [
   {
     name: "knol_search",
     description:
-      "Search for memories in Knol. Supports semantic search, filtering by kind, confidence, and graph depth traversal.",
+      "Search for memories in Cortex. Supports semantic search, filtering by kind, confidence, and graph depth traversal.",
     inputSchema: {
       type: "object",
       properties: {
@@ -384,7 +384,7 @@ server.setRequestHandler("tools/call", async (request) => {
 // Resources
 const resources: Resource[] = [
   {
-    uri: "knol://recent",
+    uri: "cortex://recent",
     name: "Recent Memories",
     description: "The 10 most recent memories for the configured user",
     mimeType: "application/json",
@@ -398,7 +398,7 @@ server.setRequestHandler("resources/list", async () => {
 server.setRequestHandler("resources/read", async (request) => {
   const { uri } = request.params;
 
-  if (uri === "knol://recent") {
+  if (uri === "cortex://recent") {
     try {
       const result = await makeRequest("POST", "/v1/memory/search", {
         query: "*",
@@ -408,7 +408,7 @@ server.setRequestHandler("resources/read", async (request) => {
 
       const contents: ResourceContents[] = [
         {
-          uri: "knol://recent",
+          uri: "cortex://recent",
           mimeType: "application/json",
           text: JSON.stringify(result, null, 2),
         },
@@ -421,7 +421,7 @@ server.setRequestHandler("resources/read", async (request) => {
       return {
         contents: [
           {
-            uri: "knol://recent",
+            uri: "cortex://recent",
             mimeType: "text/plain",
             text: `Error fetching recent memories: ${errorMessage}`,
           },

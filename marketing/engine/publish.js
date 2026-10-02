@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Content Publisher
+// Cortex Marketing — Content Publisher
 // Routes generated content to the appropriate channel adapter and publishes
 // =============================================================================
 

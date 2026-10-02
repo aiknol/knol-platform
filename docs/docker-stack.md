@@ -55,7 +55,7 @@ Frontend directories (deployed separately in production):
 ## Notes
 
 - `db-migrate` is one-shot and should exit with code `0`.
-- Rust services run from prebuilt multi-stage runtime images (`knol-oss-runtime:local`, `knol-enterprise-runtime:local`).
+- Rust services run from prebuilt multi-stage runtime images (`cortex-oss-runtime:local`, `cortex-enterprise-runtime:local`).
 - First `--build` may take several minutes (dependency compile), then restarts are fast.
 - Current optimized runtime image sizes are approximately: OSS `142MB`, Enterprise `135MB`.
 - Services are memory-capped via `mem_limit` in compose files.
@@ -70,7 +70,7 @@ Frontend directories (deployed separately in production):
 ## Verify
 
 ```bash
-docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | rg '^knol-'
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | rg '^cortex-'
 ```
 
 ## Stop

@@ -1,11 +1,11 @@
 # Quick Start Guide
 
-Get the Knol MCP server up and running in 5 minutes.
+Get the Cortex MCP server up and running in 5 minutes.
 
 ## 1. Build the Server
 
 ```bash
-cd /path/to/knol-mcp
+cd /path/to/cortex-mcp
 npm install
 npm run build
 ```
@@ -14,14 +14,14 @@ This creates the compiled server at `dist/index.js`.
 
 ## 2. Get Your API Key
 
-1. Log in to your Knol account
+1. Log in to your Cortex account
 2. Go to Settings → API Keys
 3. Create a new API key or copy an existing one
 4. Keep it safe (you'll need it in step 3)
 
 ## 3. Configure Your Tool
 
-Choose your AI coding tool and add the Knol MCP server configuration.
+Choose your AI coding tool and add the Cortex MCP server configuration.
 
 ### For Claude Code
 
@@ -30,12 +30,12 @@ Edit `~/.config/Claude Code/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "your-api-key-here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "your-api-key-here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -53,7 +53,7 @@ Same as Claude Code, but edit `~/.windsurf/mcp.json`.
 
 ## 4. Restart Your Tool
 
-Close and reopen your AI coding tool. The Knol MCP server should now be available.
+Close and reopen your AI coding tool. The Cortex MCP server should now be available.
 
 ## 5. Try It Out
 
@@ -82,14 +82,14 @@ The tool should search your memories and find the stored preference.
 - **knol_delete**: Remove memories
 - **knol_entities**: Explore knowledge graph entities
 - **knol_entity_neighbors**: See related entities
-- **knol://recent**: Quick access to your 10 most recent memories
+- **cortex://recent**: Quick access to your 10 most recent memories
 
 ## Environment Variables
 
 | Variable | Value | Example |
 |----------|-------|---------|
-| `KNOL_API_KEY` | Your API key | `sk_live_abc123...` |
-| `KNOL_API_URL` | API endpoint | `https://api.knol.io` |
+| `CORTEX_API_KEY` | Your API key | `sk_live_abc123...` |
+| `CORTEX_API_URL` | API endpoint | `https://api.cortex.doaide.com` |
 | `KNOL_USER_ID` | Your user ID | `user@example.com` |
 
 ## Troubleshooting
@@ -97,7 +97,7 @@ The tool should search your memories and find the stored preference.
 ### "Cannot find module" error
 
 ```bash
-cd /path/to/knol-mcp
+cd /path/to/cortex-mcp
 npm install
 npm run build
 ```
@@ -106,7 +106,7 @@ npm run build
 
 - Check your API key is correct
 - Verify API key has the right permissions
-- Make sure `KNOL_API_URL` matches your API endpoint
+- Make sure `CORTEX_API_URL` matches your API endpoint
 
 ### Tools not appearing
 
@@ -152,10 +152,10 @@ Claude uses knol_entity_neighbors → Shows Node.js, TypeScript, API design, etc
 - Use `session_id` to group related memories from the same coding session
 - Add `metadata` to memories for better categorization
 - Set `importance` scores to prioritize key insights
-- Use `knol://recent` to quickly check what you've been working on
+- Use `cortex://recent` to quickly check what you've been working on
 
 ## What's Next?
 
 Your memories will now persist across sessions, helping your AI assistant provide better, more contextual help.
 
-Enjoy building with Knol!
+Enjoy building with Cortex!

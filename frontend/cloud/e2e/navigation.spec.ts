@@ -43,7 +43,7 @@ test.describe('App navigation (authenticated)', () => {
   test('header shows workspace name and logout button', async ({ page, navigateTo }) => {
     await navigateTo('/dashboard');
 
-    await expect(page.locator('header').getByText('Knol Cloud')).toBeVisible();
+    await expect(page.locator('header').getByText('Cortex Cloud')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible();
   });
 });

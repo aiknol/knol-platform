@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — LinkedIn Channel Adapter
+// Cortex Marketing — LinkedIn Channel Adapter
 // Posts articles/updates via LinkedIn API (free tier w/ OAuth app)
 // Fallback: generates ready-to-post content for manual sharing
 // =============================================================================

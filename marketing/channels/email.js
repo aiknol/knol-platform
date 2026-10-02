@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Email Newsletter Channel
+// Cortex Marketing — Email Newsletter Channel
 // Sends newsletters via SMTP (Gmail free: 500/day, custom SMTP: unlimited)
 // Self-managed subscriber list (JSON file — no Mailchimp needed)
 // =============================================================================
@@ -15,8 +15,8 @@ const CONFIG = {
   SUBSCRIBERS_FILE: path.join(__dirname, '..', 'data', 'subscribers.json'),
   SENT_LOG_FILE: path.join(__dirname, '..', 'data', 'email-log.json'),
   RATE_LIMIT: { perDay: 450 }, // Stay under Gmail's 500 limit
-  FROM_NAME: 'Knol',
-  UNSUBSCRIBE_URL: 'https://aiknol.com/unsubscribe',
+  FROM_NAME: 'Cortex',
+  UNSUBSCRIBE_URL: 'https://cortex.doaide.com/unsubscribe',
 };
 
 // Load subscribers from JSON file
@@ -98,7 +98,7 @@ async function sendEmail(to, subject, htmlBody, textBody, credentials) {
       html: htmlBody,
       headers: {
         'List-Unsubscribe': `<${CONFIG.UNSUBSCRIBE_URL}>`,
-        'X-Mailer': 'knol-marketing/0.1.0',
+        'X-Mailer': 'cortex-marketing/0.1.0',
       },
     });
 
@@ -152,7 +152,7 @@ function generateNewsletterHtml(content) {
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa">
   <div style="max-width:600px;margin:0 auto;padding:20px">
     <div style="text-align:center;padding:20px 0;border-bottom:2px solid #6E56CF">
-      <h1 style="color:#6E56CF;margin:0;font-size:24px">Knol</h1>
+      <h1 style="color:#6E56CF;margin:0;font-size:24px">Cortex</h1>
       <p style="color:#666;margin:4px 0 0;font-size:14px">Memory Infrastructure for AI</p>
     </div>
     <div style="padding:24px 0;color:#333;line-height:1.6">
@@ -160,9 +160,9 @@ function generateNewsletterHtml(content) {
       ${content}
     </div>
     <div style="border-top:1px solid #eee;padding:16px 0;text-align:center;color:#999;font-size:12px">
-      <p>Knol — Open-source long-term memory for AI agents</p>
-      <p><a href="https://github.com/aiknol/knol" style="color:#6E56CF">GitHub</a> ·
-         <a href="https://aiknol.com" style="color:#6E56CF">Website</a> ·
+      <p>Cortex — Open-source long-term memory for AI agents</p>
+      <p><a href="https://github.com/doaide/cortex" style="color:#6E56CF">GitHub</a> ·
+         <a href="https://cortex.doaide.com" style="color:#6E56CF">Website</a> ·
          <a href="{{unsubscribe_url}}" style="color:#999">Unsubscribe</a></p>
     </div>
   </div>

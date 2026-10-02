@@ -19,7 +19,7 @@ export default function ApiPage() {
       <section className="docHeader">
         <h1>API Reference</h1>
         <p>
-          Canonical REST surface for Knol OSS gateway plus enterprise tenant OpenAPI links.
+          Canonical REST surface for Cortex OSS gateway plus enterprise tenant OpenAPI links.
         </p>
       </section>
 
@@ -103,7 +103,7 @@ export default function ApiPage() {
         <h2>Write Memory Example</h2>
         <div className="card">
           <pre>{`curl -X POST ${DOCS_SITE.apiBaseUrl}/v1/memory \\
-  -H "Authorization: Bearer $KNOL_API_KEY" \\
+  -H "Authorization: Bearer $CORTEX_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"content":"User likes concise replies","role":"user"}'`}</pre>
           <p>

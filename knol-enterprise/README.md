@@ -1,6 +1,6 @@
-# Knol Enterprise
+# Cortex Enterprise
 
-Enterprise extensions for [Knol](https://github.com/aiknol/knol-platform) — the context engineering platform for AI applications.
+Enterprise extensions for [Cortex](https://github.com/doaide/cortex-platform) — the context engineering platform for AI applications.
 
 ## Services
 
@@ -31,7 +31,7 @@ Frontend:
 
 ## Architecture
 
-Enterprise crates depend on shared OSS crates in `../knol-oss/crates/` for database access, caching, queueing, and common types.
+Enterprise crates depend on shared OSS crates in `../cortex-oss/crates/` for database access, caching, queueing, and common types.
 
 ## License
 

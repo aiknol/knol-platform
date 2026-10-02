@@ -1,12 +1,12 @@
 # Testing Guide
 
-This document explains how to test the Knol MCP server locally.
+This document explains how to test the Cortex MCP server locally.
 
 ## Prerequisites
 
 - Node.js 18+
 - Server built: `npm run build`
-- Knol API server running locally or accessible remotely
+- Cortex API server running locally or accessible remotely
 - Valid API key
 
 ## Unit Testing Setup
@@ -46,7 +46,7 @@ module.exports = {
 ### Test 1: Server Starts Successfully
 
 ```bash
-KNOL_API_KEY="test-key" npm start &
+CORTEX_API_KEY="test-key" npm start &
 sleep 2
 kill %1
 ```
@@ -59,7 +59,7 @@ Expected output: Server starts without errors.
 npm start
 ```
 
-Expected output: Error about missing KNOL_API_KEY.
+Expected output: Error about missing CORTEX_API_KEY.
 
 ### Test 3: Tools List Request
 
@@ -78,18 +78,18 @@ Send the request:
 
 ```bash
 cat test-tools-list.json | \
-  KNOL_API_KEY="test-key" npm start
+  CORTEX_API_KEY="test-key" npm start
 ```
 
 Expected: Response with tool definitions for all 7 tools.
 
 ### Test 4: API Connection Test
 
-Test if the server can reach the Knol API:
+Test if the server can reach the Cortex API:
 
 ```bash
-KNOL_API_KEY="sk_test_actual_key" \
-KNOL_API_URL="http://localhost:8080" \
+CORTEX_API_KEY="sk_test_actual_key" \
+CORTEX_API_URL="http://localhost:8080" \
 KNOL_USER_ID="test-user" \
 npm start
 ```
@@ -115,20 +115,20 @@ Send:
 
 ```bash
 cat test-search.json | \
-  KNOL_API_KEY="sk_test_actual_key" \
-  KNOL_API_URL="http://localhost:8080" \
+  CORTEX_API_KEY="sk_test_actual_key" \
+  CORTEX_API_URL="http://localhost:8080" \
   npm start
 ```
 
-Expected: Response from Knol API (success or API error).
+Expected: Response from Cortex API (success or API error).
 
 ## Integration Testing
 
 ### Test 1: Full Memory Lifecycle
 
 ```bash
-KNOL_API_KEY="your-key" \
-KNOL_API_URL="https://api.knol.io" \
+CORTEX_API_KEY="your-key" \
+CORTEX_API_URL="https://api.cortex.doaide.com" \
 KNOL_USER_ID="test-user" \
 npm start
 ```
@@ -271,7 +271,7 @@ Request the recent memories resource:
 }
 ```
 
-Expected: Response includes knol://recent resource.
+Expected: Response includes cortex://recent resource.
 
 Then read it:
 
@@ -281,7 +281,7 @@ Then read it:
   "id": 2,
   "method": "resources/read",
   "params": {
-    "uri": "knol://recent"
+    "uri": "cortex://recent"
   }
 }
 ```
@@ -293,7 +293,7 @@ Expected: Response with JSON array of recent memories.
 ### Test 1: Invalid API Key
 
 ```bash
-KNOL_API_KEY="invalid_key" npm start
+CORTEX_API_KEY="invalid_key" npm start
 ```
 
 Send any request. Expected: 401 Unauthorized error.
@@ -356,7 +356,7 @@ Expected: Error about unknown tool.
   "id": 1,
   "method": "resources/read",
   "params": {
-    "uri": "knol://nonexistent"
+    "uri": "cortex://nonexistent"
   }
 }
 ```
@@ -442,7 +442,7 @@ config:
     - duration: 60
       arrivalRate: 10
 scenarios:
-  - name: "Knol API Load Test"
+  - name: "Cortex API Load Test"
     flow:
       - post:
           url: "/v1/memory/search"
@@ -532,8 +532,8 @@ ENTRYPOINT ["npm", "test"]
 Build and run:
 
 ```bash
-docker build -t knol-mcp-test .
-docker run -e KNOL_API_KEY="test" knol-mcp-test
+docker build -t cortex-mcp-test .
+docker run -e CORTEX_API_KEY="test" cortex-mcp-test
 ```
 
 ## Debugging
@@ -565,13 +565,13 @@ Rebuild and test:
 
 ```bash
 npm run build
-KNOL_API_KEY="test" npm start | tee server.log
+CORTEX_API_KEY="test" npm start | tee server.log
 ```
 
 ## Test Checklist
 
-- [ ] Server starts without KNOL_API_KEY → Error
-- [ ] Server starts with KNOL_API_KEY → Success
+- [ ] Server starts without CORTEX_API_KEY → Error
+- [ ] Server starts with CORTEX_API_KEY → Success
 - [ ] Tools list returns 7 tools
 - [ ] knol_remember stores memory
 - [ ] knol_get retrieves memory
@@ -580,7 +580,7 @@ KNOL_API_KEY="test" npm start | tee server.log
 - [ ] knol_search finds memories
 - [ ] knol_entities lists entities
 - [ ] knol_entity_neighbors shows relationships
-- [ ] knol://recent resource returns recent memories
+- [ ] cortex://recent resource returns recent memories
 - [ ] Invalid API key returns 401
 - [ ] Invalid memory ID returns 404
 - [ ] Unknown tool returns error

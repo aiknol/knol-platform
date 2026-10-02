@@ -3,59 +3,59 @@ import CodeBlock from '@/components/ui/CodeBlock';
 import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: pageTitle('knol-local — Local MCP Memory for Claude & Cursor'),
+  title: pageTitle('cortex-local — Local MCP Memory for Claude & Cursor'),
   description:
-    'knol-local is a zero-setup, SQLite-backed MCP server and CLI that gives Claude Desktop, Cursor, and Claude Code persistent local memory. Install with npm, no Docker or API key required.',
+    'cortex-local is a zero-setup, SQLite-backed MCP server and CLI that gives Claude Desktop, Cursor, and Claude Code persistent local memory. Install with npm, no Docker or API key required.',
   keywords: [
-    'knol-local', 'local memory', 'MCP server', 'Claude memory', 'Cursor memory',
-    'Claude Code memory', 'SQLite memory', 'offline AI memory', 'npm knol-local',
+    'cortex-local', 'local memory', 'MCP server', 'Claude memory', 'Cursor memory',
+    'Claude Code memory', 'SQLite memory', 'offline AI memory', 'npm cortex-local',
   ],
 };
 
 const setupCode = `# Install globally — auto-configures Claude Desktop & Cursor
-npm install -g knol-local
+npm install -g cortex-local
 
 # Or configure manually for a specific client
-knol-local setup claude       # Claude Desktop
-knol-local setup cursor       # Cursor
-knol-local setup claude-code  # Claude Code CLI
-knol-local setup codex        # Codex (shows HTTP instructions)`;
+cortex-local setup claude       # Claude Desktop
+cortex-local setup cursor       # Cursor
+cortex-local setup claude-code  # Claude Code CLI
+cortex-local setup codex        # Codex (shows HTTP instructions)`;
 
 const cliCode = `# Add a memory
-knol-local add "Prefer strict TypeScript and functional patterns" --tag coding
+cortex-local add "Prefer strict TypeScript and functional patterns" --tag coding
 
 # Search memories
-knol-local search "TypeScript preferences" --limit 5
+cortex-local search "TypeScript preferences" --limit 5
 
 # List all memories
-knol-local list --limit 20 --tag coding
+cortex-local list --limit 20 --tag coding
 
 # Summary statistics
-knol-local stats
+cortex-local stats
 
 # Export / import
-knol-local export --out backup.json
-knol-local import backup.json
+cortex-local export --out backup.json
+cortex-local import backup.json
 
 # Backup / restore the SQLite database
-knol-local backup --out ~/backups/
-knol-local restore ~/backups/memories-2026-05-09.db
+cortex-local backup --out ~/backups/
+cortex-local restore ~/backups/memories-2026-05-09.db
 
 # Start the HTTP REST API (for Codex or scripts)
-knol-local serve --port 3001 --key my-secret`;
+cortex-local serve --port 3001 --key my-secret`;
 
 const claudeCodeMcpCode = `# One-time setup via Claude Code CLI
-claude mcp add knol-local knol-local
+claude mcp add cortex-local cortex-local
 
 # Or add per-project in .claude/settings.json
 {
   "mcpServers": {
-    "knol-local": { "command": "knol-local" }
+    "cortex-local": { "command": "cortex-local" }
   }
 }`;
 
 const httpCode = `# Start the REST server
-knol-local serve --port 3001
+cortex-local serve --port 3001
 
 # Add a memory
 curl -X POST http://localhost:3001/memories \\
@@ -87,7 +87,7 @@ const httpEndpoints = [
   ['GET',    '/health',           'Health check'],
 ];
 
-export default function KnolLocalPage() {
+export default function CortexLocalPage() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-16">
       <div className="max-w-4xl mx-auto">
@@ -95,18 +95,18 @@ export default function KnolLocalPage() {
         {/* Hero */}
         <section className="mb-16 text-center">
           <span className="text-xs px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4 inline-block font-mono">
-            npm install -g knol-local
+            npm install -g cortex-local
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-dark-50 mb-6">
             Local Memory for AI Assistants
           </h1>
           <p className="text-lg md:text-xl text-dark-300 max-w-2xl mx-auto mb-8">
-            <strong className="text-dark-100">knol-local</strong> is a lightweight MCP server and CLI backed by SQLite.
+            <strong className="text-dark-100">cortex-local</strong> is a lightweight MCP server and CLI backed by SQLite.
             Zero setup — no Docker, no PostgreSQL, no API key. Install once and your AI tools remember everything.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
-              href="https://www.npmjs.com/package/knol-local"
+              href="https://www.npmjs.com/package/cortex-local"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary px-6 py-3 rounded-lg font-medium"
@@ -114,14 +114,14 @@ export default function KnolLocalPage() {
               View on npm
             </a>
             <a
-              href="https://github.com/aiknol/knol-local"
+              href="https://github.com/doaide/cortex-local"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary px-6 py-3 rounded-lg font-medium"
             >
               GitHub →
             </a>
-            <a href="/docs/#knol-local" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href="/docs/#cortex-local" className="btn-secondary px-6 py-3 rounded-lg font-medium">
               API Reference →
             </a>
           </div>
@@ -131,9 +131,9 @@ export default function KnolLocalPage() {
         <section className="mb-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { badge: 'SQLite + FTS5',     title: 'No server required',    desc: 'All data lives in ~/.knol-local/memories.db. Works fully offline.' },
+              { badge: 'SQLite + FTS5',     title: 'No server required',    desc: 'All data lives in ~/.cortex-local/memories.db. Works fully offline.' },
               { badge: 'MCP native',        title: 'Claude, Cursor & more', desc: 'Exposes 6 tools via the Model Context Protocol. Auto-configures on install.' },
-              { badge: 'HTTP REST API',     title: 'Works with Codex',      desc: 'Run knol-local serve for a local REST endpoint any tool can hit.' },
+              { badge: 'HTTP REST API',     title: 'Works with Codex',      desc: 'Run cortex-local serve for a local REST endpoint any tool can hit.' },
               { badge: 'MIT · Node 18+',    title: 'Open source',           desc: 'Uses built-in node:sqlite on Node 22.5+. Zero extra deps for most users.' },
             ].map((f) => (
               <div key={f.title} className="card">
@@ -165,7 +165,7 @@ export default function KnolLocalPage() {
               {
                 num: '01',
                 title: 'Install once',
-                desc: 'npm install -g knol-local patches your Claude Desktop and Cursor MCP configs automatically. No manual JSON editing.',
+                desc: 'npm install -g cortex-local patches your Claude Desktop and Cursor MCP configs automatically. No manual JSON editing.',
               },
               {
                 num: '02',
@@ -210,7 +210,7 @@ export default function KnolLocalPage() {
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-4">Claude Code Setup</h2>
           <p className="text-dark-300 mb-6">
-            Claude Code uses its own config. Add knol-local globally with one command, or per-project via{' '}
+            Claude Code uses its own config. Add cortex-local globally with one command, or per-project via{' '}
             <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">.claude/settings.json</code>.
           </p>
           <CodeBlock code={claudeCodeMcpCode} language="bash" title="Claude Code CLI" />
@@ -229,7 +229,7 @@ export default function KnolLocalPage() {
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-4">HTTP REST API</h2>
           <p className="text-dark-300 mb-6">
-            Run <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">knol-local serve</code> to start a local
+            Run <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">cortex-local serve</code> to start a local
             REST server — useful for Codex, scripts, or any tool without native MCP support.
             Optionally protect it with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">--key</code>.
           </p>
@@ -278,7 +278,7 @@ export default function KnolLocalPage() {
               <tbody>
                 <tr className="border-b border-dark-600/20">
                   <td className="py-3 px-4 font-mono text-brand-400 text-xs">KNOL_LOCAL_DB</td>
-                  <td className="py-3 px-4 font-mono text-dark-400 text-xs">~/.knol-local/memories.db</td>
+                  <td className="py-3 px-4 font-mono text-dark-400 text-xs">~/.cortex-local/memories.db</td>
                   <td className="py-3 px-4 text-dark-300">Override the SQLite database path</td>
                 </tr>
               </tbody>
@@ -292,16 +292,16 @@ export default function KnolLocalPage() {
           </p>
         </section>
 
-        {/* vs full Knol */}
+        {/* vs full Cortex */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-dark-50 mb-6">knol-local vs Knol</h2>
+          <h2 className="text-2xl font-bold text-dark-50 mb-6">cortex-local vs Cortex</h2>
           <div className="overflow-x-auto rounded-xl border border-dark-600/30">
             <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr className="bg-dark-800/80">
                   <th className="text-left py-3 px-4 text-dark-300 font-medium"></th>
-                  <th className="text-center py-3 px-4 text-dark-300 font-medium">knol-local</th>
-                  <th className="text-center py-3 px-4 text-brand-400 font-semibold">Knol (full)</th>
+                  <th className="text-center py-3 px-4 text-dark-300 font-medium">cortex-local</th>
+                  <th className="text-center py-3 px-4 text-brand-400 font-semibold">Cortex (full)</th>
                 </tr>
               </thead>
               <tbody>
@@ -335,14 +335,14 @@ export default function KnolLocalPage() {
           </h2>
           <p className="text-dark-300 mb-6 max-w-xl mx-auto">
             One command. Works immediately with Claude Desktop, Cursor, and Claude Code.
-            Upgrade to the full Knol stack when you need teams, graphs, or hybrid retrieval.
+            Upgrade to the full Cortex stack when you need teams, graphs, or hybrid retrieval.
           </p>
           <div className="bg-dark-800 border border-dark-600 rounded-lg px-6 py-4 font-mono text-brand-300 text-sm mb-6 inline-block">
-            npm install -g knol-local
+            npm install -g cortex-local
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
-              href="https://www.npmjs.com/package/knol-local"
+              href="https://www.npmjs.com/package/cortex-local"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary px-6 py-3 rounded-lg font-medium"
@@ -350,7 +350,7 @@ export default function KnolLocalPage() {
               View on npm
             </a>
             <a
-              href="https://github.com/aiknol/knol-local"
+              href="https://github.com/doaide/cortex-local"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary px-6 py-3 rounded-lg font-medium"
@@ -358,7 +358,7 @@ export default function KnolLocalPage() {
               Star on GitHub
             </a>
             <a href="/pricing/" className="btn-secondary px-6 py-3 rounded-lg font-medium">
-              See Full Knol Plans
+              See Full Cortex Plans
             </a>
           </div>
         </section>

@@ -1,5 +1,5 @@
 /**
- * Shared test fixtures and helpers for Knol Cloud E2E tests.
+ * Shared test fixtures and helpers for Cortex Cloud E2E tests.
  *
  * Re-export a `test` object that is pre-configured with:
  *  - A logged-in page (via storageState from auth.setup.ts)
@@ -28,7 +28,7 @@ export async function navigateTo(page: Page, path: string) {
 
 /** Wait for loading spinners / skeleton text to disappear. */
 export async function waitForLoaded(page: Page) {
-  // Common loading indicators in Knol Cloud pages
+  // Common loading indicators in Cortex Cloud pages
   const loadingTexts = [
     'Loading settings...',
     'Loading dashboard...',
@@ -68,12 +68,12 @@ export async function expectError(page: Page, text?: string) {
 /*  Extended test fixture                                              */
 /* ------------------------------------------------------------------ */
 
-type KnolFixtures = {
+type CortexFixtures = {
   /** Navigate to a route and wait for load. */
   navigateTo: (path: string) => Promise<void>;
 };
 
-export const test = base.extend<KnolFixtures>({
+export const test = base.extend<CortexFixtures>({
   navigateTo: async ({ page }, provide) => {
     await provide(async (path: string) => {
       await navigateTo(page, path);

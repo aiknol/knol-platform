@@ -1,6 +1,6 @@
-# Knol Marketing Engine
+# Cortex Marketing Engine
 
-Autonomous marketing service for Knol — runs on **$0/month** using only free-tier APIs and GitHub Actions.
+Autonomous marketing service for Cortex — runs on **$0/month** using only free-tier APIs and GitHub Actions.
 
 ## Architecture
 

@@ -1,8 +1,8 @@
-# Knol MCP Server - Project Summary
+# Cortex MCP Server - Project Summary
 
 ## Project Overview
 
-**Knol MCP Server** is a production-ready Model Context Protocol (MCP) server that integrates the Knol memory platform with AI coding tools including Claude Code, Cursor, and Windsurf.
+**Cortex MCP Server** is a production-ready Model Context Protocol (MCP) server that integrates the Cortex memory platform with AI coding tools including Claude Code, Cursor, and Windsurf.
 
 This allows AI assistants to persistently store and retrieve memories across sessions, providing context-aware assistance through a knowledge graph backend.
 
@@ -20,7 +20,7 @@ Complete MCP server implementation with comprehensive documentation:
 ## Directory Structure
 
 ```
-/sessions/gifted-loving-mendel/mnt/knol/memorylayer/knol-oss/sdk/mcp/
+/sessions/gifted-loving-mendel/mnt/knol/memorylayer/cortex-oss/sdk/mcp/
 ├── src/
 │   └── index.ts                  # Main MCP server (413 lines)
 ├── package.json                  # npm configuration
@@ -51,11 +51,11 @@ Complete MCP server implementation with comprehensive documentation:
 
 ### MCP Resources (1)
 
-- **knol://recent** - Returns 10 most recent memories as JSON
+- **cortex://recent** - Returns 10 most recent memories as JSON
 
 ### Configuration
 
-- **Environment Variables**: KNOL_API_KEY, KNOL_API_URL, KNOL_USER_ID
+- **Environment Variables**: CORTEX_API_KEY, CORTEX_API_URL, KNOL_USER_ID
 - **MCP Transport**: stdio-based (efficient, no port conflicts)
 - **Authentication**: Bearer token via environment
 
@@ -116,7 +116,7 @@ Complete MCP server implementation with comprehensive documentation:
 
 ### 3. Stateless Design
 - No in-memory caching or persistent state
-- All state stored in Knol backend
+- All state stored in Cortex backend
 - Easy to restart or multiple instances
 - Scales well in distributed setups
 
@@ -152,7 +152,7 @@ Complete MCP server implementation with comprehensive documentation:
 
 ## API Implementation
 
-The server acts as HTTP client to Knol API:
+The server acts as HTTP client to Cortex API:
 
 ### Endpoints Implemented
 
@@ -167,8 +167,8 @@ The server acts as HTTP client to Knol API:
 | GET | /v1/graph/entities/:id/neighbors | knol_entity_neighbors |
 
 ### Authentication
-- All requests use `Authorization: Bearer {KNOL_API_KEY}` header
-- API key set via KNOL_API_KEY environment variable
+- All requests use `Authorization: Bearer {CORTEX_API_KEY}` header
+- API key set via CORTEX_API_KEY environment variable
 
 ### Request/Response Format
 - Content-Type: application/json
@@ -212,9 +212,9 @@ Total documentation: ~6,500 lines covering:
 - Input validation at tool handlers
 
 ### Recommendations
-- Use HTTPS for Knol API in production
+- Use HTTPS for Cortex API in production
 - Rotate API keys regularly
-- Limit API key permissions in Knol
+- Limit API key permissions in Cortex
 - Use separate keys per environment
 - Never commit configuration files with secrets
 
@@ -235,7 +235,7 @@ The server is designed to be extended:
 ### Adding New Tools
 1. Add tool definition to `tools` array
 2. Add handler in `tools/call` switch statement
-3. Call appropriate Knol API endpoint
+3. Call appropriate Cortex API endpoint
 4. Return formatted result
 
 ### Adding New Resources
@@ -253,7 +253,7 @@ The server is designed to be extended:
 ### Local Development
 ```bash
 npm install && npm run build
-KNOL_API_KEY=key npm start
+CORTEX_API_KEY=key npm start
 ```
 
 ### Docker
@@ -266,7 +266,7 @@ ENTRYPOINT ["node", "dist/index.js"]
 ```
 
 ### NPM Package
-- Can be published as @knol/mcp-server
+- Can be published as @doaide/cortex-mcp-server
 - Configured with proper package.json
 - Includes bin entry point
 
@@ -274,7 +274,7 @@ ENTRYPOINT ["node", "dist/index.js"]
 
 - **Package Version**: 0.1.0
 - **MCP Spec**: Based on official SDK
-- **Knol API**: v1 (compatible)
+- **Cortex API**: v1 (compatible)
 - **Node.js**: 18+ required
 - **TypeScript**: 5.0+
 
@@ -287,7 +287,7 @@ Potential additions (documented in DEVELOPMENT.md):
 3. Pagination support for large result sets
 4. Streaming responses for bulk operations
 5. Metrics and monitoring hooks
-6. Configuration file support (.knol.json)
+6. Configuration file support (.cortex.json)
 7. Multi-workspace support
 
 ## Quality Metrics
@@ -317,7 +317,7 @@ See `INDEX.md` for complete documentation navigation.
 
 All files are located at:
 ```
-/sessions/gifted-loving-mendel/mnt/knol/memorylayer/knol-oss/sdk/mcp/
+/sessions/gifted-loving-mendel/mnt/knol/memorylayer/cortex-oss/sdk/mcp/
 ```
 
 ### Key Files
@@ -331,12 +331,12 @@ All files are located at:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "sk_live_your_key",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "sk_live_your_key",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -362,7 +362,7 @@ This is a complete, production-ready MCP server that:
 - ✓ Uses TypeScript for type safety
 - ✓ Handles errors gracefully
 - ✓ Supports Claude Code, Cursor, Windsurf
-- ✓ Integrates with Knol REST API
+- ✓ Integrates with Cortex REST API
 - ✓ Includes setup examples for all platforms
 - ✓ Provides testing and development guides
 - ✓ Is ready for deployment and extension
@@ -374,4 +374,4 @@ The implementation is clean, focused, and follows MCP best practices.
 **Created**: February 2026
 **Version**: 0.1.0
 **Status**: Complete and ready for use
-**Location**: `/sessions/gifted-loving-mendel/mnt/knol/memorylayer/knol-oss/sdk/mcp/`
+**Location**: `/sessions/gifted-loving-mendel/mnt/knol/memorylayer/cortex-oss/sdk/mcp/`

@@ -1,5 +1,5 @@
 /**
- * Knol Memory Platform SDK - Type Definitions
+ * Cortex Memory Platform SDK - Type Definitions
  * Comprehensive TypeScript types for all API operations
  */
 
@@ -324,7 +324,7 @@ export interface ErrorResponse {
   request_id?: string;
 }
 
-export class KnolError extends Error {
+export class CortexError extends Error {
   constructor(
     message: string,
     public statusCode: number,
@@ -332,12 +332,12 @@ export class KnolError extends Error {
     public details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'KnolError';
-    Object.setPrototypeOf(this, KnolError.prototype);
+    this.name = 'CortexError';
+    Object.setPrototypeOf(this, CortexError.prototype);
   }
 
-  static isKnolError(error: unknown): error is KnolError {
-    return error instanceof KnolError;
+  static isCortexError(error: unknown): error is CortexError {
+    return error instanceof CortexError;
   }
 
   toJSON() {
@@ -355,7 +355,7 @@ export class KnolError extends Error {
 // Client Configuration
 // ============================================================================
 
-export interface KnolClientConfig {
+export interface CortexClientConfig {
   apiKey: string;
   baseUrl?: string;
   timeout?: number;

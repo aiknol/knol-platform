@@ -3,8 +3,8 @@ import './globals.css';
 import HMRErrorHandler from '@/components/HMRErrorHandler';
 
 export const metadata: Metadata = {
-  title: 'Knol Demo',
-  description: 'Knol interactive demo',
+  title: 'Cortex Demo',
+  description: 'Cortex interactive demo',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',

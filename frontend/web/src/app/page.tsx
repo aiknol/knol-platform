@@ -7,14 +7,14 @@ const quickStartCode = `# Start the full stack in one command
 docker compose up -d
 
 # Or install the Python SDK
-pip install knol
+pip install doaide-cortex
 
 # TypeScript? We've got you covered
-npm install @knol-dev/sdk`;
+npm install @doaide/cortex-sdk`;
 
-const pythonExample = `from knol import KnolClient
+const pythonExample = `from cortex import CortexClient
 
-client = KnolClient(
+client = CortexClient(
     base_url="http://localhost:3000",
     api_key="your-api-key"
 )
@@ -34,20 +34,20 @@ results = client.search(
 # Access the knowledge graph directly
 entities = client.list_entities(user_id="user-123")`;
 
-const tsExample = `import { KnolClient } from '@knol-dev/sdk';
+const tsExample = `import { CortexClient } from '@doaide/cortex-sdk';
 
-const knol = new KnolClient({
+const cortex = new CortexClient({
   baseUrl: 'http://localhost:3000',
   apiKey: 'your-api-key',
 });
 
 // Store and search with the same clean API
-await knol.add({
+await cortex.add({
   content: 'User prefers TypeScript and functional patterns',
   userId: 'user-123',
 });
 
-const results = await knol.search({
+const results = await cortex.search({
   query: 'programming preferences',
   userId: 'user-123',
 });`;
@@ -123,11 +123,11 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">
               LLMs forget everything between requests.
               <br />
-              <span className="gradient-text">Knol gives them context.</span>
+              <span className="gradient-text">Cortex gives them context.</span>
             </h2>
             <p className="mt-4 text-dark-400 max-w-2xl mx-auto">
               Context engineering is about assembling the right information at the right time.
-              Knol automates this across every interaction.
+              Cortex automates this across every interaction.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -135,7 +135,7 @@ export default function HomePage() {
               {
                 num: '01',
                 title: 'Ingest',
-                desc: 'Feed conversations through the write pipeline. Knol extracts entities, relationships, and facts using LLM-powered analysis with 75% cost optimization.',
+                desc: 'Feed conversations through the write pipeline. Cortex extracts entities, relationships, and facts using LLM-powered analysis with 75% cost optimization.',
               },
               {
                 num: '02',
@@ -158,11 +158,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Knol — Competitive Differentiation */}
+      {/* Why DoAide Cortex — Competitive Differentiation */}
       <section className="px-4 sm:px-6 lg:px-8 py-20 bg-dark-800/30">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">Why teams choose Knol</h2>
+            <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">Why teams choose Cortex</h2>
             <p className="mt-4 text-dark-400 max-w-2xl mx-auto">
               The only open-source memory platform that doesn&apos;t require Neo4j, Qdrant, or external vector databases.
             </p>
@@ -281,7 +281,7 @@ export default function HomePage() {
       <section className="px-4 sm:px-6 lg:px-8 py-20 bg-dark-800/30">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">How Knol compares</h2>
+            <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">How Cortex compares</h2>
             <p className="mt-4 text-dark-400 max-w-2xl mx-auto">
               The only open-source context engineering platform with hybrid retrieval, knowledge graphs, memory decay, and PostgreSQL-only architecture.
             </p>
@@ -316,24 +316,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* knol-local — install one-liner */}
+      {/* cortex-local — install one-liner */}
       <section className="px-4 sm:px-6 lg:px-8 py-14">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs text-dark-400 uppercase tracking-widest mb-4 font-mono">Just want local memory?</p>
           <h2 className="text-2xl md:text-3xl font-semibold text-dark-50 mb-3 tracking-tight">
-            knol-local — SQLite-backed MCP, zero setup
+            cortex-local — SQLite-backed MCP, zero setup
           </h2>
           <p className="text-dark-400 mb-8 max-w-xl mx-auto">
             A lightweight standalone MCP server + CLI. No Docker, no API key.
             Auto-configures Claude Desktop, Cursor, and Claude Code on install.
           </p>
           <div className="inline-flex items-center gap-4 bg-dark-800 border border-dark-600 rounded-xl px-6 py-4 mb-6 font-mono text-brand-300 text-base">
-            npm install -g knol-local
+            npm install -g cortex-local
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="/knol-local/" className="btn-primary text-sm">Learn more →</a>
-            <a href="https://www.npmjs.com/package/knol-local" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">npm</a>
-            <a href="https://github.com/aiknol/knol-local" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">GitHub</a>
+            <a href="/cortex-local/" className="btn-primary text-sm">Learn more →</a>
+            <a href="https://www.npmjs.com/package/cortex-local" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">npm</a>
+            <a href={SITE.githubLocal} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">GitHub</a>
           </div>
         </div>
       </section>

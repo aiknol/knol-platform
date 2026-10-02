@@ -1,9 +1,47 @@
 'use client';
 
+import { useState } from 'react';
 import { usePlaygroundState, SampleItem } from '@/features/app/playground/usePlaygroundState';
 import { OPERATIONS, OperationField } from '@/features/app/playground/operations';
 import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
+
+/** Tiny inline copy-to-clipboard button with temporary "Copied!" feedback. */
+function CopyButton({ label, text }: { label: string; text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // fallback: noop
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="text-[11px] font-medium text-dark-400 hover:text-dark-200 transition-colors"
+    >
+      {copied ? 'Copied!' : label}
+    </button>
+  );
+}
+
+/** Build a copy-pasteable cURL command for reproducing a request. */
+function buildCurlCommand(method: string, url: string, apiKey: string, body?: string): string {
+  const parts = [`curl -X ${method}`];
+  parts.push(`  -H "Authorization: Bearer ${apiKey}"`);
+  parts.push(`  -H "Content-Type: application/json"`);
+  if (body) {
+    // Escape single quotes in body for shell safety
+    const escaped = body.replace(/'/g, "'\\''");
+    parts.push(`  -d '${escaped}'`);
+  }
+  parts.push(`  "${url}"`);
+  return parts.join(' \\\n');
+}
 
 export default function PlaygroundPage() {
   const isLocal =
@@ -82,8 +120,8 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6">
-      <PageHeader title="Playground" description="Test your API keys against the Knol gateway." />
+    <div className={`space-y-6 ${workspaceMode ? '' : 'max-w-6xl mx-auto px-4 py-6 sm:py-8'}`}>
+      <PageHeader title="Playground" description="Test your API keys against the Cortex gateway." />
 
       {error && <div className="alert-error">{error}</div>}
 
@@ -125,9 +163,9 @@ export default function PlaygroundPage() {
           <p className="-mt-1 mb-3 text-xs text-dark-400">
             Log in to list and create workspace API keys, or enter a key manually.
           </p>
-        ) : usableKeys.length === 0 && (
+        ) : (
           <div className="-mt-1 mb-3 flex items-center gap-3">
-            {hasUnavailableKeys && (
+            {usableKeys.length === 0 && hasUnavailableKeys && (
               <p className="text-xs text-dark-400">
                 Your existing keys are not available in this session.
               </p>
@@ -138,7 +176,7 @@ export default function PlaygroundPage() {
               disabled={creatingKey}
               className="text-xs font-medium text-primary-400 hover:text-primary-300 disabled:opacity-60"
             >
-              {creatingKey ? 'Creating...' : 'Quick Create Key'}
+              {creatingKey ? 'Creating...' : '+ New Playground Key'}
             </button>
           </div>
         )}
@@ -174,9 +212,14 @@ export default function PlaygroundPage() {
       <section className="card">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-dark-100">Sample Data</p>
+            <p className="text-sm font-medium text-dark-100">
+              Sample Data
+              {sampleLoading && (
+                <span className="ml-2 text-xs text-dark-400 animate-pulse">refreshing…</span>
+              )}
+            </p>
             <p className="text-xs text-dark-500">
-              Loads real IDs from the gateway to power dropdowns (Memory ID, Entity ID, User ID).
+              Real IDs from your gateway — auto-loaded when you enter an API key, auto-refreshed after writes.
             </p>
           </div>
           <button
@@ -412,6 +455,13 @@ export default function PlaygroundPage() {
 
           {response ? (
             <div className="flex-1 flex flex-col">
+              {/* Request URL */}
+              {response.requestUrl && (
+                <p className="text-[11px] text-dark-500 font-mono mb-2 truncate">
+                  <span className="text-dark-300 font-semibold">{response.requestMethod}</span>{' '}
+                  {response.requestUrl}
+                </p>
+              )}
               <div className="flex items-center gap-3 mb-3">
                 <span
                   className={`text-sm font-mono font-semibold ${
@@ -425,6 +475,20 @@ export default function PlaygroundPage() {
                   {response.status}
                 </span>
                 <span className="text-xs text-dark-500">{response.duration}ms</span>
+                {response.status >= 200 && response.status < 300 && response.isMutation && (
+                  <span className="text-xs text-emerald-400/80">
+                    ✓ Dropdowns will refresh automatically
+                  </span>
+                )}
+                <div className="ml-auto flex gap-2">
+                  <CopyButton label="Copy" text={response.body} />
+                  {response.requestUrl && (
+                    <CopyButton
+                      label="cURL"
+                      text={buildCurlCommand(response.requestMethod || 'GET', response.requestUrl, apiKey, response.requestBody)}
+                    />
+                  )}
+                </div>
               </div>
               <pre className="code-block text-xs flex-1 max-h-[500px] overflow-y-auto">
                 {response.body}

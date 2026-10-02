@@ -1,6 +1,6 @@
-# Knol MCP Server
+# Cortex MCP Server
 
-A Model Context Protocol (MCP) server for integrating the Knol memory platform with AI coding tools like Claude Code, Cursor, and Windsurf. This allows AI assistants to persistently store and retrieve memories across sessions, building a contextual knowledge graph.
+A Model Context Protocol (MCP) server for integrating the Cortex memory platform with AI coding tools like Claude Code, Cursor, and Windsurf. This allows AI assistants to persistently store and retrieve memories across sessions, building a contextual knowledge graph.
 
 ## Features
 
@@ -18,12 +18,12 @@ A Model Context Protocol (MCP) server for integrating the Knol memory platform w
 
 - Node.js 18+
 - npm or yarn
-- Running Knol API server
+- Running Cortex API server
 
 ### Step 1: Build the server
 
 ```bash
-cd /path/to/knol-mcp
+cd /path/to/cortex-mcp
 npm install
 npm run build
 ```
@@ -36,14 +36,14 @@ The server reads configuration from environment variables:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `KNOL_API_KEY` | Yes | - | Bearer token for Knol API authentication |
-| `KNOL_API_URL` | No | `http://localhost:8080` | Knol API endpoint URL |
+| `CORTEX_API_KEY` | Yes | - | Bearer token for Cortex API authentication |
+| `CORTEX_API_URL` | No | `http://localhost:8080` | Cortex API endpoint URL |
 | `KNOL_USER_ID` | No | `default` | Default user ID for operations |
 
 ## MCP Tools
 
 ### knol_remember
-Store a memory in Knol.
+Store a memory in Cortex.
 
 **Parameters:**
 - `content` (string, required): The memory content to store
@@ -154,7 +154,7 @@ Get related entities for a specific entity.
 
 ## MCP Resources
 
-### knol://recent
+### cortex://recent
 Returns the 10 most recent memories for the configured user.
 
 This resource is automatically available and can be accessed to quickly retrieve recent context.
@@ -168,12 +168,12 @@ Add to your Claude Code configuration file (`~/.config/Claude Code/mcp.json` or 
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/path/to/knol-mcp/dist/index.js"],
+      "args": ["/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "your-api-key-here",
-        "KNOL_API_URL": "https://api.knol.example.com",
+        "CORTEX_API_KEY": "your-api-key-here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -188,12 +188,12 @@ Add to your Cursor settings (`.cursor/settings.json`):
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/path/to/knol-mcp/dist/index.js"],
+      "args": ["/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "your-api-key-here",
-        "KNOL_API_URL": "https://api.knol.example.com",
+        "CORTEX_API_KEY": "your-api-key-here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -208,12 +208,12 @@ Add to your Windsurf configuration (`.windsurf/mcp.json`):
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/path/to/knol-mcp/dist/index.js"],
+      "args": ["/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "your-api-key-here",
-        "KNOL_API_URL": "https://api.knol.example.com",
+        "CORTEX_API_KEY": "your-api-key-here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -228,12 +228,12 @@ If published to npm, you can also use the npx shorthand:
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "npx",
-      "args": ["@knol/mcp-server"],
+      "args": ["@doaide/cortex-mcp-server"],
       "env": {
-        "KNOL_API_KEY": "your-api-key-here",
-        "KNOL_API_URL": "https://api.knol.example.com",
+        "CORTEX_API_KEY": "your-api-key-here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -260,8 +260,8 @@ npm run dev
 To test the server locally, set up environment variables and run:
 
 ```bash
-export KNOL_API_KEY="test-key"
-export KNOL_API_URL="http://localhost:8080"
+export CORTEX_API_KEY="test-key"
+export CORTEX_API_URL="http://localhost:8080"
 npm run build
 npm start
 ```
@@ -271,18 +271,18 @@ npm start
 The MCP server is built on the `@modelcontextprotocol/sdk` and implements:
 
 - **Tools**: Seven main tools for memory and entity operations
-- **Resources**: One resource (`knol://recent`) for quick access to recent memories
+- **Resources**: One resource (`cortex://recent`) for quick access to recent memories
 - **Transport**: Standard Input/Output (stdio) for integration with MCP clients
 
 The server:
 1. Reads configuration from environment variables
-2. Makes authenticated HTTP requests to the Knol API
+2. Makes authenticated HTTP requests to the Cortex API
 3. Exposes tools and resources through the MCP protocol
 4. Returns formatted results to the MCP client
 
 ## API Reference
 
-For detailed Knol API documentation, see: https://knol.example.com/docs
+For detailed Cortex API documentation, see: https://cortex.doaide.com/docs
 
 ### Endpoints Used
 
@@ -300,7 +300,7 @@ The server handles errors gracefully and returns error messages in the MCP respo
 
 - **401 Unauthorized**: Invalid or missing API key
 - **404 Not Found**: Memory or entity not found
-- **500 Server Error**: Knol API server error
+- **500 Server Error**: Cortex API server error
 
 All errors are returned with an `isError: true` flag in the MCP response.
 
@@ -308,12 +308,12 @@ All errors are returned with an `isError: true` flag in the MCP response.
 
 - API keys are passed via environment variables and never exposed in logs
 - All communication uses Bearer token authentication
-- The server validates inputs before sending to the Knol API
-- Configure appropriate KNOL_API_URL for your deployment
+- The server validates inputs before sending to the Cortex API
+- Configure appropriate CORTEX_API_URL for your deployment
 
 ## Contributing
 
-Contributions are welcome! Please submit pull requests to the Knol repository.
+Contributions are welcome! Please submit pull requests to the Cortex repository.
 
 ## License
 
@@ -321,4 +321,4 @@ MIT License - See LICENSE file for details
 
 ## Support
 
-For issues, questions, or feature requests, please open an issue on GitHub or contact the Knol team.
+For issues, questions, or feature requests, please open an issue on GitHub or contact the Cortex team.

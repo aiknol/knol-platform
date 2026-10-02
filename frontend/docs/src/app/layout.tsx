@@ -8,7 +8,7 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(DOCS_SITE.siteUrl),
   title: DOCS_SITE.name,
-  description: 'Public tenant-service and OSS documentation for Knol.',
+  description: 'Public tenant-service and OSS documentation for Cortex.',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
@@ -27,8 +27,8 @@ export default function RootLayout({
         <HMRErrorHandler />
         <header className="topbar">
           <div className="container topbarInner">
-            <Link href="/" className="brand" aria-label="Knol Docs Home">
-              <Image src="/favicon.svg" alt="Knol" width={30} height={30} priority />
+            <Link href="/" className="brand" aria-label="Cortex Docs Home">
+              <Image src="/favicon.svg" alt="DoAide Cortex" width={30} height={30} priority />
               <div>
                 <p className="brandName">{DOCS_SITE.name}</p>
                 <p className="brandSub">{DOCS_SITE.tagline}</p>

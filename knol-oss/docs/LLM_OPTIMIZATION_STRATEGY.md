@@ -1,8 +1,8 @@
-# Knol LLM Optimization Strategy
+# Cortex LLM Optimization Strategy
 
 ## Current State Analysis
 
-Every message written to Knol triggers this flow:
+Every message written to Cortex triggers this flow:
 
 ```
 Client → service-write → NATS → service-graph → LLM extraction (Call #1)

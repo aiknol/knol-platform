@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knol — Context Engineering for AI Applications</title>
+    <title>DoAide Cortex — Context Engineering for AI Applications</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="shortcut icon" href="/favicon.svg">
     <style>
@@ -645,8 +645,8 @@
 
 <!-- Welcome Overlay -->
 <div class="welcome-overlay" id="welcomeOverlay">
-    <img class="welcome-logo" src="/favicon.svg" alt="Knol logo" width="80" height="80" />
-    <h1 class="welcome-title">Knol</h1>
+    <img class="welcome-logo" src="/favicon.svg" alt="Cortex logo" width="80" height="80" />
+    <h1 class="welcome-title">DoAide Cortex</h1>
     <p class="welcome-sub">
         Rust-native context engineering for AI applications. Sub-5ms latency, PostgreSQL-only, open source. Watch the AI extract memories, build a knowledge graph, and recall context — in real time.
     </p>
@@ -672,14 +672,14 @@
 <!-- Header -->
 <header>
     <div class="logo">
-        <img class="logo-icon" src="/favicon.svg" alt="Knol logo" width="32" height="32" />
-        <span>Knol</span>
+        <img class="logo-icon" src="/favicon.svg" alt="Cortex logo" width="32" height="32" />
+        <span>Cortex</span>
         <span class="badge badge-live" id="modeBadge">Live Demo</span>
     </div>
     <div class="header-right">
         <span style="font-size:0.7rem;color:var(--text-dim);background:var(--surface-2);padding:2px 8px;border-radius:4px;border:1px solid var(--border)" id="providerBadge"></span>
         <span style="font-size:0.8rem;color:var(--text-dim)" id="memCount">0 memories</span>
-        <a class="cta-btn github-link" href="https://github.com/aiknol/knol" class="cta-btn-link" target="_blank">Get OSS Core →</a>
+        <a class="cta-btn github-link" href="https://github.com/doaide/cortex" class="cta-btn-link" target="_blank">Get OSS Core →</a>
     </div>
 </header>
 
@@ -753,17 +753,17 @@
 
 <!-- CTA Footer -->
 <div class="cta-footer">
-    <div class="cta-footer-text"><strong>Knol</strong> — Rust-native context engineering infrastructure. One PostgreSQL database, sub-5ms latency, Apache 2.0.</div>
+    <div class="cta-footer-text"><strong>Cortex</strong> — Rust-native context engineering infrastructure. One PostgreSQL database, sub-5ms latency, Apache 2.0.</div>
     <div class="cta-links">
-        <a class="cta-btn github-link" href="https://github.com/aiknol/knol" target="_blank" style="font-size:0.8rem;padding:6px 16px;">Star on GitHub →</a>
-        <a class="cta-btn" href="https://aiknol.com/pricing/" target="_blank" style="font-size:0.8rem;padding:6px 16px;">See Plans →</a>
-        <a class="cta-btn" href="https://docs.aiknol.com/" target="_blank" style="font-size:0.8rem;padding:6px 16px;background:transparent;border:1px solid var(--border);">Docs →</a>
+        <a class="cta-btn github-link" href="https://github.com/doaide/cortex" target="_blank" style="font-size:0.8rem;padding:6px 16px;">Star on GitHub →</a>
+        <a class="cta-btn" href="https://cortex.doaide.com/pricing/" target="_blank" style="font-size:0.8rem;padding:6px 16px;">See Plans →</a>
+        <a class="cta-btn" href="https://docs.cortex.doaide.com/" target="_blank" style="font-size:0.8rem;padding:6px 16px;background:transparent;border:1px solid var(--border);">Docs →</a>
     </div>
 </div>
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Knol Interactive Demo
+// Cortex Interactive Demo
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // ── Configuration (loaded from admin API or defaults) ──
@@ -775,7 +775,7 @@ const CONFIG = {
     llmModel: 'gemini-2.0-flash',
     llmApiUrl: '',
     llmReady: false,
-    githubUrl: 'https://github.com/aiknol/knol',
+    githubUrl: 'https://github.com/doaide/cortex',
     tagline: 'Context engineering for AI applications',
     loaded: false,
 };
@@ -813,10 +813,10 @@ const CONFIG = {
                 badge.textContent = `${icon} ${CONFIG.llmModel}${CONFIG.llmReady ? '' : ' (offline)'}`;
                 badge.title = `Provider: ${p} | Model: ${CONFIG.llmModel} | LLM ready: ${CONFIG.llmReady ? 'yes' : 'no'} | Config: Admin API`;
             }
-            console.log('[Knol Demo] Config loaded from admin API');
+            console.log('[Cortex Demo] Config loaded from admin API');
         }
     } catch (e) {
-        console.log('[Knol Demo] Admin API unavailable, using defaults');
+        console.log('[Cortex Demo] Admin API unavailable, using defaults');
     }
 })();
 
@@ -995,7 +995,7 @@ class GraphRenderer {
 // ── Multi-provider LLM Client ──
 class LlmClient {
     buildSystemPrompt(memoryContext) {
-        return `You are the AI inside "Knol", a context engineering platform for AI applications. You have access to a memory store of facts, preferences, events, and relationships about the user. Knol uses hybrid retrieval (vector + BM25 + knowledge graph) to surface the most relevant context.
+        return `You are the AI inside "DoAide Cortex", a context engineering platform for AI applications. You have access to a memory store of facts, preferences, events, and relationships about the user. Cortex uses hybrid retrieval (vector + BM25 + knowledge graph) to surface the most relevant context.
 
 CURRENT MEMORY STORE:
 ${memoryContext || '(empty)'}
@@ -1291,7 +1291,7 @@ const demo = window.demo = {
             if (refBadges) refsHtml = `<div class="msg-refs">${refBadges}</div>`;
         }
 
-        el.innerHTML = `<div class="msg-label">Knol AI</div><div class="msg-bubble">${html}</div>${refsHtml}`;
+        el.innerHTML = `<div class="msg-label">Cortex AI</div><div class="msg-bubble">${html}</div>${refsHtml}`;
         chatBody.appendChild(el);
     },
 
@@ -1309,7 +1309,7 @@ const demo = window.demo = {
         const el = document.createElement('div');
         el.className = 'msg assistant';
         el.id = 'typingIndicator';
-        el.innerHTML = `<div class="msg-label">Knol AI</div><div class="typing"><span></span><span></span><span></span></div>`;
+        el.innerHTML = `<div class="msg-label">Cortex AI</div><div class="typing"><span></span><span></span><span></span></div>`;
         chatBody.appendChild(el);
         this.scrollChat();
     },

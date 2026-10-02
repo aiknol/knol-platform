@@ -3,7 +3,7 @@ import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Privacy Policy'),
-  description: 'Privacy Policy for Knol — how we collect, use, and protect your data.',
+  description: 'Privacy Policy for DoAide Cortex — how we collect, use, and protect your data.',
 };
 
 export default function PrivacyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         {/* Introduction */}
         <section className="mb-12">
           <p className="text-dark-300 text-lg leading-relaxed">
-            Knol (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;, or &quot;Company&quot;) operates the Knol website and services (collectively, the &quot;Service&quot;).
+            DoAide Cortex (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;, or &quot;Company&quot;) operates the DoAide Cortex website and services (collectively, the &quot;Service&quot;).
             This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use
             our Service and the choices you have associated with that data.
           </p>
@@ -200,10 +200,10 @@ export default function PrivacyPage() {
             If you have questions about this Privacy Policy or our privacy practices, please contact us at:
           </p>
           <div className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 text-dark-300">
-            <p className="font-semibold text-dark-100 mb-2">Knol</p>
+            <p className="font-semibold text-dark-100 mb-2">DoAide Cortex</p>
             <p className="mb-1">Email: <a href={`mailto:${SITE.contactEmail}`} className="text-brand-400 hover:text-brand-300">{SITE.contactEmail}</a></p>
             <p className="mb-1">Phone: <a href={`tel:${SITE.contactPhone}`} className="text-brand-400 hover:text-brand-300">{SITE.contactPhoneDisplay}</a></p>
-            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/aiknol/knol</a></p>
+            <p>GitHub: <a href={SITE.github} className="text-brand-400 hover:text-brand-300" target="_blank" rel="noopener noreferrer">github.com/doaide/cortex</a></p>
           </div>
         </section>
       </div>

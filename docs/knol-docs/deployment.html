@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knol — Deployment Topology</title>
+<title>DoAide Cortex — Deployment Topology</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0e1a; color: #e5e7eb; min-height: 100vh; }
@@ -50,7 +50,7 @@
 
 <div class="header">
   <div class="header-inner">
-    <div class="logo">Knol</div>
+    <div class="logo">Cortex</div>
     <div class="nav-links">
       <a href="architecture.html">Architecture</a>
       <a href="dataflow.html">Data Flow</a>
@@ -73,11 +73,11 @@
 
       <!-- Monorepo box -->
       <rect x="20" y="20" width="1060" height="460" rx="16" fill="none" stroke="rgba(55,65,81,0.4)" stroke-width="1" stroke-dasharray="6,4"/>
-      <text x="50" y="50" fill="#6b7280" font-size="12" font-weight="600">knol/ (monorepo)</text>
+      <text x="50" y="50" fill="#6b7280" font-size="12" font-weight="600">cortex/ (monorepo)</text>
 
       <!-- OSS -->
       <rect x="50" y="70" width="300" height="180" rx="12" fill="rgba(34,197,94,0.06)" stroke="#22c55e" stroke-width="1.5"/>
-      <text x="70" y="98" fill="#4ade80" font-size="14" font-weight="700">knol-oss/</text>
+      <text x="70" y="98" fill="#4ade80" font-size="14" font-weight="700">cortex-oss/</text>
       <text x="70" y="118" fill="#6b7280" font-size="10">Apache 2.0 • Rust workspace</text>
       <text x="70" y="145" fill="#9ca3af" font-size="11">11 crates (7 libs + 4 services)</text>
       <text x="70" y="165" fill="#9ca3af" font-size="11">5 SQL migrations</text>
@@ -95,11 +95,11 @@
 
       <!-- Enterprise -->
       <rect x="400" y="70" width="300" height="180" rx="12" fill="rgba(249,115,22,0.06)" stroke="#f97316" stroke-width="1.5"/>
-      <text x="420" y="98" fill="#fb923c" font-size="14" font-weight="700">knol-enterprise/</text>
+      <text x="420" y="98" fill="#fb923c" font-size="14" font-weight="700">cortex-enterprise/</text>
       <text x="420" y="118" fill="#6b7280" font-size="10">Commercial • Rust workspace</text>
       <text x="420" y="145" fill="#9ca3af" font-size="11">4 service crates (admin, jobs, billing, ingest)</text>
       <text x="420" y="165" fill="#9ca3af" font-size="11">2 SQL migrations (006, 007)</text>
-      <text x="420" y="185" fill="#9ca3af" font-size="11">Path deps → ../knol-oss/crates/</text>
+      <text x="420" y="185" fill="#9ca3af" font-size="11">Path deps → ../cortex-oss/crates/</text>
       <text x="420" y="205" fill="#9ca3af" font-size="11">railway.toml + Procfile</text>
       <text x="420" y="235" fill="#fb923c" font-size="10" font-weight="600">Deploy: Railway / Docker</text>
 
@@ -149,7 +149,7 @@
       <div class="target">For development and testing</div>
       <p>Run the entire stack locally with a single command. Infrastructure (Postgres+pgvector, Redis, NATS, MinIO) plus all OSS services.</p>
       <ul>
-        <li><code>cd knol-oss && docker compose up -d</code></li>
+        <li><code>cd cortex-oss && docker compose up -d</code></li>
         <li><code>cargo run --bin service-gateway</code></li>
         <li>API at <code>localhost:3000</code></li>
       </ul>

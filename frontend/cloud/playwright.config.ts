@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright E2E configuration for Knol Cloud.
+ * Playwright E2E configuration for Cortex Cloud.
  *
  * Expects the Next.js dev server on http://localhost:3007 and
  * the enterprise tenant API on http://localhost:3002.

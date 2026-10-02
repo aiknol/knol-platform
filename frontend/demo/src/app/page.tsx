@@ -8,11 +8,11 @@ export default function DemoHomePage() {
     <main className="demoRoot">
       <header className="toolbar">
         <div>
-          <p className="label">Knol Demo</p>
+          <p className="label">Cortex Demo</p>
           <h1 className="title">Interactive Sandbox</h1>
         </div>
       </header>
-      <iframe title="Knol Interactive Demo" src={demoSrc} className="demoFrame" />
+      <iframe title="Cortex Interactive Demo" src={demoSrc} className="demoFrame" />
     </main>
   );
 }

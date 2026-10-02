@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knol — Deployment Strategy for Cost Effectiveness</title>
+<title>DoAide Cortex — Deployment Strategy for Cost Effectiveness</title>
 <style>
   :root {
     --ink: #0A0A0B;
@@ -247,7 +247,7 @@
 <header>
   <div class="container">
     <div class="tag">Infrastructure</div>
-    <h1>Knol deployment strategy</h1>
+    <h1>Cortex deployment strategy</h1>
     <p class="subtitle">Cost-effective hosting for 8 Rust microservices, 4 infrastructure dependencies, and a static marketing site</p>
   </div>
 </header>
@@ -258,7 +258,7 @@
 <section>
   <h2>Recommendation at a glance</h2>
   <div class="summary-box">
-    <p><strong>Best overall:</strong> Hetzner VPS + Docker Compose for the backend (~€15/mo), Neon for Postgres (free→$5), Upstash for Redis (free→$2), Cloudflare Pages for the website (free). Total: <strong>~$20–35/month</strong> to run the full Knol stack in production.</p>
+    <p><strong>Best overall:</strong> Hetzner VPS + Docker Compose for the backend (~€15/mo), Neon for Postgres (free→$5), Upstash for Redis (free→$2), Cloudflare Pages for the website (free). Total: <strong>~$20–35/month</strong> to run the full Cortex stack in production.</p>
     <p><strong>Why not Railway/Render?</strong> With 8 services, per-service pricing adds up fast. A single VPS running all containers is 3–5× cheaper at this stage.</p>
   </div>
 </section>
@@ -266,7 +266,7 @@
 <!-- What we're deploying -->
 <section>
   <h2>What needs to be deployed</h2>
-  <p>Knol's architecture has three deployment concerns: compute (8 Rust services), stateful infrastructure (Postgres, Redis, NATS, MinIO), and a static website.</p>
+  <p>Cortex's architecture has three deployment concerns: compute (8 Rust services), stateful infrastructure (Postgres, Redis, NATS, MinIO), and a static website.</p>
 
   <table>
     <tr><th>Component</th><th>Type</th><th>Resources needed</th></tr>
@@ -352,7 +352,7 @@
 
   <h3>Database — Neon serverless Postgres</h3>
   <div class="cost-row"><span class="item">Neon free tier — 100 CU-hours/mo, 0.5 GB storage, pgvector included</span><span class="amount free">$0</span></div>
-  <p>Neon is serverless Postgres with native pgvector support (critical for Knol's vector search). The free tier scales to zero when idle and provides 100 compute-unit hours per month — plenty for a pre-revenue product. When you outgrow it, Launch tier is pay-as-you-go at $0.106/CU-hour with no minimum.</p>
+  <p>Neon is serverless Postgres with native pgvector support (critical for Cortex's vector search). The free tier scales to zero when idle and provides 100 compute-unit hours per month — plenty for a pre-revenue product. When you outgrow it, Launch tier is pay-as-you-go at $0.106/CU-hour with no minimum.</p>
 
   <h3>Cache — Upstash Redis</h3>
   <div class="cost-row"><span class="item">Upstash free tier — 500K commands/mo, 256 MB</span><span class="amount free">$0</span></div>
@@ -383,7 +383,7 @@
   <div class="arch-box">
 <span class="comment">                    ┌─────────────────────────┐</span>
 <span class="comment">                    │</span>  <span class="label">Cloudflare Pages</span>        <span class="comment">│</span>
-<span class="comment">                    │</span>  knol.dev (static)        <span class="comment">│</span>
+<span class="comment">                    │</span>  cortex.doaide.com (static)        <span class="comment">│</span>
 <span class="comment">                    └───────────┬─────────────┘</span>
 <span class="comment">                                │</span>
 <span class="comment">                    ┌───────────▼─────────────┐</span>
@@ -415,7 +415,7 @@
 <!-- Platform comparison -->
 <section>
   <h2>Platform comparison for compute</h2>
-  <p>The key question is whether to use a VPS (self-managed containers) or a PaaS (managed deployment). Here's how the options compare for Knol's 8-service architecture:</p>
+  <p>The key question is whether to use a VPS (self-managed containers) or a PaaS (managed deployment). Here's how the options compare for Cortex's 8-service architecture:</p>
 
   <table>
     <tr>
@@ -463,14 +463,14 @@
   </table>
 
   <div class="note">
-    <strong>Why Hetzner wins for Knol:</strong> Rust microservices have tiny memory footprints (~20–30 MB each). PaaS platforms charge per-service, making them 5–8× more expensive for the same workload. A single 8 GB VPS easily runs all 8 services plus NATS and MinIO with room to spare.
+    <strong>Why Hetzner wins for Cortex:</strong> Rust microservices have tiny memory footprints (~20–30 MB each). PaaS platforms charge per-service, making them 5–8× more expensive for the same workload. A single 8 GB VPS easily runs all 8 services plus NATS and MinIO with room to spare.
   </div>
 </section>
 
 <!-- Database comparison -->
 <section>
   <h2>Database — Postgres + pgvector options</h2>
-  <p>Knol requires pgvector for embedding similarity search, which limits options. Here are the viable managed providers:</p>
+  <p>Cortex requires pgvector for embedding similarity search, which limits options. Here are the viable managed providers:</p>
 
   <table>
     <tr>
@@ -525,7 +525,7 @@
 <!-- Website -->
 <section>
   <h2>Static website hosting</h2>
-  <p>The Knol marketing site is a Next.js static export — pure HTML/JS/CSS with no server-side rendering needed. This opens up the cheapest tier of hosting.</p>
+  <p>The Cortex marketing site is a Next.js static export — pure HTML/JS/CSS with no server-side rendering needed. This opens up the cheapest tier of hosting.</p>
 
   <table>
     <tr><th>Provider</th><th>Free tier</th><th>Bandwidth</th><th>Build minutes</th></tr>
@@ -563,10 +563,10 @@
 <!-- Migration path -->
 <section>
   <h2>Scaling migration path</h2>
-  <p>Start cheap, scale incrementally. Here's the progression as Knol grows:</p>
+  <p>Start cheap, scale incrementally. Here's the progression as Cortex grows:</p>
 
   <h3>Phase 1 — Pre-revenue ($8–22/mo)</h3>
-  <p>Single Hetzner CX32 with Docker Compose. Neon + Upstash free tiers. Cloudflare Pages. This runs the entire Knol stack including all enterprise services. Focus on shipping, not infrastructure.</p>
+  <p>Single Hetzner CX32 with Docker Compose. Neon + Upstash free tiers. Cloudflare Pages. This runs the entire Cortex stack including all enterprise services. Focus on shipping, not infrastructure.</p>
 
   <h3>Phase 2 — Early traction ($40–80/mo)</h3>
   <p>Upgrade to Hetzner CCX23 (dedicated vCPU) for consistent performance. Move to Neon Launch tier for more compute hours. Add Cloudflare R2 to replace MinIO for durable object storage. Add automated backups via Hetzner snapshots.</p>
@@ -590,7 +590,7 @@
     <tr><td>4</td><td>Write production <code>docker-compose.prod.yml</code></td><td>1–2 hrs</td><td>—</td></tr>
     <tr><td>5</td><td>Set up Caddy as reverse proxy with auto-TLS</td><td>30 min</td><td>—</td></tr>
     <tr><td>6</td><td>Deploy static site to Cloudflare Pages</td><td>15 min</td><td class="free">Free</td></tr>
-    <tr><td>7</td><td>Configure DNS: <code>knol.dev</code> → Hetzner, website → Cloudflare</td><td>30 min</td><td>~$10/yr</td></tr>
+    <tr><td>7</td><td>Configure DNS: <code>cortex.doaide.com</code> → Hetzner, website → Cloudflare</td><td>30 min</td><td>~$10/yr</td></tr>
     <tr><td>8</td><td>Set up GitHub Actions CI/CD for deploy on push</td><td>1–2 hrs</td><td class="free">Free</td></tr>
   </table>
 </section>
@@ -667,7 +667,7 @@
 </div>
 
 <footer style="background: var(--ink); color: var(--silver); padding: 32px 0; margin-top: 48px; text-align: center; font-size: 13px;">
-  Knol — Memory infrastructure for AI &middot; knol.dev
+  Cortex — Memory infrastructure for AI &middot; cortex.doaide.com
 </footer>
 
 </body>

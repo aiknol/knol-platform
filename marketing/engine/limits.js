@@ -1,5 +1,5 @@
 // =============================================================================
-// Knol Marketing — Limit State Inspector
+// Cortex Marketing — Limit State Inspector
 // =============================================================================
 
 const limiter = require('./limit-intelligence');
@@ -20,7 +20,7 @@ function main() {
     return;
   }
 
-  console.log('Knol Marketing — Rate Limit State\n');
+  console.log('Cortex Marketing — Rate Limit State\n');
   for (const [channel, s] of channels) {
     const dayCount = Object.values(s.day || {}).reduce((a, b) => a + b, 0);
     const monthCount = Object.values(s.month || {}).reduce((a, b) => a + b, 0);

@@ -4,7 +4,7 @@ import { pageTitle, SITE } from '@/config/site';
 
 export const metadata: Metadata = {
   title: pageTitle('Documentation'),
-  description: 'Complete API reference and SDK guides for Knol — context engineering infrastructure for AI applications.',
+  description: 'Complete API reference and SDK guides for Cortex — context engineering infrastructure for AI applications.',
 };
 
 const endpoints = [
@@ -71,9 +71,9 @@ const searchExample = `curl -X POST http://localhost:3000/v1/memory/search \\
   "retrieval_strategy": "vector_primary"
 }`;
 
-const pythonSdkExample = `from knol import KnolClient
+const pythonSdkExample = `from cortex import CortexClient
 
-client = KnolClient(
+client = CortexClient(
     base_url="http://localhost:3000",
     api_key="your-api-key"
 )
@@ -100,11 +100,11 @@ memory = client.get(memory_id="550e8400-...")
 client.update(memory_id="550e8400-...", content="Updated content")
 client.delete(memory_id="550e8400-...")`;
 
-const asyncPythonExample = `from knol import AsyncKnolClient
+const asyncPythonExample = `from cortex import AsyncCortexClient
 import asyncio
 
 async def main():
-    client = AsyncKnolClient(
+    client = AsyncCortexClient(
         base_url="http://localhost:3000",
         api_key="your-api-key"
     )
@@ -122,32 +122,32 @@ async def main():
 
 asyncio.run(main())`;
 
-const tsSdkExample = `import { KnolClient } from '@knol-dev/sdk';
+const tsSdkExample = `import { CortexClient } from '@doaide/cortex-sdk';
 
-const knol = new KnolClient({
+const cortex = new CortexClient({
   baseUrl: 'http://localhost:3000',
   apiKey: 'your-api-key',
 });
 
 // Store
-await knol.add({
+await cortex.add({
   content: 'User prefers TypeScript and functional patterns',
   userId: 'user-123',
 });
 
 // Search
-const results = await knol.search({
+const results = await cortex.search({
   query: 'programming preferences',
   userId: 'user-123',
 });
 
 // Knowledge graph
-const entities = await knol.listEntities({ userId: 'user-123' });`;
+const entities = await cortex.listEntities({ userId: 'user-123' });`;
 
-const langchainExample = `from knol.langchain import KnolMemory
+const langchainExample = `from cortex.langchain import CortexMemory
 from langchain.agents import AgentExecutor
 
-memory = KnolMemory(
+memory = CortexMemory(
     base_url="http://localhost:3000",
     api_key="your-api-key",
     user_id="user-123"
@@ -159,10 +159,10 @@ agent = AgentExecutor(
     memory=memory
 )`;
 
-const crewaiExample = `from knol.crewai import KnolMemory
+const crewaiExample = `from cortex.crewai import CortexMemory
 from crewai import Crew
 
-memory = KnolMemory(
+memory = CortexMemory(
     base_url="http://localhost:3000",
     api_key="your-api-key"
 )
@@ -222,7 +222,7 @@ export default function DocsPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-dark-50 mb-4">Documentation</h1>
         <p className="text-dark-300 text-lg mb-12">
-          Complete reference for the Knol REST API, Python SDK, TypeScript SDK, and framework integrations.
+          Complete reference for the Cortex REST API, Python SDK, TypeScript SDK, and framework integrations.
         </p>
 
         {/* Quick Start */}
@@ -233,22 +233,22 @@ export default function DocsPage() {
 docker compose up -d
 
 # Option 2: pip install
-pip install knol
+pip install doaide-cortex
 
 # Option 3: npm install
-npm install @knol-dev/sdk
+npm install @doaide/cortex-sdk
 
 # Option 4: Build from source
-cd knol-oss
+cd cortex-oss
 cargo build --workspace --release`}
             language="bash"
             title="Setup"
           />
         </section>
 
-        {/* knol-local */}
-        <section className="mb-16" id="knol-local">
-          <h2 className="text-2xl font-bold text-dark-50 mb-2">knol-local — Local MCP &amp; CLI</h2>
+        {/* cortex-local */}
+        <section className="mb-16" id="cortex-local">
+          <h2 className="text-2xl font-bold text-dark-50 mb-2">cortex-local — Local MCP &amp; CLI</h2>
           <p className="text-dark-300 mb-6">
             A lightweight, standalone memory server backed by SQLite. No Docker, no PostgreSQL, no API key required.
             Works with Claude Desktop, Cursor, Windsurf, and Claude Code out of the box.
@@ -256,22 +256,22 @@ cargo build --workspace --release`}
 
           <h3 className="text-lg font-semibold text-dark-100 mb-3">Installation</h3>
           <CodeBlock
-            code={`npm install -g knol-local`}
+            code={`npm install -g cortex-local`}
             language="bash"
             title="Global install"
           />
           <p className="text-dark-400 text-sm mt-3 mb-6">
             The postinstall script automatically patches any existing Claude Desktop or Cursor config files.
-            Re-run <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">node $(npm root -g)/knol-local/setup.mjs</code> at any time to re-apply.
+            Re-run <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">node $(npm root -g)/cortex-local/setup.mjs</code> at any time to re-apply.
           </p>
 
           <h3 className="text-lg font-semibold text-dark-100 mb-3">Manual Client Setup</h3>
           <CodeBlock
-            code={`knol-local setup claude       # Claude Desktop (creates config if missing)
-knol-local setup cursor       # Cursor (~/.cursor/mcp.json)
-knol-local setup claude-code  # Claude Code CLI (claude mcp add)
-knol-local setup codex        # Codex — shows HTTP API instructions
-knol-local setup              # Auto-detect and configure all found clients`}
+            code={`cortex-local setup claude       # Claude Desktop (creates config if missing)
+cortex-local setup cursor       # Cursor (~/.cursor/mcp.json)
+cortex-local setup claude-code  # Claude Code CLI (claude mcp add)
+cortex-local setup codex        # Codex — shows HTTP API instructions
+cortex-local setup              # Auto-detect and configure all found clients`}
             language="bash"
             title="Setup commands"
           />
@@ -279,7 +279,7 @@ knol-local setup              # Auto-detect and configure all found clients`}
             For Claude Code you can also add it per-project in <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">.claude/settings.json</code>:
           </p>
           <CodeBlock
-            code={`{ "mcpServers": { "knol-local": { "command": "knol-local" } } }`}
+            code={`{ "mcpServers": { "cortex-local": { "command": "cortex-local" } } }`}
             language="json"
             title=".claude/settings.json"
           />
@@ -307,34 +307,34 @@ knol-local setup              # Auto-detect and configure all found clients`}
           <h3 className="text-lg font-semibold text-dark-100 mb-3">CLI Commands</h3>
           <CodeBlock
             code={`# Add a memory
-knol-local add "Prefer strict TypeScript and functional patterns" --tag coding
+cortex-local add "Prefer strict TypeScript and functional patterns" --tag coding
 
 # Search memories
-knol-local search "TypeScript preferences" --limit 5
+cortex-local search "TypeScript preferences" --limit 5
 
 # List all memories
-knol-local list --limit 20 --tag coding
+cortex-local list --limit 20 --tag coding
 
 # Summary statistics
-knol-local stats
+cortex-local stats
 
 # Export / import
-knol-local export --out backup.json
-knol-local import backup.json
+cortex-local export --out backup.json
+cortex-local import backup.json
 
 # Backup / restore the SQLite database
-knol-local backup --out ~/backups/
-knol-local restore ~/backups/memories-2026-05-09.db
+cortex-local backup --out ~/backups/
+cortex-local restore ~/backups/memories-2026-05-09.db
 
 # Start the HTTP REST API (useful for Codex)
-knol-local serve --port 3001 --key my-secret`}
+cortex-local serve --port 3001 --key my-secret`}
             language="bash"
-            title="knol-local CLI"
+            title="cortex-local CLI"
           />
 
           <h3 className="text-lg font-semibold text-dark-100 mb-3 mt-8">HTTP REST API</h3>
           <p className="text-dark-300 mb-4">
-            Start the server with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">knol-local serve</code> to expose a local REST API — useful for Codex or any tool without native MCP support.
+            Start the server with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">cortex-local serve</code> to expose a local REST API — useful for Codex or any tool without native MCP support.
           </p>
           <div className="overflow-x-auto mb-4">
             <table className="w-full text-sm">
@@ -384,7 +384,7 @@ knol-local serve --port 3001 --key my-secret`}
               </thead>
               <tbody>
                 {[
-                  ['KNOL_LOCAL_DB', '~/.knol-local/memories.db', 'Path to the SQLite database file'],
+                  ['KNOL_LOCAL_DB', '~/.cortex-local/memories.db', 'Path to the SQLite database file'],
                 ].map(([name, def, desc]) => (
                   <tr key={name} className="border-b border-dark-600/20">
                     <td className="py-3 px-4 font-mono text-brand-400 text-xs">{name}</td>
@@ -402,7 +402,7 @@ knol-local serve --port 3001 --key my-secret`}
 
           <div className="flex gap-4 mt-6">
             <a
-              href="https://www.npmjs.com/package/knol-local"
+              href="https://www.npmjs.com/package/cortex-local"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-300 hover:text-brand-200 text-sm font-medium transition-colors"
@@ -410,7 +410,7 @@ knol-local serve --port 3001 --key my-secret`}
               npm page →
             </a>
             <a
-              href="https://github.com/aiknol/knol-local"
+              href="https://github.com/doaide/cortex-local"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-300 hover:text-brand-200 text-sm font-medium transition-colors"
@@ -489,7 +489,7 @@ knol-local serve --port 3001 --key my-secret`}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-6">Python SDK</h2>
           <p className="text-dark-300 mb-4">
-            Install with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">pip install knol</code>.
+            Install with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">pip install doaide-cortex</code>.
             Both sync and async clients are included.
           </p>
           <div className="space-y-6">
@@ -502,7 +502,7 @@ knol-local serve --port 3001 --key my-secret`}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-6">TypeScript SDK</h2>
           <p className="text-dark-300 mb-4">
-            Install with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">npm install @knol-dev/sdk</code>.
+            Install with <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">npm install @doaide/cortex-sdk</code>.
             Fully typed with TypeScript generics.
           </p>
           <CodeBlock code={tsSdkExample} language="typescript" title="TypeScript SDK" />
@@ -594,7 +594,7 @@ knol-local serve --port 3001 --key my-secret`}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-6">Webhooks</h2>
           <p className="text-dark-300 mb-4">
-            Webhooks allow you to receive real-time events from Knol. Events are sent as HTTP POST requests to your configured URL with HMAC-SHA256 signatures for verification.
+            Webhooks allow you to receive real-time events from Cortex. Events are sent as HTTP POST requests to your configured URL with HMAC-SHA256 signatures for verification.
           </p>
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-dark-100 mb-3">Webhook Management</h3>
@@ -616,7 +616,7 @@ knol-local serve --port 3001 --key my-secret`}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-dark-100 mb-3">Signature Verification</h3>
             <p className="text-dark-300 mb-4">
-              Each webhook request includes an <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">X-Webhook-Signature</code> header containing an HMAC-SHA256 signature of the request body using your webhook secret. Verify this signature to confirm the request came from Knol.
+              Each webhook request includes an <code className="text-brand-200 bg-brand-500/15 px-1.5 rounded">X-Webhook-Signature</code> header containing an HMAC-SHA256 signature of the request body using your webhook secret. Verify this signature to confirm the request came from Cortex.
             </p>
           </div>
           <CodeBlock code={webhookExample} language="bash" title="POST /v1/webhooks" />
@@ -675,7 +675,7 @@ knol-local serve --port 3001 --key my-secret`}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-dark-50 mb-6">Architecture</h2>
           <p className="text-dark-300 mb-4">
-            Knol uses a microservice architecture with each concern isolated in its own Rust binary.
+            Cortex uses a microservice architecture with each concern isolated in its own Rust binary.
             All services share a single PostgreSQL database with pgvector for vector storage.
           </p>
           {/* Desktop diagram */}
@@ -728,11 +728,11 @@ knol-local serve --port 3001 --key my-secret`}
             </a>
             <a href={SITE.pypi} className="card text-center hover:border-brand-500/50" target="_blank" rel="noopener noreferrer">
               <h3 className="text-lg font-semibold text-dark-100 mb-1">PyPI</h3>
-              <p className="text-dark-400 text-sm">pip install knol</p>
+              <p className="text-dark-400 text-sm">pip install doaide-cortex</p>
             </a>
             <a href={SITE.npm} className="card text-center hover:border-brand-500/50" target="_blank" rel="noopener noreferrer">
               <h3 className="text-lg font-semibold text-dark-100 mb-1">npm</h3>
-              <p className="text-dark-400 text-sm">npm install @knol-dev/sdk</p>
+              <p className="text-dark-400 text-sm">npm install @doaide/cortex-sdk</p>
             </a>
           </div>
         </section>

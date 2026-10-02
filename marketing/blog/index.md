@@ -1,6 +1,6 @@
 ---
 layout: home
-title: Knol Blog
+title: Cortex Blog
 ---
 
 Engineering insights on building memory infrastructure for AI agents.

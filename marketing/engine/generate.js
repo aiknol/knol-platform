@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // =============================================================================
-// Knol Marketing — Content Generation Engine
+// Cortex Marketing — Content Generation Engine
 // Generates marketing content from templates + optional Claude API enhancement
 // =============================================================================
 
@@ -13,12 +13,12 @@ const https = require('https');
 // ---------------------------------------------------------------------------
 
 const PRODUCT = {
-  name: 'Knol',
+  name: 'DoAide Cortex',
   tagline: 'Memory infrastructure for AI',
   description: 'Open-source long-term memory layer for LLM applications. Rust-powered microservices with vector search, knowledge graphs, and bi-temporal data.',
-  url: 'https://aiknol.com',
-  github: 'https://github.com/aiknol/knol',
-  pypi: 'pip install knol',
+  url: 'https://cortex.doaide.com',
+  github: 'https://github.com/doaide/cortex',
+  pypi: 'pip install doaide-cortex',
   features: [
     'Vector similarity search (pgvector + HNSW)',
     'Bi-temporal knowledge graph',
@@ -102,18 +102,18 @@ const TEMPLATES = {
     {
       title: `Building AI Applications That Actually Remember: A Guide to ${PRODUCT.name}`,
       tags: ['ai', 'rust', 'opensource', 'llm'],
-      body: `---\ntitle: Building AI Applications That Actually Remember\npublished: true\ntags: ai, rust, opensource, llm\n---\n\n## The Problem\n\nEvery AI chatbot you've used has amnesia. Close the tab, and it forgets everything. Even within a conversation, once you exceed the context window, information is lost.\n\nRAG (Retrieval Augmented Generation) helps with documents, but what about:\n- User preferences ("I prefer dark mode and use Vim")\n- Past decisions ("We decided to use Svelte last Tuesday")\n- Evolving relationships ("Alice now manages the engineering team")\n\nThis is the **memory problem** — and it's why AI assistants feel stateless.\n\n## The Solution: ${PRODUCT.name}\n\n${PRODUCT.name} is open-source memory infrastructure for LLM applications. Think of it as a purpose-built database for AI memory.\n\n### Quick Start\n\n\`\`\`python\nfrom knol import KnolClient\n\nclient = KnolClient(api_key="your-key", base_url="https://api.aiknol.com")\n\n# Store a memory\nclient.write(content="User prefers TypeScript over JavaScript", role="user")\n\n# Search memories\nresults = client.search(query="What programming language does the user prefer?")\n# → Returns: "User prefers TypeScript over JavaScript" (score: 0.94)\n\`\`\`\n\n### How It Works\n\n${PRODUCT.name} uses a 5-stage retrieval pipeline:\n\n1. **Intent Classification** — Detects query type (preference, temporal, relational, general)\n2. **Parallel Search** — Vector + BM25 + Graph run concurrently\n3. **Scope Cascade** — Narrows results: session → user → agent → org\n4. **RRF Fusion** — Combines signals with intent-weighted Reciprocal Rank Fusion\n5. **Confidence Filtering** — Returns only high-confidence results\n\n### Architecture\n\n8 Rust microservices:\n- **Gateway** — Auth, rate limiting, request routing\n- **Write** — Episode ingestion + NATS event publishing\n- **Retrieve** — Hybrid search with intent classification\n- **Graph** — LLM entity extraction + knowledge graph\n- **Admin** — CRUD, audit log, policies\n- **Jobs** — Background tasks (decay, dedup, consolidation)\n- **Billing** — Usage metering + plan enforcement\n- **Ingest** — Webhook + bulk connector framework\n\nInfrastructure: PostgreSQL + pgvector, Redis, NATS JetStream, MinIO\n\n### Why Rust?\n\nEach service uses ~30MB RAM. The entire stack (8 services + NATS + MinIO) runs on a single $8/mo Hetzner VPS. Try that with Python microservices.\n\n### Get Started\n\n\`\`\`bash\ngit clone ${PRODUCT.github}\ncd knol\ndocker compose up -d\n\`\`\`\n\nGitHub: ${PRODUCT.github}\nDocs: ${PRODUCT.url}/docs\n\nLicense: Apache 2.0. Contributions welcome.\n`,
+      body: `---\ntitle: Building AI Applications That Actually Remember\npublished: true\ntags: ai, rust, opensource, llm\n---\n\n## The Problem\n\nEvery AI chatbot you've used has amnesia. Close the tab, and it forgets everything. Even within a conversation, once you exceed the context window, information is lost.\n\nRAG (Retrieval Augmented Generation) helps with documents, but what about:\n- User preferences ("I prefer dark mode and use Vim")\n- Past decisions ("We decided to use Svelte last Tuesday")\n- Evolving relationships ("Alice now manages the engineering team")\n\nThis is the **memory problem** — and it's why AI assistants feel stateless.\n\n## The Solution: ${PRODUCT.name}\n\n${PRODUCT.name} is open-source memory infrastructure for LLM applications. Think of it as a purpose-built database for AI memory.\n\n### Quick Start\n\n\`\`\`python\nfrom cortex import CortexClient\n\nclient = CortexClient(api_key="your-key", base_url="https://api.cortex.doaide.com")\n\n# Store a memory\nclient.write(content="User prefers TypeScript over JavaScript", role="user")\n\n# Search memories\nresults = client.search(query="What programming language does the user prefer?")\n# → Returns: "User prefers TypeScript over JavaScript" (score: 0.94)\n\`\`\`\n\n### How It Works\n\n${PRODUCT.name} uses a 5-stage retrieval pipeline:\n\n1. **Intent Classification** — Detects query type (preference, temporal, relational, general)\n2. **Parallel Search** — Vector + BM25 + Graph run concurrently\n3. **Scope Cascade** — Narrows results: session → user → agent → org\n4. **RRF Fusion** — Combines signals with intent-weighted Reciprocal Rank Fusion\n5. **Confidence Filtering** — Returns only high-confidence results\n\n### Architecture\n\n8 Rust microservices:\n- **Gateway** — Auth, rate limiting, request routing\n- **Write** — Episode ingestion + NATS event publishing\n- **Retrieve** — Hybrid search with intent classification\n- **Graph** — LLM entity extraction + knowledge graph\n- **Admin** — CRUD, audit log, policies\n- **Jobs** — Background tasks (decay, dedup, consolidation)\n- **Billing** — Usage metering + plan enforcement\n- **Ingest** — Webhook + bulk connector framework\n\nInfrastructure: PostgreSQL + pgvector, Redis, NATS JetStream, MinIO\n\n### Why Rust?\n\nEach service uses ~30MB RAM. The entire stack (8 services + NATS + MinIO) runs on a single $8/mo Hetzner VPS. Try that with Python microservices.\n\n### Get Started\n\n\`\`\`bash\ngit clone ${PRODUCT.github}\ncd knol\ndocker compose up -d\n\`\`\`\n\nGitHub: ${PRODUCT.github}\nDocs: ${PRODUCT.url}/docs\n\nLicense: Apache 2.0. Contributions welcome.\n`,
     },
   ],
 
   // --- Hacker News ---
   hn_launch: [
     {
-      title: `Show HN: Knol – Open-source memory infrastructure for LLMs (Rust, pgvector, knowledge graphs)`,
+      title: `Show HN: Cortex – Open-source memory infrastructure for LLMs (Rust, pgvector, knowledge graphs)`,
       url: PRODUCT.github,
     },
     {
-      title: `Knol: Giving LLMs persistent memory with vector search + knowledge graphs (Apache 2.0)`,
+      title: `Cortex: Giving LLMs persistent memory with vector search + knowledge graphs (Apache 2.0)`,
       url: PRODUCT.github,
     },
   ],
@@ -121,15 +121,15 @@ const TEMPLATES = {
   // --- Blog ---
   blog_launch: [
     {
-      title: 'Introducing Knol: Memory Infrastructure for AI',
-      slug: 'introducing-knol',
+      title: 'Introducing DoAide Cortex: Memory Infrastructure for AI',
+      slug: 'introducing-cortex',
       description: 'Why we built an open-source memory layer for LLM applications, and how it works under the hood.',
     },
   ],
 
   blog_technical: [
     {
-      title: 'How Knol Achieves Sub-10ms Memory Retrieval',
+      title: 'How Cortex Achieves Sub-10ms Memory Retrieval',
       slug: 'sub-10ms-retrieval',
       description: 'A deep dive into intent-aware hybrid search with RRF fusion.',
     },
@@ -287,7 +287,7 @@ async function main() {
   const category = args[1] || 'tweet_launch';
   const enhance = args.includes('--enhance');
 
-  console.log(`\n[Knol Marketing] Generating ${type} from ${category}...`);
+  console.log(`\n[Cortex Marketing] Generating ${type} from ${category}...`);
   const content = await generateContent(type, category, { enhance });
 
   console.log('\n--- Generated Content ---');

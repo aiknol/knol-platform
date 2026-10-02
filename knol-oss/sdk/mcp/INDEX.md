@@ -1,6 +1,6 @@
-# Knol MCP Server - Complete Documentation Index
+# Cortex MCP Server - Complete Documentation Index
 
-A Model Context Protocol (MCP) server for integrating the Knol memory platform with AI coding tools like Claude Code, Cursor, and Windsurf.
+A Model Context Protocol (MCP) server for integrating the Cortex memory platform with AI coding tools like Claude Code, Cursor, and Windsurf.
 
 ## Quick Navigation
 
@@ -23,18 +23,18 @@ A Model Context Protocol (MCP) server for integrating the Knol memory platform w
 
 ## What This Project Does
 
-The Knol MCP Server acts as a bridge between AI coding tools and the Knol memory platform:
+The Cortex MCP Server acts as a bridge between AI coding tools and the Cortex memory platform:
 
 ```
 Claude Code / Cursor / Windsurf
     ↓
 MCP Protocol (stdio-based)
     ↓
-Knol MCP Server (this project)
+Cortex MCP Server (this project)
     ↓
 HTTP/REST
     ↓
-Knol API Backend
+Cortex API Backend
 ```
 
 ## Key Features
@@ -50,7 +50,7 @@ Knol API Backend
 ## Project Structure
 
 ```
-knol-mcp/
+cortex-mcp/
 ├── src/
 │   └── index.ts              # Main server implementation (600+ lines)
 ├── package.json              # npm configuration
@@ -72,7 +72,7 @@ knol-mcp/
 
 ### 1. Installation (2 minutes)
 ```bash
-cd /path/to/knol-mcp
+cd /path/to/cortex-mcp
 npm install
 npm run build
 ```
@@ -109,7 +109,7 @@ Done! The AI now has persistent memory.
 
 | Resource | Purpose |
 |----------|---------|
-| `knol://recent` | 10 most recent memories for user |
+| `cortex://recent` | 10 most recent memories for user |
 
 ## Configuration Reference
 
@@ -117,8 +117,8 @@ Done! The AI now has persistent memory.
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `KNOL_API_KEY` | ✓ | - | Bearer token for API |
-| `KNOL_API_URL` | ✗ | `http://localhost:8080` | API endpoint |
+| `CORTEX_API_KEY` | ✓ | - | Bearer token for API |
+| `CORTEX_API_URL` | ✗ | `http://localhost:8080` | API endpoint |
 | `KNOL_USER_ID` | ✗ | `default` | Default user for operations |
 
 ### Example MCP Configuration
@@ -126,12 +126,12 @@ Done! The AI now has persistent memory.
 ```json
 {
   "mcpServers": {
-    "knol": {
+    "cortex": {
       "command": "node",
-      "args": ["/absolute/path/to/knol-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/cortex-mcp/dist/index.js"],
       "env": {
-        "KNOL_API_KEY": "your-api-key-here",
-        "KNOL_API_URL": "https://api.knol.io",
+        "CORTEX_API_KEY": "your-api-key-here",
+        "CORTEX_API_URL": "https://api.cortex.doaide.com",
         "KNOL_USER_ID": "your-user-id"
       }
     }
@@ -184,7 +184,7 @@ All tools are defined as JSON schemas with:
 
 ### Resource (1 total)
 One resource provides quick access:
-- URI: `knol://recent`
+- URI: `cortex://recent`
 - Handler: Resources/read request handler
 - Returns: JSON array of recent memories
 
@@ -243,7 +243,7 @@ Total documentation: ~50 KB
 ## Performance
 
 - **Startup time**: <100ms
-- **Request latency**: 200-600ms (including Knol API time)
+- **Request latency**: 200-600ms (including Cortex API time)
 - **Memory footprint**: <30MB
 - **Concurrent connections**: Limited by MCP client
 
@@ -253,13 +253,13 @@ Total documentation: ~50 KB
 - Never logged or exposed
 - HTTP requests use Bearer token auth
 - No persistent state on server
-- Input validation by Knol API
+- Input validation by Cortex API
 - Respects API rate limits and errors
 
 ## Version
 
 - **MCP Server Version**: 0.1.0
-- **Knol API Version**: v1
+- **Cortex API Version**: v1
 - **Node.js Requirement**: 18+
 
 ## License
@@ -298,7 +298,7 @@ Include:
                   │ Transport: stdio
                   ▼
 ┌─────────────────────────────────────────────┐
-│      Knol MCP Server (this project)          │
+│      Cortex MCP Server (this project)          │
 │ ┌─────────────────────────────────────────┐ │
 │ │ MCP Tools (7)                           │ │
 │ │ - knol_remember                         │ │
@@ -310,7 +310,7 @@ Include:
 │ │ - knol_entity_neighbors                 │ │
 │ │                                         │ │
 │ │ MCP Resources (1)                       │ │
-│ │ - knol://recent                         │ │
+│ │ - cortex://recent                         │ │
 │ └─────────────────────────────────────────┘ │
 └─────────────────┬───────────────────────────┘
                   │ HTTP (fetch)
@@ -318,14 +318,14 @@ Include:
                   │ Content-Type: application/json
                   ▼
          ┌────────────────────┐
-         │ Knol REST API v1   │
+         │ Cortex REST API v1   │
          │ - /v1/memory       │
          │ - /v1/graph        │
          └────────────────────┘
                   │
                   ▼
          ┌────────────────────┐
-         │ Knol Backend       │
+         │ Cortex Backend       │
          │ - Database         │
          │ - Semantic Search  │
          │ - Knowledge Graph  │
@@ -352,7 +352,7 @@ Include:
 ## What's Not Included
 
 - Frontend UI for memory management
-- Knol API server (use external service)
+- Cortex API server (use external service)
 - Batch operations (use individual tool calls)
 - Local caching (MCP client can cache)
 - Metrics/monitoring (log-based monitoring available)
@@ -369,13 +369,13 @@ Include:
 **Q: Do I need to host this server?**
 A: The server runs locally in your AI tool. No separate hosting needed.
 
-**Q: Can I use this without a Knol backend?**
-A: No, you need a running Knol API server to store and retrieve memories.
+**Q: Can I use this without a Cortex backend?**
+A: No, you need a running Cortex API server to store and retrieve memories.
 
 **Q: Is my API key secure?**
 A: Yes, it's stored in environment variables and never logged or exposed.
 
-**Q: Can I use multiple AI tools with the same Knol instance?**
+**Q: Can I use multiple AI tools with the same Cortex instance?**
 A: Yes, just configure all tools to point to the same API instance.
 
 **Q: What if I want to modify the server?**

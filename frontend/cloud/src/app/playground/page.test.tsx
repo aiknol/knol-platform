@@ -72,7 +72,7 @@ describe('PlaygroundPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Playground')).toBeTruthy();
     });
-    expect(screen.getByText('Test your API keys against the Knol gateway.')).toBeTruthy();
+    expect(screen.getByText('Test your API keys against the Cortex gateway.')).toBeTruthy();
   });
 
   it('renders API key input as password type by default', async () => {

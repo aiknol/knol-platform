@@ -1,9 +1,9 @@
-interface KnolLogoProps {
+interface CortexLogoProps {
   className?: string;
   label?: string;
 }
 
-export default function KnolLogo({ className = 'w-8 h-8', label = 'Knol logo' }: KnolLogoProps) {
+export default function CortexLogo({ className = 'w-8 h-8', label = 'Cortex logo' }: CortexLogoProps) {
   return (
     <svg className={className} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label={label}>
       <rect width="64" height="64" rx="14" fill="#0A0A0B" />

@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { SITE, NAV_LINKS } from '@/config/site';
-import KnolLogo from '@/components/layout/KnolLogo';
+import { SITE, NAV_LINKS, PRODUCT_LINKS } from '@/config/site';
+import CortexLogo from '@/components/layout/CortexLogo';
 
 const GITHUB_ICON = (
   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-label="GitHub" role="img">
@@ -13,16 +13,45 @@ const GITHUB_ICON = (
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
 
   return (
     <header className="fixed top-0 w-full bg-dark-900/95 backdrop-blur-md border-b border-dark-600/30 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         <Link href="/" className="flex items-center gap-3">
-          <KnolLogo className="w-8 h-8" label="Knol home" />
+          <CortexLogo className="w-8 h-8" label="Cortex home" />
           <span className="text-lg font-medium tracking-tight text-dark-50">{SITE.name}</span>
         </Link>
 
         <ul className="hidden md:flex items-center gap-8">
+          <li className="relative"
+            onMouseEnter={() => setProductsOpen(true)}
+            onMouseLeave={() => setProductsOpen(false)}
+          >
+            <button className="inline-flex items-center gap-1.5 text-dark-300 hover:text-dark-50 transition-colors text-sm py-2">
+              Products
+              <svg className={`w-3.5 h-3.5 transition-transform ${productsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {productsOpen && (
+              <>
+                {/* Invisible bridge so the mouse can travel from button to dropdown without leaving the <li> */}
+                <div className="absolute top-full left-0 h-2 w-56" />
+                <div className="absolute top-full left-0 mt-2 w-56 bg-dark-800 border border-dark-600/50 rounded-xl shadow-xl py-2 z-50">
+                  {PRODUCT_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-dark-300 hover:text-dark-50 hover:bg-dark-700/50 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </li>
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               {link.external ? (
@@ -58,24 +87,31 @@ export default function Navbar() {
 
       {mobileOpen && (
         <div className="md:hidden bg-dark-800 border-t border-dark-600/30 px-4 py-4 space-y-3">
-          {NAV_LINKS.map((link) => {
-            const isExternal = 'external' in link && link.external;
-            const isAbsolute = link.href.startsWith('http://') || link.href.startsWith('https://');
-            return isExternal ? (
-              <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-dark-300 hover:text-dark-50" onClick={() => setMobileOpen(false)}>
-                {link.label}
-              </a>
-            ) : isAbsolute ? (
-              <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-dark-300 hover:text-dark-50" onClick={() => setMobileOpen(false)}>
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.href} href={link.href} className="block text-dark-300 hover:text-dark-50" onClick={() => setMobileOpen(false)}>
-                {link.label}
-              </Link>
-            );
-          })}
-          <a href={SITE.github} className="block text-dark-300 hover:text-dark-50">GitHub</a>
+          <p className="text-xs text-dark-400 uppercase tracking-wider font-semibold pt-1">Products</p>
+          {PRODUCT_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="block text-dark-300 hover:text-dark-50 pl-2 py-1" onClick={() => setMobileOpen(false)}>
+              {link.label}
+            </Link>
+          ))}
+          <div className="border-t border-dark-600/30 pt-3">
+            {NAV_LINKS.map((link) => {
+              const isExternal = 'external' in link && link.external;
+              const isAbsolute = link.href.startsWith('http://') || link.href.startsWith('https://');
+              return isExternal ? (
+                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-dark-300 hover:text-dark-50 py-1" onClick={() => setMobileOpen(false)}>
+                  {link.label}
+                </a>
+              ) : isAbsolute ? (
+                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-dark-300 hover:text-dark-50 py-1" onClick={() => setMobileOpen(false)}>
+                  {link.label}
+                </a>
+              ) : (
+                <Link key={link.href} href={link.href} className="block text-dark-300 hover:text-dark-50 py-1" onClick={() => setMobileOpen(false)}>
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
           <a href={SITE.appUrl} target="_blank" rel="noopener noreferrer" className="block btn-primary text-sm text-center mt-2" onClick={() => setMobileOpen(false)}>Get Started Free</a>
         </div>
       )}
