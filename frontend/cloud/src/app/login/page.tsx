@@ -33,11 +33,11 @@ export default function AppLoginPage() {
         <div className="mb-6 flex items-center gap-3">
           <CortexLogo className="w-11 h-11" label="Cortex logo" />
           <div>
-            <p className="text-xs uppercase tracking-[0.12em] text-dark-500">Cortex Cloud</p>
-            <p className="text-sm text-dark-300">Tenant Workspace</p>
+            <p className="text-xs uppercase tracking-[0.12em] text-dark-500">DoAide Cortex</p>
+            <p className="text-sm text-dark-300">Cloud Workspace</p>
           </div>
         </div>
-        <h2 className="text-2xl font-semibold text-dark-50 mb-2">Sign in to Cortex Cloud</h2>
+        <h2 className="text-2xl font-semibold text-dark-50 mb-2">Sign in to DoAide Cortex</h2>
         <p className="text-sm text-dark-400 mb-6">Use your workspace credentials to access memory services.</p>
 
         {error && (

@@ -22,6 +22,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const isAuthPage =
+    pathname === '/' ||
     pathname === '/login' ||
     pathname === '/login/' ||
     pathname === '/signup' ||
@@ -114,7 +115,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <CortexLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0" label="Cortex logo" />
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-dark-400">Cortex Cloud</p>
+              <p className="text-xs sm:text-sm text-dark-400">DoAide Cortex</p>
               <h1 className="text-base sm:text-lg font-semibold text-dark-100 truncate">{tenant?.name || 'Workspace'}</h1>
             </div>
           </div>

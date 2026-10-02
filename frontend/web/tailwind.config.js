@@ -7,16 +7,16 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#EDE9FE',
-          100: '#D4CAFE',
-          200: '#B8A9E8',
-          300: '#8B73E6',
-          400: '#7A63D9',
-          500: '#6E56CF',
-          600: '#5B45B0',
-          700: '#4A3791',
-          800: '#3A2B72',
-          900: '#2A1F53',
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          300: '#F7CC5F',
+          400: '#F0B429',
+          500: '#D99E1B',
+          600: '#B78415',
+          700: '#926A10',
+          800: '#6D500C',
+          900: '#493607',
         },
         dark: {
           50: '#FAFAFA',
@@ -32,7 +32,7 @@ module.exports = {
         },
       },
       backgroundImage: {
-        'gradient-brand': 'linear-gradient(135deg, #6E56CF 0%, #8B73E6 100%)',
+        'gradient-brand': 'linear-gradient(135deg, #F0B429 0%, #F7CC5F 100%)',
         'gradient-dark': 'linear-gradient(180deg, #0A0A0B 0%, #111113 100%)',
       },
       fontFamily: {

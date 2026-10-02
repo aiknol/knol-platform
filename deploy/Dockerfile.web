@@ -1,5 +1,5 @@
 # =============================================================================
-# Knol Web — Multi-stage Static Build Dockerfile
+# DoAide Cortex Web — Multi-stage Static Build Dockerfile
 # Builds Next.js static export and serves via nginx (~25MB image)
 # =============================================================================
 
