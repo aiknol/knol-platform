@@ -1,0 +1,1068 @@
+[
+  {
+    "channel": "email",
+    "timestamp": "2026-07-01T16:28:32.967Z",
+    "attribution": {
+      "contentType": "email",
+      "templateCategory": "email_weekly",
+      "variantIndex": 0,
+      "variantId": "email_weekly:v0",
+      "enhanced": false,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-newsletter",
+      "utmSource": "email",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-newsletter",
+      "utmContent": "email_weekly:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "data": {
+      "sent": 0,
+      "failed": 0,
+      "errors": []
+    },
+    "contentPreview": "{\"text\":\"{\\\"subject\\\":\\\"This week in Knol: [TOPIC]\\\",\\\"preheader\\\":\\\"New features, community highlights, and engineering deep dives\\\"}\",\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "github",
+    "timestamp": "2026-07-01T16:28:35.972Z",
+    "attribution": {
+      "templateCategory": "github_metadata",
+      "variantId": "github_metadata:v0",
+      "variantIndex": 0,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-github-update",
+      "utmSource": "github",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-github-update",
+      "utmContent": "github_metadata:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "data": [
+      {
+        "success": false,
+        "status": 404,
+        "statusCode": 404,
+        "rateLimited": false,
+        "headers": {
+          "date": "Wed, 01 Jul 2026 16:28:36 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "content-length": "121",
+          "x-github-media-type": "github.v3; format=json",
+          "x-accepted-github-permissions": "administration=write",
+          "x-github-api-version-selected": "2022-11-28",
+          "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+          "access-control-allow-origin": "*",
+          "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+          "x-frame-options": "deny",
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "0",
+          "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+          "content-security-policy": "default-src 'none'",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-request-id": "6C40:185541:15B59D2:4E9B39C:6A454034",
+          "server": "github.com",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4998",
+          "x-ratelimit-reset": "1782926907",
+          "x-ratelimit-used": "2",
+          "x-ratelimit-resource": "core"
+        },
+        "data": {
+          "message": "Not Found",
+          "documentation_url": "https://docs.github.com/rest/repos/repos#update-a-repository",
+          "status": "404"
+        }
+      },
+      {
+        "success": false,
+        "status": 404,
+        "statusCode": 404,
+        "rateLimited": false,
+        "headers": {
+          "date": "Wed, 01 Jul 2026 16:28:36 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "content-length": "131",
+          "x-github-media-type": "github.v3; format=json",
+          "x-accepted-github-permissions": "administration=write",
+          "x-github-api-version-selected": "2022-11-28",
+          "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+          "access-control-allow-origin": "*",
+          "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+          "x-frame-options": "deny",
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "0",
+          "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+          "content-security-policy": "default-src 'none'",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-request-id": "6C40:185541:15B5AC1:4E9B648:6A454034",
+          "server": "github.com",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4997",
+          "x-ratelimit-reset": "1782926907",
+          "x-ratelimit-used": "3",
+          "x-ratelimit-resource": "core"
+        },
+        "data": {
+          "message": "Not Found",
+          "documentation_url": "https://docs.github.com/rest/repos/repos#replace-all-repository-topics",
+          "status": "404"
+        }
+      }
+    ],
+    "success": true,
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "twitter",
+    "timestamp": "2026-07-01T16:28:45.551Z",
+    "attribution": {
+      "contentType": "tweet",
+      "templateCategory": "tweet_launch",
+      "variantIndex": 0,
+      "variantId": "tweet_launch:v0",
+      "enhanced": false,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-thread",
+      "utmSource": "twitter",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-thread",
+      "utmContent": "tweet_launch:v0"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "success": false,
+    "data": [
+      {
+        "success": false,
+        "error": "Missing Twitter credentials"
+      }
+    ],
+    "contentPreview": "{\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "blog",
+    "timestamp": "2026-07-14T15:24:37.007Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "blog",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "data": {
+      "success": true,
+      "filename": "2026-07-14-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "filepath": "/home/runner/work/knol-platform/knol-platform/marketing/blog/_posts/2026-07-14-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "url": "https://blog.aiknol.com/2026/07/14/bi-temporal-data-for-ai-time-travel-for-llm-memory",
+      "slug": "bi-temporal-data-for-ai-time-travel-for-llm-memory"
+    },
+    "success": true,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "devto",
+    "timestamp": "2026-07-14T15:24:37.009Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "devto",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 3,
+      "utmUrlsApplied": 3
+    },
+    "data": {
+      "success": false,
+      "error": "Missing Dev.to API key",
+      "manual": true,
+      "content": {
+        "title": "Bi-Temporal Data for AI: Time Travel for LLM Memory",
+        "body": "# Bi-Temporal Data for AI: Time Travel for LLM Memory\n\nHow valid_from and valid_to enable point-in-time replay of AI knowledge.\n\nGitHub: https://github.com/aiknol/knol?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1\nDocs: https://aiknol.com/docs?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1",
+        "tags": [
+          "tutorial",
+          "docker",
+          "deployment"
+        ],
+        "canonicalUrl": "https://blog.aiknol.com/2026/07/14/bi-temporal-data-for-ai-time-travel-for-llm-memory?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1"
+      }
+    },
+    "success": false,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":3,\"utmUrlsApplied\":3}"
+  },
+  {
+    "channel": "linkedin",
+    "timestamp": "2026-07-14T15:24:40.014Z",
+    "attribution": {
+      "contentType": "linkedin",
+      "templateCategory": "linkedin_technical",
+      "variantIndex": 0,
+      "variantId": "linkedin_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-linkedin",
+      "utmSource": "linkedin",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-linkedin",
+      "utmContent": "linkedin_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "data": {
+      "success": false,
+      "error": "Missing LinkedIn credentials — saving content for manual posting",
+      "content": "How we achieve sub-10ms memory retrieval in Knol:\n\nMost \"AI memory\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\n\nKnol uses a 5-stage retrieval pipeline:\n\n1. Intent Classification — detect if the query is about preferences, temporal events, relationships, or general knowledge\n2. Parallel Search — vector similarity + BM25 full-text + graph traversal run concurrently\n3. Scope Cascade — search narrows from session → user → agent → organization\n4. RRF Fusion — Reciprocal Rank Fusion with intent-weighted scores combines all signals\n5. Confidence Filtering — results below threshold are excluded\n\nThe key insight: different queries need different retrieval strategies. \"What does Alice prefer?\" needs vector search. \"Who manages Bob?\" needs graph traversal. \"What happened last Tuesday?\" needs temporal + text.\n\nAll written in Rust with Axum, running on PostgreSQL + pgvector.\n\nhttps://github.com/aiknol/knol?utm_source=linkedin&utm_medium=free_promo&utm_campaign=weekly_weekly-linkedin&utm_content=linkedin_technical%3Av0\n\n#Engineering #AI #SystemDesign #Rust",
+      "manual": true
+    },
+    "success": false,
+    "contentPreview": "{\"text\":\"How we achieve sub-10ms memory retrieval in Knol:\\n\\nMost \\\"AI memory\\\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\\n\\nKnol uses a 5-sta"
+  },
+  {
+    "channel": "reddit",
+    "timestamp": "2026-07-14T15:24:43.018Z",
+    "attribution": {
+      "contentType": "reddit",
+      "templateCategory": "reddit_ml",
+      "variantIndex": 0,
+      "variantId": "reddit_ml:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit",
+      "utmSource": "reddit",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit",
+      "utmContent": "reddit_ml:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"text\":\"Most LLM memory solutions are just \\\"stuff vectors in a DB and hope for the best.\\\" That works for simple Q&A but breaks down when you need:\\n\\n- Tracking how knowledge evolves over time\\n- Understanding relationships between entit"
+  },
+  {
+    "channel": "reddit_engagement",
+    "timestamp": "2026-07-14T15:24:46.020Z",
+    "attribution": {
+      "templateCategory": "reddit_engagement",
+      "variantId": "reddit_engagement:v0",
+      "variantIndex": 0,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit-engagement",
+      "utmSource": "reddit_engagement",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit-engagement",
+      "utmContent": "reddit_engagement:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "blog",
+    "timestamp": "2026-07-21T15:45:27.468Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 0,
+      "variantId": "blog_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "blog",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "data": {
+      "success": true,
+      "filename": "2026-07-21-how-knol-achieves-sub-10ms-memory-retrieval.md",
+      "filepath": "/home/runner/work/knol-platform/knol-platform/marketing/blog/_posts/2026-07-21-how-knol-achieves-sub-10ms-memory-retrieval.md",
+      "url": "https://blog.aiknol.com/2026/07/21/how-knol-achieves-sub-10ms-memory-retrieval",
+      "slug": "how-knol-achieves-sub-10ms-memory-retrieval"
+    },
+    "success": true,
+    "contentPreview": "{\"title\":\"How Knol Achieves Sub-10ms Memory Retrieval\",\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "devto",
+    "timestamp": "2026-07-21T15:45:27.470Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 0,
+      "variantId": "blog_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "devto",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 3,
+      "utmUrlsApplied": 3
+    },
+    "data": {
+      "success": false,
+      "error": "Missing Dev.to API key",
+      "manual": true,
+      "content": {
+        "title": "How Knol Achieves Sub-10ms Memory Retrieval",
+        "body": "# How Knol Achieves Sub-10ms Memory Retrieval\n\nA deep dive into intent-aware hybrid search with RRF fusion.\n\nGitHub: https://github.com/aiknol/knol?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av0\nDocs: https://aiknol.com/docs?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av0",
+        "tags": [
+          "ai",
+          "llm",
+          "memory"
+        ],
+        "canonicalUrl": "https://blog.aiknol.com/2026/07/21/how-knol-achieves-sub-10ms-memory-retrieval?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av0"
+      }
+    },
+    "success": false,
+    "contentPreview": "{\"title\":\"How Knol Achieves Sub-10ms Memory Retrieval\",\"urlsDetected\":3,\"utmUrlsApplied\":3}"
+  },
+  {
+    "channel": "linkedin",
+    "timestamp": "2026-07-21T15:45:30.475Z",
+    "attribution": {
+      "contentType": "linkedin",
+      "templateCategory": "linkedin_technical",
+      "variantIndex": 0,
+      "variantId": "linkedin_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-linkedin",
+      "utmSource": "linkedin",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-linkedin",
+      "utmContent": "linkedin_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "data": {
+      "success": false,
+      "error": "Missing LinkedIn credentials — saving content for manual posting",
+      "content": "How we achieve sub-10ms memory retrieval in Knol:\n\nMost \"AI memory\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\n\nKnol uses a 5-stage retrieval pipeline:\n\n1. Intent Classification — detect if the query is about preferences, temporal events, relationships, or general knowledge\n2. Parallel Search — vector similarity + BM25 full-text + graph traversal run concurrently\n3. Scope Cascade — search narrows from session → user → agent → organization\n4. RRF Fusion — Reciprocal Rank Fusion with intent-weighted scores combines all signals\n5. Confidence Filtering — results below threshold are excluded\n\nThe key insight: different queries need different retrieval strategies. \"What does Alice prefer?\" needs vector search. \"Who manages Bob?\" needs graph traversal. \"What happened last Tuesday?\" needs temporal + text.\n\nAll written in Rust with Axum, running on PostgreSQL + pgvector.\n\nhttps://github.com/aiknol/knol?utm_source=linkedin&utm_medium=free_promo&utm_campaign=weekly_weekly-linkedin&utm_content=linkedin_technical%3Av0\n\n#Engineering #AI #SystemDesign #Rust",
+      "manual": true
+    },
+    "success": false,
+    "contentPreview": "{\"text\":\"How we achieve sub-10ms memory retrieval in Knol:\\n\\nMost \\\"AI memory\\\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\\n\\nKnol uses a 5-sta"
+  },
+  {
+    "channel": "reddit",
+    "timestamp": "2026-07-21T15:45:33.479Z",
+    "attribution": {
+      "contentType": "reddit",
+      "templateCategory": "reddit_ml",
+      "variantIndex": 0,
+      "variantId": "reddit_ml:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit",
+      "utmSource": "reddit",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit",
+      "utmContent": "reddit_ml:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"text\":\"Most LLM memory solutions are just \\\"stuff vectors in a DB and hope for the best.\\\" That works for simple Q&A but breaks down when you need:\\n\\n- Tracking how knowledge evolves over time\\n- Understanding relationships between entit"
+  },
+  {
+    "channel": "reddit_engagement",
+    "timestamp": "2026-07-21T15:45:36.481Z",
+    "attribution": {
+      "templateCategory": "reddit_engagement",
+      "variantId": "reddit_engagement:v0",
+      "variantIndex": 0,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit-engagement",
+      "utmSource": "reddit_engagement",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit-engagement",
+      "utmContent": "reddit_engagement:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "email",
+    "timestamp": "2026-08-01T16:45:08.372Z",
+    "attribution": {
+      "contentType": "email",
+      "templateCategory": "email_weekly",
+      "variantIndex": 0,
+      "variantId": "email_weekly:v0",
+      "enhanced": false,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-newsletter",
+      "utmSource": "email",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-newsletter",
+      "utmContent": "email_weekly:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "data": {
+      "sent": 0,
+      "failed": 0,
+      "errors": []
+    },
+    "contentPreview": "{\"text\":\"{\\\"subject\\\":\\\"This week in Knol: [TOPIC]\\\",\\\"preheader\\\":\\\"New features, community highlights, and engineering deep dives\\\"}\",\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "github",
+    "timestamp": "2026-08-01T16:45:11.377Z",
+    "attribution": {
+      "templateCategory": "github_metadata",
+      "variantId": "github_metadata:v0",
+      "variantIndex": 0,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-github-update",
+      "utmSource": "github",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-github-update",
+      "utmContent": "github_metadata:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "data": [
+      {
+        "success": false,
+        "status": 404,
+        "statusCode": 404,
+        "rateLimited": false,
+        "headers": {
+          "date": "Sat, 01 Aug 2026 16:45:11 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "content-length": "121",
+          "x-github-media-type": "github.v3; format=json",
+          "x-accepted-github-permissions": "administration=write",
+          "x-github-api-version-selected": "2022-11-28",
+          "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+          "access-control-allow-origin": "*",
+          "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+          "x-frame-options": "deny",
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "0",
+          "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+          "content-security-policy": "default-src 'none'",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-request-id": "E818:854F7:2BFC7B3:9BC6260:6A6E2297",
+          "x-github-edge-region": "iad",
+          "server": "github.com",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4998",
+          "x-ratelimit-reset": "1785606303",
+          "x-ratelimit-used": "2",
+          "x-ratelimit-resource": "core"
+        },
+        "data": {
+          "message": "Not Found",
+          "documentation_url": "https://docs.github.com/rest/repos/repos#update-a-repository",
+          "status": "404"
+        }
+      },
+      {
+        "success": false,
+        "status": 404,
+        "statusCode": 404,
+        "rateLimited": false,
+        "headers": {
+          "date": "Sat, 01 Aug 2026 16:45:11 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "content-length": "131",
+          "x-github-media-type": "github.v3; format=json",
+          "x-accepted-github-permissions": "administration=write",
+          "x-github-api-version-selected": "2022-11-28",
+          "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+          "access-control-allow-origin": "*",
+          "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+          "x-frame-options": "deny",
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "0",
+          "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+          "content-security-policy": "default-src 'none'",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-request-id": "E818:854F7:2BFC81D:9BC63CD:6A6E2297",
+          "x-github-edge-region": "iad",
+          "server": "github.com",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4997",
+          "x-ratelimit-reset": "1785606303",
+          "x-ratelimit-used": "3",
+          "x-ratelimit-resource": "core"
+        },
+        "data": {
+          "message": "Not Found",
+          "documentation_url": "https://docs.github.com/rest/repos/repos#replace-all-repository-topics",
+          "status": "404"
+        }
+      }
+    ],
+    "success": true,
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "twitter",
+    "timestamp": "2026-08-01T16:45:20.505Z",
+    "attribution": {
+      "contentType": "tweet",
+      "templateCategory": "tweet_launch",
+      "variantIndex": 2,
+      "variantId": "tweet_launch:v2",
+      "enhanced": false,
+      "cadence": "monthly",
+      "campaignName": "Monthly Push",
+      "taskId": "monthly-thread",
+      "utmSource": "twitter",
+      "utmMedium": "free_promo",
+      "utmCampaign": "monthly_monthly-thread",
+      "utmContent": "tweet_launch:v2"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "success": false,
+    "data": [
+      {
+        "success": false,
+        "error": "Missing Twitter credentials"
+      }
+    ],
+    "contentPreview": "{\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "blog",
+    "timestamp": "2026-08-11T15:00:58.332Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "blog",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "data": {
+      "success": true,
+      "filename": "2026-08-11-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "filepath": "/home/runner/work/knol-platform/knol-platform/marketing/blog/_posts/2026-08-11-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "url": "https://blog.aiknol.com/2026/08/11/bi-temporal-data-for-ai-time-travel-for-llm-memory",
+      "slug": "bi-temporal-data-for-ai-time-travel-for-llm-memory"
+    },
+    "success": true,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "devto",
+    "timestamp": "2026-08-11T15:00:58.335Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "devto",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 3,
+      "utmUrlsApplied": 3
+    },
+    "data": {
+      "success": false,
+      "error": "Missing Dev.to API key",
+      "manual": true,
+      "content": {
+        "title": "Bi-Temporal Data for AI: Time Travel for LLM Memory",
+        "body": "# Bi-Temporal Data for AI: Time Travel for LLM Memory\n\nHow valid_from and valid_to enable point-in-time replay of AI knowledge.\n\nGitHub: https://github.com/aiknol/knol?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1\nDocs: https://aiknol.com/docs?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1",
+        "tags": [
+          "rag",
+          "retrieval",
+          "ai"
+        ],
+        "canonicalUrl": "https://blog.aiknol.com/2026/08/11/bi-temporal-data-for-ai-time-travel-for-llm-memory?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1"
+      }
+    },
+    "success": false,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":3,\"utmUrlsApplied\":3}"
+  },
+  {
+    "channel": "linkedin",
+    "timestamp": "2026-08-11T15:01:01.340Z",
+    "attribution": {
+      "contentType": "linkedin",
+      "templateCategory": "linkedin_technical",
+      "variantIndex": 0,
+      "variantId": "linkedin_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-linkedin",
+      "utmSource": "linkedin",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-linkedin",
+      "utmContent": "linkedin_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "data": {
+      "success": false,
+      "error": "Missing LinkedIn credentials — saving content for manual posting",
+      "content": "How we achieve sub-10ms memory retrieval in Knol:\n\nMost \"AI memory\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\n\nKnol uses a 5-stage retrieval pipeline:\n\n1. Intent Classification — detect if the query is about preferences, temporal events, relationships, or general knowledge\n2. Parallel Search — vector similarity + BM25 full-text + graph traversal run concurrently\n3. Scope Cascade — search narrows from session → user → agent → organization\n4. RRF Fusion — Reciprocal Rank Fusion with intent-weighted scores combines all signals\n5. Confidence Filtering — results below threshold are excluded\n\nThe key insight: different queries need different retrieval strategies. \"What does Alice prefer?\" needs vector search. \"Who manages Bob?\" needs graph traversal. \"What happened last Tuesday?\" needs temporal + text.\n\nAll written in Rust with Axum, running on PostgreSQL + pgvector.\n\nhttps://github.com/aiknol/knol?utm_source=linkedin&utm_medium=free_promo&utm_campaign=weekly_weekly-linkedin&utm_content=linkedin_technical%3Av0\n\n#Engineering #AI #SystemDesign #Rust",
+      "manual": true
+    },
+    "success": false,
+    "contentPreview": "{\"text\":\"How we achieve sub-10ms memory retrieval in Knol:\\n\\nMost \\\"AI memory\\\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\\n\\nKnol uses a 5-sta"
+  },
+  {
+    "channel": "reddit",
+    "timestamp": "2026-08-11T15:01:04.345Z",
+    "attribution": {
+      "contentType": "reddit",
+      "templateCategory": "reddit_ml",
+      "variantIndex": 0,
+      "variantId": "reddit_ml:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit",
+      "utmSource": "reddit",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit",
+      "utmContent": "reddit_ml:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"text\":\"Most LLM memory solutions are just \\\"stuff vectors in a DB and hope for the best.\\\" That works for simple Q&A but breaks down when you need:\\n\\n- Tracking how knowledge evolves over time\\n- Understanding relationships between entit"
+  },
+  {
+    "channel": "reddit_engagement",
+    "timestamp": "2026-08-11T15:01:07.346Z",
+    "attribution": {
+      "templateCategory": "reddit_engagement",
+      "variantId": "reddit_engagement:v0",
+      "variantIndex": 0,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit-engagement",
+      "utmSource": "reddit_engagement",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit-engagement",
+      "utmContent": "reddit_engagement:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "blog",
+    "timestamp": "2026-08-18T15:26:25.835Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 0,
+      "variantId": "blog_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "blog",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "data": {
+      "success": true,
+      "filename": "2026-08-18-how-knol-achieves-sub-10ms-memory-retrieval.md",
+      "filepath": "/home/runner/work/knol-platform/knol-platform/marketing/blog/_posts/2026-08-18-how-knol-achieves-sub-10ms-memory-retrieval.md",
+      "url": "https://blog.aiknol.com/2026/08/18/how-knol-achieves-sub-10ms-memory-retrieval",
+      "slug": "how-knol-achieves-sub-10ms-memory-retrieval"
+    },
+    "success": true,
+    "contentPreview": "{\"title\":\"How Knol Achieves Sub-10ms Memory Retrieval\",\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "devto",
+    "timestamp": "2026-08-18T15:26:25.837Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 0,
+      "variantId": "blog_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "devto",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 3,
+      "utmUrlsApplied": 3
+    },
+    "data": {
+      "success": false,
+      "error": "Missing Dev.to API key",
+      "manual": true,
+      "content": {
+        "title": "How Knol Achieves Sub-10ms Memory Retrieval",
+        "body": "# How Knol Achieves Sub-10ms Memory Retrieval\n\nA deep dive into intent-aware hybrid search with RRF fusion.\n\nGitHub: https://github.com/aiknol/knol?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av0\nDocs: https://aiknol.com/docs?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av0",
+        "tags": [
+          "rust",
+          "architecture",
+          "open-source"
+        ],
+        "canonicalUrl": "https://blog.aiknol.com/2026/08/18/how-knol-achieves-sub-10ms-memory-retrieval?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av0"
+      }
+    },
+    "success": false,
+    "contentPreview": "{\"title\":\"How Knol Achieves Sub-10ms Memory Retrieval\",\"urlsDetected\":3,\"utmUrlsApplied\":3}"
+  },
+  {
+    "channel": "linkedin",
+    "timestamp": "2026-08-18T15:26:28.843Z",
+    "attribution": {
+      "contentType": "linkedin",
+      "templateCategory": "linkedin_technical",
+      "variantIndex": 0,
+      "variantId": "linkedin_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-linkedin",
+      "utmSource": "linkedin",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-linkedin",
+      "utmContent": "linkedin_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "data": {
+      "success": false,
+      "error": "Missing LinkedIn credentials — saving content for manual posting",
+      "content": "How we achieve sub-10ms memory retrieval in Knol:\n\nMost \"AI memory\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\n\nKnol uses a 5-stage retrieval pipeline:\n\n1. Intent Classification — detect if the query is about preferences, temporal events, relationships, or general knowledge\n2. Parallel Search — vector similarity + BM25 full-text + graph traversal run concurrently\n3. Scope Cascade — search narrows from session → user → agent → organization\n4. RRF Fusion — Reciprocal Rank Fusion with intent-weighted scores combines all signals\n5. Confidence Filtering — results below threshold are excluded\n\nThe key insight: different queries need different retrieval strategies. \"What does Alice prefer?\" needs vector search. \"Who manages Bob?\" needs graph traversal. \"What happened last Tuesday?\" needs temporal + text.\n\nAll written in Rust with Axum, running on PostgreSQL + pgvector.\n\nhttps://github.com/aiknol/knol?utm_source=linkedin&utm_medium=free_promo&utm_campaign=weekly_weekly-linkedin&utm_content=linkedin_technical%3Av0\n\n#Engineering #AI #SystemDesign #Rust",
+      "manual": true
+    },
+    "success": false,
+    "contentPreview": "{\"text\":\"How we achieve sub-10ms memory retrieval in Knol:\\n\\nMost \\\"AI memory\\\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\\n\\nKnol uses a 5-sta"
+  },
+  {
+    "channel": "reddit",
+    "timestamp": "2026-08-18T15:26:31.848Z",
+    "attribution": {
+      "contentType": "reddit",
+      "templateCategory": "reddit_ml",
+      "variantIndex": 0,
+      "variantId": "reddit_ml:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit",
+      "utmSource": "reddit",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit",
+      "utmContent": "reddit_ml:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"text\":\"Most LLM memory solutions are just \\\"stuff vectors in a DB and hope for the best.\\\" That works for simple Q&A but breaks down when you need:\\n\\n- Tracking how knowledge evolves over time\\n- Understanding relationships between entit"
+  },
+  {
+    "channel": "reddit_engagement",
+    "timestamp": "2026-08-18T15:26:34.850Z",
+    "attribution": {
+      "templateCategory": "reddit_engagement",
+      "variantId": "reddit_engagement:v0",
+      "variantIndex": 0,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit-engagement",
+      "utmSource": "reddit_engagement",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit-engagement",
+      "utmContent": "reddit_engagement:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  },
+  {
+    "channel": "blog",
+    "timestamp": "2026-08-25T15:37:06.301Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "blog",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 2,
+      "utmUrlsApplied": 2
+    },
+    "data": {
+      "success": true,
+      "filename": "2026-08-25-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "filepath": "/home/runner/work/knol-platform/knol-platform/marketing/blog/_posts/2026-08-25-bi-temporal-data-for-ai-time-travel-for-llm-memory.md",
+      "url": "https://blog.aiknol.com/2026/08/25/bi-temporal-data-for-ai-time-travel-for-llm-memory",
+      "slug": "bi-temporal-data-for-ai-time-travel-for-llm-memory"
+    },
+    "success": true,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":2,\"utmUrlsApplied\":2}"
+  },
+  {
+    "channel": "devto",
+    "timestamp": "2026-08-25T15:37:06.304Z",
+    "attribution": {
+      "contentType": "blog",
+      "templateCategory": "blog_technical",
+      "variantIndex": 1,
+      "variantId": "blog_technical:v1",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-blog",
+      "utmSource": "devto",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-blog",
+      "utmContent": "blog_technical:v1"
+    },
+    "tracking": {
+      "urlsDetected": 3,
+      "utmUrlsApplied": 3
+    },
+    "data": {
+      "success": false,
+      "error": "Missing Dev.to API key",
+      "manual": true,
+      "content": {
+        "title": "Bi-Temporal Data for AI: Time Travel for LLM Memory",
+        "body": "# Bi-Temporal Data for AI: Time Travel for LLM Memory\n\nHow valid_from and valid_to enable point-in-time replay of AI knowledge.\n\nGitHub: https://github.com/aiknol/knol?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1\nDocs: https://aiknol.com/docs?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1",
+        "tags": [
+          "claude",
+          "entity-extraction",
+          "llm"
+        ],
+        "canonicalUrl": "https://blog.aiknol.com/2026/08/25/bi-temporal-data-for-ai-time-travel-for-llm-memory?utm_source=devto&utm_medium=free_promo&utm_campaign=weekly_weekly-blog&utm_content=blog_technical%3Av1"
+      }
+    },
+    "success": false,
+    "contentPreview": "{\"title\":\"Bi-Temporal Data for AI: Time Travel for LLM Memory\",\"urlsDetected\":3,\"utmUrlsApplied\":3}"
+  },
+  {
+    "channel": "linkedin",
+    "timestamp": "2026-08-25T15:37:09.308Z",
+    "attribution": {
+      "contentType": "linkedin",
+      "templateCategory": "linkedin_technical",
+      "variantIndex": 0,
+      "variantId": "linkedin_technical:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-linkedin",
+      "utmSource": "linkedin",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-linkedin",
+      "utmContent": "linkedin_technical:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "data": {
+      "success": false,
+      "error": "Missing LinkedIn credentials — saving content for manual posting",
+      "content": "How we achieve sub-10ms memory retrieval in Knol:\n\nMost \"AI memory\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\n\nKnol uses a 5-stage retrieval pipeline:\n\n1. Intent Classification — detect if the query is about preferences, temporal events, relationships, or general knowledge\n2. Parallel Search — vector similarity + BM25 full-text + graph traversal run concurrently\n3. Scope Cascade — search narrows from session → user → agent → organization\n4. RRF Fusion — Reciprocal Rank Fusion with intent-weighted scores combines all signals\n5. Confidence Filtering — results below threshold are excluded\n\nThe key insight: different queries need different retrieval strategies. \"What does Alice prefer?\" needs vector search. \"Who manages Bob?\" needs graph traversal. \"What happened last Tuesday?\" needs temporal + text.\n\nAll written in Rust with Axum, running on PostgreSQL + pgvector.\n\nhttps://github.com/aiknol/knol?utm_source=linkedin&utm_medium=free_promo&utm_campaign=weekly_weekly-linkedin&utm_content=linkedin_technical%3Av0\n\n#Engineering #AI #SystemDesign #Rust",
+      "manual": true
+    },
+    "success": false,
+    "contentPreview": "{\"text\":\"How we achieve sub-10ms memory retrieval in Knol:\\n\\nMost \\\"AI memory\\\" solutions are just a vector database with a prompt template. That works for simple cases but breaks down with complex, evolving knowledge.\\n\\nKnol uses a 5-sta"
+  },
+  {
+    "channel": "reddit",
+    "timestamp": "2026-08-25T15:37:12.313Z",
+    "attribution": {
+      "contentType": "reddit",
+      "templateCategory": "reddit_ml",
+      "variantIndex": 0,
+      "variantId": "reddit_ml:v0",
+      "enhanced": false,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit",
+      "utmSource": "reddit",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit",
+      "utmContent": "reddit_ml:v0"
+    },
+    "tracking": {
+      "urlsDetected": 1,
+      "utmUrlsApplied": 1
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"text\":\"Most LLM memory solutions are just \\\"stuff vectors in a DB and hope for the best.\\\" That works for simple Q&A but breaks down when you need:\\n\\n- Tracking how knowledge evolves over time\\n- Understanding relationships between entit"
+  },
+  {
+    "channel": "reddit_engagement",
+    "timestamp": "2026-08-25T15:37:15.320Z",
+    "attribution": {
+      "templateCategory": "reddit_engagement",
+      "variantId": "reddit_engagement:v0",
+      "variantIndex": 0,
+      "cadence": "weekly",
+      "campaignName": "Weekly Content",
+      "taskId": "weekly-reddit-engagement",
+      "utmSource": "reddit_engagement",
+      "utmMedium": "free_promo",
+      "utmCampaign": "weekly_weekly-reddit-engagement",
+      "utmContent": "reddit_engagement:v0"
+    },
+    "tracking": {
+      "urlsDetected": 0,
+      "utmUrlsApplied": 0
+    },
+    "success": false,
+    "data": {
+      "error": "Auth failed: Missing Reddit credentials"
+    },
+    "contentPreview": "{\"urlsDetected\":0,\"utmUrlsApplied\":0}"
+  }
+]
