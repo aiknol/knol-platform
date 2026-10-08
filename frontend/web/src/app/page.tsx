@@ -1,6 +1,8 @@
 import FeatureGrid from '@/components/marketing/FeatureGrid';
 import CodeBlock from '@/components/ui/CodeBlock';
 import ComparisonTable from '@/components/marketing/ComparisonTable';
+import FAQ from '@/components/marketing/FAQ';
+import Testimonials from '@/components/marketing/Testimonials';
 import { SITE, TECH_STACK, KEY_METRICS, MEMORY_TYPES, USE_CASES, SDK_ECOSYSTEM } from '@/config';
 
 const quickStartCode = `# Start the full stack in one command
@@ -74,13 +76,13 @@ export default function HomePage() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-base">
-              Try the Live Demo
+              Start Building Free
             </a>
             <a href={SITE.github} className="btn-secondary text-base">
-              Star on GitHub
+              View Source on GitHub
             </a>
             <a href="/pricing/" className="btn-secondary text-base">
-              See Cloud Plans
+              Compare Plans
             </a>
           </div>
           <p className="mt-6 text-sm text-dark-400">
@@ -432,22 +434,28 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* FAQ */}
+      <FAQ />
+
       {/* CTA */}
       <section className="px-4 sm:px-6 lg:px-8 py-24 text-center relative overflow-hidden">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="max-w-3xl mx-auto relative">
           <h2 className="text-3xl md:text-4xl font-semibold text-dark-50 tracking-tight">
-            Ready to give your AI persistent context?
+            Give your AI agents persistent memory — in 60 seconds
           </h2>
           <p className="mt-4 text-lg text-dark-300">
-            Deploy the open-source stack in 60 seconds. Scale with managed cloud when you&apos;re ready.
+            Deploy the open-source stack with a single command. No credit card, no vendor lock-in. Scale to managed cloud when you&apos;re ready.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
-              Try the Live Demo
+              Deploy Cortex Now
             </a>
             <a href={SITE.github} className="btn-secondary">
-              Star on GitHub
+              View Source on GitHub
             </a>
           </div>
         </div>
