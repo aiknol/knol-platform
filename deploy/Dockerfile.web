@@ -16,8 +16,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY frontend/web/ .
 
 # Build args for environment-specific values
-ARG NEXT_PUBLIC_API_URL=https://api.aiknol.com
-ARG NEXT_PUBLIC_ADMIN_API_URL=https://admin.aiknol.com
+ARG NEXT_PUBLIC_API_URL=https://api.cortex.doaide.com
+ARG NEXT_PUBLIC_ADMIN_API_URL=https://api.cortex.doaide.com
 
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_ADMIN_API_URL=${NEXT_PUBLIC_ADMIN_API_URL}

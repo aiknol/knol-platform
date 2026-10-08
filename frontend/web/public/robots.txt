@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
-Sitemap: https://aiknol.com/sitemap.xml
+Sitemap: https://cortex.doaide.com/sitemap.xml

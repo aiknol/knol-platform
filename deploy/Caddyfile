@@ -82,20 +82,43 @@
 	}
 }
 
+# Main Website — cortex.doaide.com (static export)
+{$WEB_DOMAIN:cortex.doaide.com}, {$WWW_DOMAIN:www.cortex.doaide.com} {
+	root * /srv/web
+	file_server
+	try_files {path} {path}/ /index.html
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+}
+
 # Internal service routes — not publicly exposed, but available on
 # the internal network for service-to-service communication.
 # Caddy only exposes the API domain externally.
 
 # MinIO console — optional, only enable for debugging
-# Uncomment to expose at minio.aiknol.com:
+# Uncomment to expose at minio.cortex.doaide.com:
 #
-# {$MINIO_DOMAIN:minio.aiknol.com} {
+# {$MINIO_DOMAIN:minio.cortex.doaide.com} {
 # 	reverse_proxy minio:9001
 # }
 
 # NATS monitoring — optional, only enable for debugging
-# Uncomment to expose at nats.aiknol.com:
+# Uncomment to expose at nats.cortex.doaide.com:
 #
-# {$NATS_DOMAIN:nats.aiknol.com} {
+# {$NATS_DOMAIN:nats.cortex.doaide.com} {
 # 	reverse_proxy nats:8222
 # }
