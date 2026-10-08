@@ -36,7 +36,11 @@ echo "==> Web builds"
 echo "==> Frontend smoke checks"
 "$ROOT_DIR/scripts/frontend-smoke.sh"
 
-echo "==> E2E tests (gateway + tenant API)"
-"$ROOT_DIR/scripts/e2e-tests.sh"
+if [ "${SKIP_E2E:-}" = "1" ]; then
+  echo "==> E2E tests (skipped: SKIP_E2E=1)"
+else
+  echo "==> E2E tests (gateway + tenant API)"
+  "$ROOT_DIR/scripts/e2e-tests.sh"
+fi
 
 echo "✅ Local CI gates passed"
