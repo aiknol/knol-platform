@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HMRErrorHandler from '@/components/HMRErrorHandler';
 import WhatsAppShare from '@/components/ui/WhatsAppShare';
+import OnboardingGuide from '@/components/ui/OnboardingGuide';
 import { SITE, pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -92,6 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="pt-16">{children}</main>
         <WhatsAppShare />
         <Footer />
+        <OnboardingGuide />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd) }}
