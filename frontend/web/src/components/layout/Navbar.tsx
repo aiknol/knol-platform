@@ -76,7 +76,7 @@ export default function Navbar() {
           </li>
         </ul>
 
-        <button className="md:hidden text-dark-100" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
+        <button className="md:hidden text-dark-100 inline-flex items-center justify-center min-h-[48px] min-w-[48px] -mr-3" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu" aria-expanded={mobileOpen}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {mobileOpen
               ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,10 +86,10 @@ export default function Navbar() {
       </nav>
 
       {mobileOpen && (
-        <div className="md:hidden bg-dark-800 border-t border-dark-600/30 px-4 py-4 space-y-3">
+        <div className="md:hidden bg-dark-800 border-t border-dark-600/30 px-4 py-4 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
           <p className="text-xs text-dark-400 uppercase tracking-wider font-semibold pt-1">Products</p>
           {PRODUCT_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="block text-dark-300 hover:text-dark-50 pl-2 py-1" onClick={() => setMobileOpen(false)}>
+            <Link key={link.href} href={link.href} className="flex items-center min-h-[48px] text-dark-300 hover:text-dark-50 pl-2" onClick={() => setMobileOpen(false)}>
               {link.label}
             </Link>
           ))}
@@ -98,21 +98,21 @@ export default function Navbar() {
               const isExternal = 'external' in link && link.external;
               const isAbsolute = link.href.startsWith('http://') || link.href.startsWith('https://');
               return isExternal ? (
-                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-dark-300 hover:text-dark-50 py-1" onClick={() => setMobileOpen(false)}>
+                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="flex items-center min-h-[48px] text-dark-300 hover:text-dark-50" onClick={() => setMobileOpen(false)}>
                   {link.label}
                 </a>
               ) : isAbsolute ? (
-                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="block text-dark-300 hover:text-dark-50 py-1" onClick={() => setMobileOpen(false)}>
+                <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="flex items-center min-h-[48px] text-dark-300 hover:text-dark-50" onClick={() => setMobileOpen(false)}>
                   {link.label}
                 </a>
               ) : (
-                <Link key={link.href} href={link.href} className="block text-dark-300 hover:text-dark-50 py-1" onClick={() => setMobileOpen(false)}>
+                <Link key={link.href} href={link.href} className="flex items-center min-h-[48px] text-dark-300 hover:text-dark-50" onClick={() => setMobileOpen(false)}>
                   {link.label}
                 </Link>
               );
             })}
           </div>
-          <Link href={SITE.demoUrl} className="block btn-primary text-sm text-center mt-2" onClick={() => setMobileOpen(false)}>Try Free — No Signup</Link>
+          <Link href={SITE.demoUrl} className="flex items-center justify-center min-h-[48px] btn-primary text-sm mt-2" onClick={() => setMobileOpen(false)}>Try Free — No Signup</Link>
         </div>
       )}
     </header>

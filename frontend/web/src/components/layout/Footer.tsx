@@ -10,13 +10,13 @@ export default function Footer() {
             {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
               <h3 className="text-sm font-semibold text-dark-100 mb-4">{section.title}</h3>
-              <ul className="space-y-2">
+              <ul className="md:space-y-2">
                 {section.links.map((link) => {
                   const isExternal = 'external' in link && link.external;
                   const href = String(link.href);
                   const isProtocol = href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('http://') || href.startsWith('https://');
                   const isAbsoluteWeb = href.startsWith('http://') || href.startsWith('https://');
-                  const className = "text-dark-300 hover:text-brand-500 text-sm";
+                  const className = "inline-flex items-center min-h-[48px] md:min-h-0 text-dark-300 hover:text-brand-500 text-sm";
                   return (
                     <li key={String(link.label)}>
                       {isExternal || isProtocol ? (
