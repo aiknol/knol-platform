@@ -38,10 +38,10 @@ export default function CortexOssPage() {
             >
               GitHub &rarr;
             </a>
-            <a href={SITE.docsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.docsUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Documentation
             </a>
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.demoUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Live Demo
             </a>
           </div>
@@ -306,7 +306,7 @@ const results = await cortex.search({
             >
               Star on GitHub
             </a>
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.demoUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Try Live Demo
             </a>
           </div>

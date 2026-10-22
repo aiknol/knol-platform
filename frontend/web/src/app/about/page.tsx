@@ -191,8 +191,6 @@ export default function AboutPage() {
 
             <a
               href={SITE.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               className="bg-dark-700/30 border border-dark-600 rounded-lg p-6 hover:border-brand-500/50 transition text-center"
             >
               <h3 className="text-lg font-semibold text-dark-100 mb-2">Live Demo</h3>

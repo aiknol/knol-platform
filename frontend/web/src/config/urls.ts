@@ -136,7 +136,9 @@ export function resolveAppSignupUrl(): string {
   if (explicitApp) return ensureSignupUrl(explicitApp);
 
   if (APP_ORIGIN) return `${APP_ORIGIN}/signup/`;
-  return 'https://cloud.cortex.doaide.com/signup/';
+  // No hosted cloud app is configured: the on-site /signup/ page points visitors
+  // at everything that works without an account.
+  return '/signup/';
 }
 
 export function resolveAppLoginUrl(): string {
@@ -147,19 +149,20 @@ export function resolveAppLoginUrl(): string {
   if (explicitApp) return `${stripTrailingSlash(explicitApp)}/login/`;
 
   if (APP_ORIGIN) return `${APP_ORIGIN}/login/`;
-  return 'https://cloud.cortex.doaide.com/login/';
+  return '/login/';
 }
 
 export function resolveDemoUrl(): string {
   const explicit = readEnv('NEXT_PUBLIC_DEMO_URL');
   if (explicit) return ensureTrailingSlash(explicit);
   if (DEMO_ORIGIN) return `${DEMO_ORIGIN}/`;
-  return IS_DEV ? '/demo/' : 'https://demo.cortex.doaide.com/';
+  // The live demo is served on-site and needs no login.
+  return '/demo/';
 }
 
 export function resolveDocsUrl(): string {
   if (DOCS_ORIGIN) return `${DOCS_ORIGIN}/`;
-  return 'https://docs.cortex.doaide.com/';
+  return '/docs/';
 }
 
 function inferApiOriginFromLocation(): string | null {

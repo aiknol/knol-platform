@@ -27,14 +27,12 @@ export default function MCPPage() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
-              href={SITE.appUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/cortex-local/"
               className="btn-primary px-6 py-3 rounded-lg font-medium"
             >
-              Get Started Free
+              Install Cortex Local — No Signup
             </a>
-            <a href={SITE.docsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.docsUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Read the Docs
             </a>
           </div>
@@ -212,7 +210,7 @@ export default function MCPPage() {
             >
               Star on GitHub
             </a>
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium text-center">
+            <a href={SITE.demoUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium text-center">
               Try the Demo
             </a>
             <Link href="/pricing/" className="btn-secondary px-6 py-3 rounded-lg font-medium text-center">

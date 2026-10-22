@@ -32,7 +32,7 @@ export default function LaunchPage() {
             >
               Star on GitHub
             </a>
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
+            <a href={SITE.demoUrl} className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
               Try the Demo
             </a>
           </div>
@@ -234,7 +234,7 @@ export default function LaunchPage() {
             >
               Star on GitHub
             </a>
-            <a href={SITE.docsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
+            <a href={SITE.docsUrl} className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">
               Documentation
             </a>
             <Link href="/mcp/" className="btn-secondary px-8 py-3 rounded-lg font-medium text-lg">

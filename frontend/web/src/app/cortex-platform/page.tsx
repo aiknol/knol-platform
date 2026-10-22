@@ -38,7 +38,7 @@ export default function CortexPlatformPage() {
             >
               GitHub &rarr;
             </a>
-            <a href={SITE.docsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.docsUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Documentation
             </a>
             <a href="/pricing/" className="btn-secondary px-6 py-3 rounded-lg font-medium">
@@ -270,7 +270,7 @@ npm install @doaide/cortex-sdk`}</pre>
             >
               Star on GitHub
             </a>
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary px-6 py-3 rounded-lg font-medium">
+            <a href={SITE.demoUrl} className="btn-secondary px-6 py-3 rounded-lg font-medium">
               Try Live Demo
             </a>
             <a href="/pricing/" className="btn-secondary px-6 py-3 rounded-lg font-medium">

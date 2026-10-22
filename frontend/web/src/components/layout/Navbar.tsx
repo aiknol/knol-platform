@@ -72,7 +72,7 @@ export default function Navbar() {
             </li>
           ))}
           <li>
-            <a href={SITE.appUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-sm !py-2 !px-4">Get Started Free</a>
+            <Link href={SITE.demoUrl} className="btn-primary text-sm !py-2 !px-4">Try Free — No Signup</Link>
           </li>
         </ul>
 
@@ -112,7 +112,7 @@ export default function Navbar() {
               );
             })}
           </div>
-          <a href={SITE.appUrl} target="_blank" rel="noopener noreferrer" className="block btn-primary text-sm text-center mt-2" onClick={() => setMobileOpen(false)}>Get Started Free</a>
+          <Link href={SITE.demoUrl} className="block btn-primary text-sm text-center mt-2" onClick={() => setMobileOpen(false)}>Try Free — No Signup</Link>
         </div>
       )}
     </header>

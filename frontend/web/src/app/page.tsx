@@ -75,7 +75,7 @@ export default function HomePage() {
             One binary. One PostgreSQL database. Sub-5ms latency. Deploy in 60 seconds.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-primary text-base">
+            <a href={SITE.demoUrl} className="btn-primary text-base">
               Start Building Free
             </a>
             <a href={SITE.github} className="btn-secondary text-base">
@@ -451,7 +451,7 @@ export default function HomePage() {
             Deploy the open-source stack with a single command. No credit card, no vendor lock-in. Scale to managed cloud when you&apos;re ready.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={SITE.demoUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
+            <a href={SITE.demoUrl} className="btn-primary">
               Deploy Cortex Now
             </a>
             <a href={SITE.github} className="btn-secondary">
