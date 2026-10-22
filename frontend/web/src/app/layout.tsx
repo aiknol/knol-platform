@@ -3,6 +3,7 @@ import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HMRErrorHandler from '@/components/HMRErrorHandler';
+import WhatsAppShare from '@/components/ui/WhatsAppShare';
 import { SITE, pageTitle } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -89,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <HMRErrorHandler />
         <Navbar />
         <main className="pt-16">{children}</main>
+        <WhatsAppShare />
         <Footer />
         <script
           type="application/ld+json"
