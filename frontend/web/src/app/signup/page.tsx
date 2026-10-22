@@ -1,15 +1,14 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { resolveAppSignupUrl } from '@/config/urls';
-import { pageTitle } from '@/config/site';
+import { pageTitle, withSeo } from '@/config/site';
 import NoAccountNeeded from '@/components/marketing/NoAccountNeeded';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/signup/', {
   title: pageTitle('Get started'),
   description: 'Get started with Cortex without signing up: live demo, Cortex Local for MCP clients, and self-hosted Cortex OSS.',
-  alternates: { canonical: '/signup/' },
   robots: { index: false, follow: true },
-};
+});
 
 export default function SignupPage() {
   const url = resolveAppSignupUrl();

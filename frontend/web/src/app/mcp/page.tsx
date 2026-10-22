@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/mcp/', {
   title: pageTitle('MCP Server — Give Claude Persistent Memory'),
   description:
     'Use Cortex as an MCP server to give Claude, Cursor, and any MCP-compatible AI tool persistent memory. Install in one command, no configuration required.',
   keywords: ['MCP', 'Model Context Protocol', 'Claude memory', 'Cursor memory', 'AI memory', 'MCP server', 'persistent memory'],
-};
+});
 
 export default function MCPPage() {
   return (

@@ -2,9 +2,15 @@ import FeatureGrid from '@/components/marketing/FeatureGrid';
 import CodeBlock from '@/components/ui/CodeBlock';
 import ComparisonTable from '@/components/marketing/ComparisonTable';
 import FAQ from '@/components/marketing/FAQ';
-import Testimonials from '@/components/marketing/Testimonials';
+import type { Metadata } from 'next';
+import { withSeo, pageTitle } from '@/config/site';
 import { SITE, TECH_STACK, KEY_METRICS, MEMORY_TYPES, USE_CASES, SDK_ECOSYSTEM } from '@/config';
 
+
+export const metadata: Metadata = withSeo('/', {
+  title: pageTitle(),
+  description: SITE.description,
+});
 const quickStartCode = `# Start the full stack in one command
 docker compose up -d
 
@@ -434,8 +440,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <Testimonials />
 
       {/* FAQ */}
       <FAQ />

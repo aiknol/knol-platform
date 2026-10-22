@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { BLOG_POSTS, BlogPost } from '@/config';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -24,10 +24,11 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     };
   }
 
-  return {
+  return withSeo(`/blog/${post.slug}/`, {
     title: pageTitle(post.title),
     description: post.description,
-  };
+    openGraph: { type: 'article', publishedTime: post.date },
+  });
 }
 
 function renderBody(body: string) {

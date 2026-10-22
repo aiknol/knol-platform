@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/cortex-oss/', {
   title: pageTitle('DoAide Cortex OSS — Open-Source Memory Infrastructure'),
   description:
     'Cortex OSS is the standalone open-source memory infrastructure for AI applications. Hybrid search, knowledge graphs, memory decay — all Apache 2.0 licensed.',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     'cortex oss', 'open source', 'AI memory', 'knowledge graph', 'vector search',
     'Rust', 'PostgreSQL', 'pgvector', 'Apache 2.0', 'self-host',
   ],
-};
+});
 
 export default function CortexOssPage() {
   return (

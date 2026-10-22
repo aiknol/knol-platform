@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { BLOG_POSTS } from '@/config';
-import { pageTitle } from '@/config/site';
+import { pageTitle, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/blog/', {
   title: pageTitle('Blog'),
   description: 'Updates, technical deep dives, and research from the Cortex team on AI memory infrastructure.',
-};
+});
 
 export default function BlogPage() {
   return (

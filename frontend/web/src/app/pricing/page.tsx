@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 import PricingCard from '@/components/ui/PricingCard';
 import { PRICING_TIERS } from '@/config';
-import { pageTitle } from '@/config/site';
+import { pageTitle, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/pricing/', {
   title: pageTitle('Pricing'),
   description: 'Competitive, transparent pricing for Cortex. Open source at the core, predictable plans for production growth.',
-};
+});
 
 export default function PricingPage() {
   return (

@@ -2,8 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import NoAccountNeeded from '@/components/marketing/NoAccountNeeded';
 
-const ORIGINAL_ENV = process.env.NODE_ENV;
-
 async function prodUrls() {
   vi.resetModules();
   vi.stubEnv('NODE_ENV', 'production');
@@ -12,7 +10,6 @@ async function prodUrls() {
 
 afterEach(() => {
   vi.unstubAllEnvs();
-  process.env.NODE_ENV = ORIGINAL_ENV;
 });
 
 describe('login-free defaults (production, no env overrides)', () => {

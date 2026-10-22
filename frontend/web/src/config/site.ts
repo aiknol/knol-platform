@@ -1,5 +1,6 @@
 // ── Core site identity and navigation ────────────────────────────
 
+import type { Metadata } from 'next';
 import { resolveAppSignupUrl, resolveDemoUrl, resolveDocsUrl, resolveSiteUrl } from './urls';
 
 export const SITE = {
@@ -23,6 +24,19 @@ export const SITE = {
 
 export function pageTitle(title?: string): string {
   return title ? `${title} | ${SITE.name}` : `${SITE.name} - ${SITE.tagline}`;
+}
+
+/** Adds a canonical URL and page-specific Open Graph / Twitter tags so shared
+ * links and search results describe the page itself, not the homepage. */
+export function withSeo(path: string, meta: Metadata): Metadata {
+  const title = typeof meta.title === 'string' ? meta.title : pageTitle();
+  const description = meta.description ?? SITE.description;
+  return {
+    ...meta,
+    alternates: { canonical: path, ...meta.alternates },
+    openGraph: { title, description, url: path, siteName: SITE.name, type: 'website', ...meta.openGraph },
+    twitter: { card: 'summary_large_image', title, description, ...meta.twitter },
+  };
 }
 
 // ── Navigation ──────────────────────────────────────────────────

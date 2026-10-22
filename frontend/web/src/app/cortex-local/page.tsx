@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import CodeBlock from '@/components/ui/CodeBlock';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/cortex-local/', {
   title: pageTitle('cortex-local — Local MCP Memory for Claude & Cursor'),
   description:
     'cortex-local is a zero-setup, SQLite-backed MCP server and CLI that gives Claude Desktop, Cursor, and Claude Code persistent local memory. Install with npm, no Docker or API key required.',
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     'cortex-local', 'local memory', 'MCP server', 'Claude memory', 'Cursor memory',
     'Claude Code memory', 'SQLite memory', 'offline AI memory', 'npm cortex-local',
   ],
-};
+});
 
 const setupCode = `# Install globally — auto-configures Claude Desktop & Cursor
 npm install -g cortex-local

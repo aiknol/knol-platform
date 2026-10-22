@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/privacy/', {
   title: pageTitle('Privacy Policy'),
   description: 'Privacy Policy for DoAide Cortex — how we collect, use, and protect your data.',
-};
+});
 
 export default function PrivacyPage() {
   return (

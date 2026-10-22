@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 import CodeBlock from '@/components/ui/CodeBlock';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/docs/', {
   title: pageTitle('Documentation'),
   description: 'Complete API reference and SDK guides for Cortex — context engineering infrastructure for AI applications.',
-};
+});
 
 const endpoints = [
   { method: 'POST', path: '/v1/memory', desc: 'Store a new memory (async extraction)' },

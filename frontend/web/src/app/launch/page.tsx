@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
-  title: pageTitle('DoAide Cortex — Context Engineering Infrastructure for AI'),
+export const metadata: Metadata = withSeo('/launch/', {
+  title: pageTitle('Launch — Rust-Native Context Engineering, Open Source'),
   description:
     'Rust-native context engineering platform for LLM applications. One binary, one PostgreSQL database, sub-5ms latency. Deploy in 60 seconds. Open source.',
   keywords: ['AI memory', 'context engineering', 'LLM memory', 'Rust', 'PostgreSQL', 'open source', 'Mem0 alternative', 'Zep alternative'],
-};
+});
 
 export default function LaunchPage() {
   return (

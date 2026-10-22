@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/cortex-platform/', {
   title: pageTitle('DoAide Cortex Platform — Context Engineering Infrastructure'),
   description:
     'The full Cortex platform: Rust-native context engineering infrastructure with hybrid retrieval, knowledge graphs, memory decay, and microservice architecture. Open core, self-hostable.',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     'cortex platform', 'context engineering', 'AI memory', 'knowledge graph',
     'hybrid retrieval', 'Rust', 'PostgreSQL', 'pgvector', 'open core',
   ],
-};
+});
 
 export default function CortexPlatformPage() {
   return (

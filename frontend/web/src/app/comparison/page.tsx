@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { pageTitle } from '@/config/site';
+import { pageTitle, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/comparison/', {
   title: pageTitle('Context Engineering Platform Comparison - Cortex vs Competitors'),
   description:
     'Comprehensive comparison of Cortex, Mem0, Zep, and Letta across context engineering, retrieval, temporal modeling, and operational architecture.',
-};
+});
 
 const Yes = () => <span className="text-emerald-400 font-bold text-base">✓</span>;
 const No = () => <span className="text-red-400 font-bold text-base">✗</span>;

@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import { pageTitle, SITE } from '@/config/site';
+import { pageTitle, SITE, withSeo } from '@/config/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withSeo('/about/', {
   title: pageTitle('About DoAide Cortex'),
   description: 'Learn about DoAide Cortex — an open-source context engineering platform for building AI applications with persistent memory.',
-};
+});
 
 export default function AboutPage() {
   return (
